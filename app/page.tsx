@@ -10,9 +10,6 @@ import { RootState } from "@/lib/redux/store";
 import { fetchTemplates } from "@/lib/redux/slices/templatesSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 
-import { Template, TemplateLayout } from "./types";
-
-// ✅ Import MUI Components
 import {
   Container,
   Box,

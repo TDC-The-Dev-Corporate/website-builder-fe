@@ -1,24 +1,24 @@
-export interface Template {
+interface Template {
   id: string;
   name: string;
   thumbnail: string;
   layout: TemplateLayout;
 }
 
-export interface TemplateLayout {
+interface TemplateLayout {
   sections: Section[];
   styles: Record<string, any>;
   navigation?: Navigation;
 }
 
-export interface Section {
+interface Section {
   id: string;
   type: "hero" | "about" | "projects" | "contact";
   content: Record<string, any>;
   styles: Record<string, any>;
 }
 
-export interface Portfolio {
+interface Portfolio {
   id: string;
   userId: string;
   templateId: string;
@@ -28,19 +28,19 @@ export interface Portfolio {
   updatedAt: Date;
 }
 
-export interface Project {
+interface Project {
   title: string;
   description: string;
   image: string;
 }
 
-export interface Navigation {
+interface Navigation {
   type: "navbar" | "drawer";
   items: NavItem[];
   styles: Record<string, any>;
 }
 
-export interface NavItem {
+interface NavItem {
   label: string;
   href: string;
 }
