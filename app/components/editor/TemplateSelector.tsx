@@ -11,8 +11,6 @@ import {
   Grid,
 } from "@mui/material";
 
-import { Template } from "@/app/types";
-
 interface TemplateSelectorProps {
   templates: Template[];
   onSelect: (template: Template) => void;
