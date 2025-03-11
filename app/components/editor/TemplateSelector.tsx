@@ -11,7 +11,6 @@ import {
   Typography,
   Grid,
 } from "@mui/material";
-import { useState } from "react";
 
 interface TemplateSelectorProps {
   templates: Template[];
