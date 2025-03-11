@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import TemplateSelector from "./components/editor/TemplateSelector";
-import Editor from "./components/editor/Editor";
 import AppLoader from "./components/loader/AppLoader";
 
 import { RootState } from "@/lib/redux/store";
@@ -21,10 +20,6 @@ import {
 } from "@mui/material";
 
 export default function Home() {
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
-    null
-  );
-
   const dispatch = useAppDispatch();
   const { templates, loading } = useAppSelector(
     (state: RootState) => state.templates
@@ -34,14 +29,6 @@ export default function Home() {
     dispatch(fetchTemplates());
   }, []);
 
-  const handleTemplateSelect = (template: Template) => {
-    setSelectedTemplate(template);
-  };
-
-  const handleSave = (layout: TemplateLayout) => {
-    console.log("Saving layout:", layout);
-  };
-
   return (
     <AppLoader loading={loading}>
       <Box sx={{ minHeight: "100vh", bgcolor: "grey.100" }}>
@@ -50,9 +37,6 @@ export default function Home() {
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
               Portfolio Template Editor
             </Typography>
-            <Button color="primary" variant="contained">
-              Save
-            </Button>
           </Toolbar>
         </AppBar>
 
@@ -64,19 +48,12 @@ export default function Home() {
             mx: "auto",
           }}
         >
-          {!selectedTemplate ? (
-            <Paper elevation={3} sx={{ p: 5 }}>
-              <Typography variant="h5" sx={{ mb: 2 }}>
-                Choose a Template
-              </Typography>
-              <TemplateSelector
-                templates={templates}
-                onSelect={handleTemplateSelect}
-              />
-            </Paper>
-          ) : (
-            <Editor template={selectedTemplate} onSave={handleSave} />
-          )}
+          <Paper elevation={3} sx={{ p: 5 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Choose a Template
+            </Typography>
+            <TemplateSelector templates={templates} />
+          </Paper>
         </Container>
       </Box>
     </AppLoader>
