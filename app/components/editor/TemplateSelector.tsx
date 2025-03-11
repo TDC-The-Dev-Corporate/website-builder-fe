@@ -1,7 +1,7 @@
 "use client";
 
-import { Template } from "@/app/types";
 import Image from "next/image";
+
 import {
   Card,
   CardActionArea,
@@ -10,6 +10,8 @@ import {
   Typography,
   Grid,
 } from "@mui/material";
+
+import { Template } from "@/app/types";
 
 interface TemplateSelectorProps {
   templates: Template[];
@@ -21,9 +23,9 @@ export default function TemplateSelector({
   onSelect,
 }: TemplateSelectorProps) {
   return (
-    <Grid container spacing={3} padding={3}>
+    <Grid container spacing={5} padding={3}>
       {templates.map((template) => (
-        <Grid item xs={12} sm={6} md={4} key={template.id}>
+        <Grid item xs={12} sm={6} md={3} key={template.id}>
           <Card
             sx={{
               cursor: "pointer",
@@ -33,7 +35,6 @@ export default function TemplateSelector({
             onClick={() => onSelect(template)}
           >
             <CardActionArea>
-              {/* Thumbnail Image */}
               <CardMedia sx={{ height: 140 }}>
                 <Image
                   src={template.thumbnail}
@@ -44,7 +45,6 @@ export default function TemplateSelector({
                 />
               </CardMedia>
 
-              {/* Template Name */}
               <CardContent>
                 <Typography
                   variant="h6"
