@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import TemplateSelector from "./components/editor/TemplateSelector";
 import Editor from "./components/editor/Editor";
-import { Template, TemplateLayout } from "./types";
+import AppLoader from "./components/loader/AppLoader";
+
 import { RootState } from "@/lib/redux/store";
 import { fetchTemplates } from "@/lib/redux/slices/templatesSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
-import AppLoader from "./components/loader/AppLoader";
+
+import { Template, TemplateLayout } from "./types";
 
 // ✅ Import MUI Components
 import {
@@ -45,7 +48,6 @@ export default function Home() {
   return (
     <AppLoader loading={loading}>
       <Box sx={{ minHeight: "100vh", bgcolor: "grey.100" }}>
-        {/* ✅ Header */}
         <AppBar position="static" elevation={1} color="default">
           <Toolbar>
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -57,10 +59,16 @@ export default function Home() {
           </Toolbar>
         </AppBar>
 
-        {/* ✅ Main Content */}
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Container
+          maxWidth={false}
+          sx={{
+            py: 4,
+            width: "100%",
+            mx: "auto",
+          }}
+        >
           {!selectedTemplate ? (
-            <Paper elevation={3} sx={{ p: 3 }}>
+            <Paper elevation={3} sx={{ p: 5 }}>
               <Typography variant="h5" sx={{ mb: 2 }}>
                 Choose a Template
               </Typography>
