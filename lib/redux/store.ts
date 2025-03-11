@@ -1,9 +1,11 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import { templateReducer } from "./slices/templatesSlice";
+import { portfolioReducer } from "./slices/portfolioSlice";
 
 export const store = configureStore({
   reducer: {
     templates: templateReducer,
+    portfolio: portfolioReducer,
   },
 });
 

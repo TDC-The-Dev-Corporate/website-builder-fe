@@ -20,7 +20,7 @@ import SectionEditDialog from "./SectionEditDialog";
 import NavigationEditDialog from "./NavigationEditDialog";
 
 interface EditorProps {
-  template: Template;
+  template: TemplateLayout;
   onSave: (layout: TemplateLayout) => void;
 }
 
@@ -28,7 +28,7 @@ type PreviewMode = "mobile" | "tablet" | "desktop";
 type EditMode = "sections" | "navigation";
 
 export default function Editor({ template, onSave }: EditorProps) {
-  const [layout, setLayout] = useState<TemplateLayout>(template.layout);
+  const [layout, setLayout] = useState<TemplateLayout>(template);
   const [previewMode, setPreviewMode] = useState<PreviewMode>("desktop");
   const [editMode, setEditMode] = useState<EditMode>("sections");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
