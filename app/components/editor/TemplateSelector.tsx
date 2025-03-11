@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import {
   Card,
@@ -10,16 +11,18 @@ import {
   Typography,
   Grid,
 } from "@mui/material";
+import { useState } from "react";
 
 interface TemplateSelectorProps {
   templates: Template[];
-  onSelect: (template: Template) => void;
 }
 
-export default function TemplateSelector({
-  templates,
-  onSelect,
-}: TemplateSelectorProps) {
+export default function TemplateSelector({ templates }: TemplateSelectorProps) {
+  const router = useRouter();
+  const handleTemplateSelect = (template: Template) => {
+    localStorage.setItem("template", JSON.stringify(template));
+    router.push("/pages/editor");
+  };
   return (
     <Grid container spacing={5} padding={3}>
       {templates.map((template) => (
@@ -30,7 +33,7 @@ export default function TemplateSelector({
               "&:hover": { boxShadow: 6 },
               transition: "0.3s",
             }}
-            onClick={() => onSelect(template)}
+            onClick={() => handleTemplateSelect(template)}
           >
             <CardActionArea>
               <CardMedia sx={{ height: 140 }}>
