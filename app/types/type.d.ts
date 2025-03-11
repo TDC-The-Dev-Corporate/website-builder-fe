@@ -22,7 +22,7 @@ interface Portfolio {
   id: string;
   userId: string;
   templateId: string;
-  customizations: TemplateLayout;
+  layout: TemplateLayout;
   content: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
