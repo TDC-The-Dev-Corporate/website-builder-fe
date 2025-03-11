@@ -1,7 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
 import { getTemplates } from "../api/templates";
-import { Template } from "@/app/types";
 
 interface TemplatesState {
   templates: Template[];
