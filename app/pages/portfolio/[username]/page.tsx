@@ -1,26 +1,63 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
-import { Box } from "@mui/material";
-
-import AppLoader from "@/app/components/loader/AppLoader";
+import { Box, Typography } from "@mui/material";
 
 import Portfolio from "./portfolio";
+import AppLoader from "@/app/components/loader/AppLoader";
 
-export default function EditorPage() {
-  const [template, setTemplate] = useState<Template | null>(null);
+import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
+
+export default function PortfolioPage() {
+  const params = useParams();
+  const username = params.username as string;
+  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedTemplate = localStorage.getItem("template");
-    if (storedTemplate) {
-      setTemplate(JSON.parse(storedTemplate));
+    async function fetchPortfolio() {
+      if (!username) return;
+
+      try {
+        const response = getPortfolioByUserName(username);
+        if (!response) {
+          throw new Error("Failed to fetch portfolio");
+        }
+
+        const data = await response;
+        setPortfolio(data);
+      } catch (error) {
+        console.error("Error fetching portfolio:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, []);
+
+    fetchPortfolio();
+  }, [username]);
+
+  if (!portfolio) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="h6" color="text.secondary">
+          Portfolio not found
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
-    <AppLoader loading={!template}>
-      <Box>{template && <Portfolio template={template.layout} />}</Box>
+    <AppLoader loading={loading}>
+      <Box>{portfolio && <Portfolio template={portfolio.layout} />}</Box>
     </AppLoader>
   );
 }
