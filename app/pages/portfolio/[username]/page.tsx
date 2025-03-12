@@ -28,36 +28,33 @@ export default function PortfolioPage() {
 
         const data = await response;
         setPortfolio(data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching portfolio:", error);
-      } finally {
-        setLoading(false);
       }
     }
 
     fetchPortfolio();
   }, [username]);
 
-  if (!portfolio) {
-    return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Typography variant="h6" color="text.secondary">
-          Portfolio not found
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
     <AppLoader loading={loading}>
-      <Box>{portfolio && <Portfolio template={portfolio.layout} />}</Box>
+      {loading ? null : portfolio ? (
+        <Portfolio template={portfolio.layout} />
+      ) : (
+        <Box
+          sx={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Typography variant="h6" color="text.secondary">
+            Portfolio not found
+          </Typography>
+        </Box>
+      )}
     </AppLoader>
   );
 }
