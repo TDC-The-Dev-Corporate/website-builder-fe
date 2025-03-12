@@ -1,66 +1,40 @@
-"use client";
+import React, { useState } from "react";
 
-import { useState } from "react";
-import { Template, TemplateLayout, Section } from "@/app/types";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Pencil, Move, Trash, Smartphone, Tablet, Monitor } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import {
-  AppBar,
-  Toolbar,
+  Box,
+  Button,
   Typography,
-  IconButton,
-  Drawer,
-  List,
-  ListItemButton,
+  ToggleButtonGroup,
+  ToggleButton,
+  Tab,
+  Tabs,
 } from "@mui/material";
-import { Menu as MenuIcon } from "@mui/icons-material";
-import { Container, Box, Grid, CardMedia, CardContent } from "@mui/material";
+
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
+import { Smartphone, Tablet, Monitor } from "lucide-react";
+
+import Navigation from "./Navigation";
+import SectionEditor from "./SectionEditor";
+import SectionEditDialog from "./SectionEditDialog";
+import NavigationEditDialog from "./NavigationEditDialog";
 
 interface EditorProps {
-  template: Template;
+  template: TemplateLayout;
   onSave: (layout: TemplateLayout) => void;
 }
 
 type PreviewMode = "mobile" | "tablet" | "desktop";
+type EditMode = "sections" | "navigation";
 
 export default function Editor({ template, onSave }: EditorProps) {
-  const [layout, setLayout] = useState<TemplateLayout>(template.layout);
-  const [selectedSection, setSelectedSection] = useState<Section | null>(null);
+  const [layout, setLayout] = useState<TemplateLayout>(template);
   const [previewMode, setPreviewMode] = useState<PreviewMode>("desktop");
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const handleTextEdit = (sectionId: string, field: string, value: string) => {
-    setLayout((prev) => ({
-      ...prev,
-      sections: prev.sections.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              content: { ...section.content, [field]: value },
-            }
-          : section
-      ),
-    }));
-  };
-
-  const handleDelete = (sectionId: string) => {
-    setLayout((prev) => ({
-      ...prev,
-      sections: prev.sections.filter((section) => section.id !== sectionId),
-    }));
-  };
+  const [editMode, setEditMode] = useState<EditMode>("sections");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [currentSection, setCurrentSection] = useState<Section | null>(null);
+  const [navEditDialogOpen, setNavEditDialogOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -69,235 +43,136 @@ export default function Editor({ template, onSave }: EditorProps) {
     const [reorderedSection] = sections.splice(result.source.index, 1);
     sections.splice(result.destination.index, 0, reorderedSection);
 
-    setLayout((prev) => ({
-      ...prev,
+    setLayout({
+      ...layout,
       sections,
-    }));
+    });
   };
 
-  const getPreviewWidth = () => {
-    switch (previewMode) {
-      case "mobile":
-        return "max-w-[375px]";
-      case "tablet":
-        return "max-w-[768px]";
-      default:
-        return "max-w-4xl";
+  const handleDelete = (sectionId: string) => {
+    setLayout({
+      ...layout,
+      sections: layout.sections.filter((section) => section.id !== sectionId),
+    });
+  };
+
+  const handleEditClick = (section: Section) => {
+    setCurrentSection(section);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSave = (content: any) => {
+    if (currentSection) {
+      setLayout({
+        ...layout,
+        sections: layout.sections.map((section) =>
+          section.id === currentSection.id ? { ...section, content } : section
+        ),
+      });
     }
   };
 
-  const renderNavigation = () => {
-    if (!layout.navigation) return null;
-
-    if (layout.navigation.type === "navbar") {
-      return (
-        <AppBar
-          position="sticky"
-          sx={{
-            backgroundColor: layout.navigation.styles.backgroundColor,
-            boxShadow: 1,
-          }}
-        >
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Navbar
-            </Typography>
-            <div className="flex space-x-4">
-              {layout.navigation.items.map((item) => (
-                <Typography
-                  key={item.href}
-                  component="a"
-                  href={item.href}
-                  sx={{
-                    color: layout.navigation?.styles.textColor,
-                    textDecoration: "none",
-                    borderBottom: "2px solid transparent",
-                    "&:hover": {
-                      borderBottomColor: layout.navigation?.styles.activeColor,
-                    },
-                  }}
-                >
-                  {item.label}
-                </Typography>
-              ))}
-            </div>
-          </Toolbar>
-        </AppBar>
-      );
-    }
-
-    if (layout.navigation.type === "drawer") {
-      return (
-        <>
-          <IconButton
-            sx={{ position: "fixed", top: 16, left: 16, zIndex: 1300 }}
-            onClick={() => setIsDrawerOpen(true)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Drawer
-            anchor="left"
-            open={isDrawerOpen}
-            onClose={() => setIsDrawerOpen(false)}
-          >
-            <List
-              sx={{
-                width: 300,
-                backgroundColor: layout.navigation.styles.backgroundColor,
-                height: "100%",
-              }}
-            >
-              {layout.navigation.items.map((item) => (
-                <ListItemButton
-                  key={item.href}
-                  component="a"
-                  href={item.href}
-                  sx={{
-                    color: layout.navigation?.styles.textColor,
-                    "&:hover": {
-                      backgroundColor: layout.navigation?.styles.activeColor,
-                    },
-                  }}
-                  onClick={() => setIsDrawerOpen(false)}
-                >
-                  {item.label}
-                </ListItemButton>
-              ))}
-            </List>
-          </Drawer>
-        </>
-      );
-    }
-
-    return null;
-  };
-
-  const renderSectionContent = (section: Section) => {
-    switch (section.type) {
-      case "hero":
-        return (
-          <Box sx={{ textAlign: "center", py: 10 }}>
-            <Typography
-              variant="h2"
-              fontWeight="bold"
-              sx={{ color: section.styles.textColor }}
-            >
-              {section.content.heading}
-            </Typography>
-            <Typography
-              variant="h5"
-              mt={2}
-              sx={{ color: section.styles.textColor }}
-            >
-              {section.content.subheading}
-            </Typography>
-          </Box>
-        );
-
-      case "about":
-        return (
-          <Container sx={{ py: 8 }}>
-            <Typography variant="h4" fontWeight="bold" mb={3}>
-              {section.content.heading}
-            </Typography>
-            <Typography variant="body1" whiteSpace="pre-line">
-              {section.content.description}
-            </Typography>
-          </Container>
-        );
-
-      case "projects":
-        return (
-          <Container sx={{ py: 8 }}>
-            <Typography
-              variant="h4"
-              fontWeight="bold"
-              mb={4}
-              textAlign="center"
-            >
-              {section.content.heading}
-            </Typography>
-            <Grid container spacing={4}>
-              {section.content.projects?.map((project: any, index: number) => (
-                <Grid item xs={12} md={6} key={index}>
-                  <Card>
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={project.image}
-                      alt={project.title}
-                    />
-                    <CardContent>
-                      <Typography variant="h6" fontWeight="bold">
-                        {project.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {project.description}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Container>
-        );
-
-      default:
-        return null;
-    }
+  const handleNavEditSave = (navigation: any) => {
+    setLayout({
+      ...layout,
+      navigation,
+    });
+    setNavEditDialogOpen(false);
   };
 
   return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
-      <Drawer
-        variant="permanent"
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      <Box
         sx={{
-          width: 250,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": { width: 250, boxSizing: "border-box", p: 2 },
+          width: "300px",
+          bgcolor: "background.paper",
+          borderRight: 1,
+          borderColor: "divider",
+          p: 2,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <Typography variant="h6" fontWeight="bold" mb={2}>
-          Tools
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Editor
         </Typography>
-        <Box>
-          <Typography variant="h6" fontWeight="bold" mb={2}>
-            Preview Mode
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              variant={previewMode === "mobile" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setPreviewMode("mobile")}
-            >
-              <Smartphone className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={previewMode === "tablet" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setPreviewMode("tablet")}
-            >
-              <Tablet className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={previewMode === "desktop" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setPreviewMode("desktop")}
-            >
-              <Monitor className="w-4 h-4" />
-            </Button>
-          </Box>
-        </Box>
-      </Drawer>
 
-      <div className="flex-1 p-6 bg-gray-50 overflow-auto">
-        <div
-          className={`mx-auto transition-all duration-300 ${getPreviewWidth()}`}
+        <Tabs
+          value={editMode}
+          onChange={(_, newValue) => setEditMode(newValue)}
+          sx={{ mb: 3 }}
         >
-          {renderNavigation()}
+          <Tab value="sections" label="Sections" />
+          <Tab value="navigation" label="Navigation" />
+        </Tabs>
+
+        {editMode === "sections" && (
+          <>
+            <Typography variant="subtitle1" sx={{ mb: 2 }}>
+              Preview Mode
+            </Typography>
+            <ToggleButtonGroup
+              value={previewMode}
+              exclusive
+              onChange={(_, newMode) => newMode && setPreviewMode(newMode)}
+              sx={{ mb: 3 }}
+            >
+              <ToggleButton value="mobile">
+                <Smartphone />
+              </ToggleButton>
+              <ToggleButton value="tablet">
+                <Tablet />
+              </ToggleButton>
+              <ToggleButton value="desktop">
+                <Monitor />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </>
+        )}
+
+        {editMode === "navigation" && (
+          <Button
+            variant="contained"
+            onClick={() => setNavEditDialogOpen(true)}
+            sx={{ mb: 3 }}
+          >
+            Edit Navigation
+          </Button>
+        )}
+
+        <Button
+          variant="contained"
+          onClick={() => onSave(layout)}
+          sx={{ mt: "auto" }}
+        >
+          Save Changes
+        </Button>
+      </Box>
+
+      <Box sx={{ flex: 1, bgcolor: "grey.100", overflow: "auto" }}>
+        <Box
+          sx={{
+            width:
+              previewMode === "mobile"
+                ? "375px"
+                : previewMode === "tablet"
+                ? "768px"
+                : "100%",
+            mx: "auto",
+            transition: "all 0.3s",
+          }}
+        >
+          {layout.navigation && (
+            <Navigation
+              navigation={layout.navigation}
+              drawerOpen={drawerOpen}
+              onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
+            />
+          )}
+
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="sections">
-              {(provided, snapshot) => (
+              {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {layout.sections.map((section, index) => (
                     <Draggable
@@ -306,99 +181,18 @@ export default function Editor({ template, onSave }: EditorProps) {
                       index={index}
                     >
                       {(provided) => (
-                        <Card
-                          className="mb-6 relative group"
+                        <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
+                          {...provided.dragHandleProps}
                         >
-                          <Box
-                            className="controls"
-                            sx={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              opacity: 0,
-                              transition: "opacity 0.3s",
-                              display: "flex",
-                              gap: 1,
-                              zIndex: 10,
-                            }}
-                          >
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Pencil className="w-4 h-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Edit Section</DialogTitle>
-                                </DialogHeader>
-                                <Box
-                                  sx={{
-                                    py: 2,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 2,
-                                  }}
-                                >
-                                  {Object.entries(section.content).map(
-                                    ([key, value]) => {
-                                      if (key === "projects") return null;
-                                      return (
-                                        <div key={key}>
-                                          <label className="text-sm font-medium mb-1 block">
-                                            {key.charAt(0).toUpperCase() +
-                                              key.slice(1)}
-                                          </label>
-                                          {typeof value === "string" &&
-                                          value.length > 50 ? (
-                                            <Textarea
-                                              value={value}
-                                              onChange={(e) =>
-                                                handleTextEdit(
-                                                  section.id,
-                                                  key,
-                                                  e.target.value
-                                                )
-                                              }
-                                            />
-                                          ) : (
-                                            <Input
-                                              value={value}
-                                              onChange={(e) =>
-                                                handleTextEdit(
-                                                  section.id,
-                                                  key,
-                                                  e.target.value
-                                                )
-                                              }
-                                            />
-                                          )}
-                                        </div>
-                                      );
-                                    }
-                                  )}
-                                </Box>
-                              </DialogContent>
-                            </Dialog>
-                            <div {...provided.dragHandleProps}>
-                              <Button variant="outline" size="sm">
-                                <Move className="w-4 h-4" />
-                              </Button>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDelete(section.id)}
-                            >
-                              <Trash className="w-4 h-4" />
-                            </Button>
-                          </Box>
-                          <div className={section.styles.backgroundColor}>
-                            {renderSectionContent(section)}
-                          </div>
-                        </Card>
+                          <SectionEditor
+                            section={section}
+                            dragHandleProps={provided.dragHandleProps}
+                            onEdit={handleEditClick}
+                            onDelete={handleDelete}
+                          />
+                        </div>
                       )}
                     </Draggable>
                   ))}
@@ -407,9 +201,24 @@ export default function Editor({ template, onSave }: EditorProps) {
               )}
             </Droppable>
           </DragDropContext>
-        </div>
-        -
-      </div>
+        </Box>
+      </Box>
+
+      <SectionEditDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        section={currentSection}
+        onSave={handleEditSave}
+      />
+
+      {layout.navigation && (
+        <NavigationEditDialog
+          open={navEditDialogOpen}
+          onClose={() => setNavEditDialogOpen(false)}
+          navigation={layout.navigation}
+          onSave={handleNavEditSave}
+        />
+      )}
     </Box>
   );
 }
