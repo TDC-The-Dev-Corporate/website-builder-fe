@@ -29,8 +29,8 @@ export default function Portfolio({ template }: WebsiteProps) {
           {layout.navigation && (
             <Navigation
               navigation={layout.navigation}
-              drawerOpen={drawerOpen}
-              onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
+              //   drawerOpen={drawerOpen}
+              //   onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
             />
           )}
 

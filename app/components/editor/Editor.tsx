@@ -165,8 +165,8 @@ export default function Editor({ template, onSave }: EditorProps) {
           {layout.navigation && (
             <Navigation
               navigation={layout.navigation}
-              drawerOpen={drawerOpen}
-              onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
+              // drawerOpen={drawerOpen}
+              // onDrawerToggle={() => setDrawerOpen(!drawerOpen)}
             />
           )}
 
