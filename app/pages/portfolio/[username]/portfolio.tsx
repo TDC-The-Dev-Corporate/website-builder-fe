@@ -13,12 +13,11 @@ interface WebsiteProps {
 }
 
 export default function Portfolio({ template }: WebsiteProps) {
-  const { username } = useParams();
   const [layout, setLayout] = useState<TemplateLayout>(template);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+    <Box sx={{ display: "flex", overflow: "hidden" }}>
       <Box sx={{ flex: 1, bgcolor: "grey.100", overflow: "auto" }}>
         <Box
           sx={{
