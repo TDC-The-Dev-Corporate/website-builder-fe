@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import {
   Dialog,
   DialogTitle,
@@ -9,7 +8,9 @@ import {
   TextField,
   Box,
   Typography,
+  IconButton,
 } from "@mui/material";
+import { Upload, X } from "lucide-react";
 
 interface SectionEditDialogProps {
   open: boolean;
@@ -18,6 +19,10 @@ interface SectionEditDialogProps {
   onSave: (content: any) => void;
 }
 
+const CLOUDINARY_UPLOAD_PRESET =
+  process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
 export default function SectionEditDialog({
   open,
   onClose,
@@ -25,6 +30,105 @@ export default function SectionEditDialog({
   onSave,
 }: SectionEditDialogProps) {
   const [content, setContent] = useState<any>(section?.content || {});
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: string,
+    projectIndex?: number
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const data = await response.json();
+
+      if (projectIndex !== undefined) {
+        const newProjects = [...content.projects];
+        newProjects[projectIndex] = {
+          ...newProjects[projectIndex],
+          [field]: data.secure_url,
+        };
+        setContent({ ...content, projects: newProjects });
+      } else {
+        setContent({ ...content, [field]: data.secure_url });
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const ImageUploadField = ({ value, onChange, onUpload, label }: any) => (
+    <Box sx={{ mb: 2 }}>
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        {label}
+      </Typography>
+      <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+        <TextField
+          fullWidth
+          value={value || ""}
+          onChange={onChange}
+          placeholder="Enter image URL"
+        />
+        <input
+          accept="image/*"
+          type="file"
+          id="image-upload"
+          style={{ display: "none" }}
+          onChange={onUpload}
+        />
+        <label htmlFor="image-upload">
+          <IconButton
+            component="span"
+            disabled={uploading}
+            sx={{ bgcolor: "grey.200" }}
+          >
+            <Upload />
+          </IconButton>
+        </label>
+      </Box>
+      {value && (
+        <Box sx={{ mt: 2, position: "relative" }}>
+          <img
+            src={value}
+            alt="Preview"
+            style={{
+              maxWidth: "100%",
+              maxHeight: "200px",
+              objectFit: "cover",
+              borderRadius: "4px",
+            }}
+          />
+          <IconButton
+            size="small"
+            onClick={() => onChange({ target: { value: "" } })}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              bgcolor: "rgba(255,255,255,0.8)",
+            }}
+          >
+            <X size={16} />
+          </IconButton>
+        </Box>
+      )}
+    </Box>
+  );
 
   const handleSave = () => {
     onSave(content);
@@ -56,13 +160,13 @@ export default function SectionEditDialog({
               }
               sx={{ mb: 2 }}
             />
-            <TextField
-              fullWidth
-              label="Background Image URL"
-              value={content.image || ""}
-              onChange={(e) =>
+            <ImageUploadField
+              label="Background Image"
+              value={content.image}
+              onChange={(e: any) =>
                 setContent({ ...content, image: e.target.value })
               }
+              onUpload={(e: any) => handleImageUpload(e, "image")}
             />
           </>
         );
@@ -138,15 +242,15 @@ export default function SectionEditDialog({
                   }}
                   sx={{ mb: 2 }}
                 />
-                <TextField
-                  fullWidth
-                  label="Image URL"
-                  value={project.image || ""}
-                  onChange={(e) => {
+                <ImageUploadField
+                  label="Project Image"
+                  value={project.image}
+                  onChange={(e: any) => {
                     const newProjects = [...content.projects];
                     newProjects[index] = { ...project, image: e.target.value };
                     setContent({ ...content, projects: newProjects });
                   }}
+                  onUpload={(e: any) => handleImageUpload(e, "image", index)}
                 />
               </Box>
             ))}
@@ -178,7 +282,7 @@ export default function SectionEditDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">
+        <Button onClick={handleSave} variant="contained" disabled={uploading}>
           Save
         </Button>
       </DialogActions>
