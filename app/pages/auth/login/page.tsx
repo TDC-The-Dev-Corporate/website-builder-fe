@@ -1,8 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import {
   Box,
@@ -15,9 +16,9 @@ import {
 } from "@mui/material";
 
 import { AppDispatch, RootState } from "@/lib/redux/store";
-import { sendOTP } from "@/lib/redux/slices/authSlice";
+import { login } from "@/lib/redux/slices/authSlice";
 
-export default function ForgotPassword() {
+export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { loading, error } = useSelector((state: RootState) => state.auth);
@@ -28,9 +29,9 @@ export default function ForgotPassword() {
   } = useForm();
 
   const onSubmit = async (data: any) => {
-    const result = await dispatch(sendOTP(data));
-    if (!result.payload.error) {
-      router.push("/auth/verify-otp");
+    const result = await dispatch(login(data));
+    if (result.payload.success) {
+      router.push("/pages/template-selector");
     }
   };
 
@@ -45,7 +46,7 @@ export default function ForgotPassword() {
         }}
       >
         <Typography component="h1" variant="h5">
-          Forgot Password
+          Sign in
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
@@ -58,6 +59,16 @@ export default function ForgotPassword() {
             error={!!errors.email}
             helperText={errors.email ? "Email is required" : ""}
           />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Password"
+            type="password"
+            {...register("password", { required: true })}
+            error={!!errors.password}
+            helperText={errors.password ? "Password is required" : ""}
+          />
           <Button
             type="submit"
             fullWidth
@@ -65,8 +76,14 @@ export default function ForgotPassword() {
             sx={{ mt: 3, mb: 2 }}
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : "Send OTP"}
+            {loading ? <CircularProgress size={24} /> : "Sign In"}
           </Button>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Link href="/pages/auth/register">
+              Don't have an account? Sign Up
+            </Link>
+            <Link href="/pages/auth/forgot-password">Forgot password?</Link>
+          </Box>
         </Box>
       </Box>
     </Container>
