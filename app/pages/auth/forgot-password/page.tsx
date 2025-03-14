@@ -1,9 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 import {
   Box,
@@ -16,9 +15,9 @@ import {
 } from "@mui/material";
 
 import { AppDispatch, RootState } from "@/lib/redux/store";
-import { login } from "@/lib/redux/slices/authSlice";
+import { sendOTP } from "@/lib/redux/slices/authSlice";
 
-export default function Login() {
+export default function ForgotPassword() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { loading, error } = useSelector((state: RootState) => state.auth);
@@ -29,9 +28,9 @@ export default function Login() {
   } = useForm();
 
   const onSubmit = async (data: any) => {
-    const result = await dispatch(login(data));
-    if (!result.payload.error) {
-      router.push("/dashboard");
+    const result = await dispatch(sendOTP(data));
+    if (result.payload.success) {
+      router.push("/pages/auth/verify-otp");
     }
   };
 
@@ -46,7 +45,7 @@ export default function Login() {
         }}
       >
         <Typography component="h1" variant="h5">
-          Sign in
+          Forgot Password
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
@@ -59,16 +58,6 @@ export default function Login() {
             error={!!errors.email}
             helperText={errors.email ? "Email is required" : ""}
           />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Password"
-            type="password"
-            {...register("password", { required: true })}
-            error={!!errors.password}
-            helperText={errors.password ? "Password is required" : ""}
-          />
           <Button
             type="submit"
             fullWidth
@@ -76,12 +65,8 @@ export default function Login() {
             sx={{ mt: 3, mb: 2 }}
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : "Sign In"}
+            {loading ? <CircularProgress size={24} /> : "Send OTP"}
           </Button>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Link href="/auth/register">Don't have an account? Sign Up</Link>
-            <Link href="/auth/forgot-password">Forgot password?</Link>
-          </Box>
         </Box>
       </Box>
     </Container>
