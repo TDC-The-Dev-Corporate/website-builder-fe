@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginUser, registerUser, verify } from "../api/auth";
+import { getUserId } from "@/lib/utils";
 
 interface AuthState {
   user: any;
@@ -97,8 +98,12 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        const id = getUserId(action.payload.data.access_token);
         localStorage.setItem("token", action.payload.data.access_token);
-        localStorage.setItem("user", JSON.stringify(action.payload.data));
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ ...action.payload.data, id: id })
+        );
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;

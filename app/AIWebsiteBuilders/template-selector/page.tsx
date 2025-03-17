@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import AppLoader from "@/app/components/loader/AppLoader";
 import TemplateSelector from "@/app/components/TemplateSelector";
+import { logoutUser } from "@/lib/utils";
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -36,6 +37,9 @@ export default function Home() {
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
               Portfolio Template Editor
             </Typography>
+            <Button color="inherit" onClick={() => logoutUser()}>
+              Logout
+            </Button>
           </Toolbar>
         </AppBar>
 

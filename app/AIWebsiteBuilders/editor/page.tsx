@@ -26,8 +26,9 @@ export default function EditorPage() {
 
   const handleSave = async (layout: TemplateLayout) => {
     console.log("template", template);
+    const user = JSON.parse(localStorage.getItem("user"));
     const data = {
-      userId: "550e8400-e29b-41d4-a716-446655440000",
+      userId: user.id,
       templateId: template?.id,
       layout: layout,
     };
@@ -42,7 +43,7 @@ export default function EditorPage() {
       delete formatedData.templateId;
       localStorage.setItem("template", JSON.stringify(formatedData));
 
-      const link = `${window.location.origin}/pages/portfolio/${res.payload.user.name}`;
+      const link = `${window.location.origin}/AIWebsiteBuilders/portfolio/${res.payload.user.username}`;
       setPortfolioLink(link);
       setOpenModal(true);
     }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+
 import {
   Box,
   Button,
@@ -13,6 +13,8 @@ import {
   useTheme,
 } from "@mui/material";
 import { AutoAwesome, Speed, Devices, Security } from "@mui/icons-material";
+
+import { motion } from "framer-motion";
 
 export default function Home() {
   const router = useRouter();
@@ -93,7 +95,9 @@ export default function Home() {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => router.push("/pages/auth/register")}
+                  onClick={() =>
+                    router.push("/AIWebsiteBuilders/template-selector")
+                  }
                   sx={{
                     bgcolor: "#fff",
                     color: theme.palette.primary.main,
@@ -107,7 +111,7 @@ export default function Home() {
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => router.push("/pages/auth/login")}
+                  onClick={() => router.push("/AIWebsiteBuilders/auth/login")}
                   sx={{
                     color: "#fff",
                     borderColor: "#fff",
