@@ -23,7 +23,7 @@ export const register = createAsyncThunk(
       const response = await registerUser(data);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error);
     }
   }
 );
@@ -35,7 +35,7 @@ export const verifyUser = createAsyncThunk(
       const response = await verify(data);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error);
     }
   }
 );
@@ -47,7 +47,7 @@ export const login = createAsyncThunk(
       const response = await loginUser(data);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error);
     }
   }
 );
@@ -59,7 +59,7 @@ export const sendOTP = createAsyncThunk(
       const response = await sendOTP(data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error);
     }
   }
 );
@@ -88,7 +88,7 @@ const authSlice = createSlice({
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = (action.payload as { message: string }).message;
       })
       .addCase(login.pending, (state) => {
         state.loading = true;
@@ -107,7 +107,29 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = (action.payload as { message: string }).message;
+      })
+      .addCase(sendOTP.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(sendOTP.fulfilled, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(sendOTP.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as { message: string }).message;
+      })
+      .addCase(verifyUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyUser.fulfilled, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(verifyUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as { message: string }).message;
       });
   },
 });
