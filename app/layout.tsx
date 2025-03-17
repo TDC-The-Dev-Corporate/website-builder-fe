@@ -2,6 +2,7 @@
 
 import { store } from "@/lib/redux/store";
 import { Provider } from "react-redux";
+import { ProtectRoute } from "./protectRoute";
 
 export default function RootLayout({
   children,
@@ -14,7 +15,9 @@ export default function RootLayout({
       style={{ margin: 0, padding: 0, width: "100%", height: "100%" }}
     >
       <body style={{ margin: 0, padding: 0, width: "100%", height: "100%" }}>
-        <Provider store={store}>{children}</Provider>
+        <Provider store={store}>
+          <ProtectRoute>{children}</ProtectRoute>
+        </Provider>
       </body>
     </html>
   );

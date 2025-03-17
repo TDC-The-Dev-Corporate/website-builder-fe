@@ -30,7 +30,7 @@ export default function TemplateSelector() {
 
   const handleTemplateSelect = (template: Template) => {
     localStorage.setItem("template", JSON.stringify(template));
-    router.push("/pages/editor");
+    router.push("/AIWebsiteBuilders/editor");
   };
   return (
     <AppLoader loading={loading}>
