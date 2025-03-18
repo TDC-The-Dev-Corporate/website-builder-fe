@@ -96,7 +96,7 @@ export default function Home() {
                   variant="contained"
                   size="large"
                   onClick={() =>
-                    router.push("/AIWebsiteBuilders/template-selector")
+                    router.push("/AIWebsiteBuilders/auth/register")
                   }
                   sx={{
                     bgcolor: "#fff",
