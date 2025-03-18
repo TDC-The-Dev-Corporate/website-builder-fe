@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 
 import { AppDispatch, RootState } from "@/lib/redux/store";
-import { login } from "@/lib/redux/slices/authSlice";
+import { googleLogin, login } from "@/lib/redux/slices/authSlice";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
@@ -30,6 +30,13 @@ export default function Login() {
 
   const onSubmit = async (data: any) => {
     const result = await dispatch(login(data));
+    if (result.payload.success) {
+      router.push("/AIWebsiteBuilders/template-selector");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const result = await dispatch(googleLogin());
     if (result.payload.success) {
       router.push("/AIWebsiteBuilders/template-selector");
     }
@@ -78,6 +85,17 @@ export default function Login() {
           >
             {loading ? <CircularProgress size={24} /> : "Sign In"}
           </Button>
+
+          {/* Google Login Button */}
+          <Button
+            fullWidth
+            variant="outlined"
+            sx={{ mb: 2 }}
+            onClick={handleGoogleLogin}
+          >
+            Sign in with Google
+          </Button>
+
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Link href="/AIWebsiteBuilders/auth/register">
               Don't have an account? Sign Up
