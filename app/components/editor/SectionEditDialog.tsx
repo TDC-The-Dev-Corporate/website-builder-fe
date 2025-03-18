@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -31,6 +31,10 @@ export default function SectionEditDialog({
 }: SectionEditDialogProps) {
   const [content, setContent] = useState<any>(section?.content || {});
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    setContent(section?.content);
+  }, [section]);
 
   const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
