@@ -31,9 +31,13 @@ export default function SectionEditDialog({
 }: SectionEditDialogProps) {
   const [content, setContent] = useState<any>(section?.content || {});
   const [uploading, setUploading] = useState(false);
+  const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
-    setContent(section?.content);
+    if (section?.content) {
+      setContent(section?.content);
+      setFetching(false);
+    }
   }, [section]);
 
   const handleImageUpload = async (
@@ -282,7 +286,7 @@ export default function SectionEditDialog({
         Section
       </DialogTitle>
       <DialogContent>
-        <Box sx={{ mt: 2 }}>{renderFields()}</Box>
+        {!fetching && <Box sx={{ mt: 2 }}>{renderFields()}</Box>}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
