@@ -52,6 +52,41 @@ export const login = createAsyncThunk(
   }
 );
 
+export const googleLogin = createAsyncThunk<any, void, { rejectValue: any }>(
+  "auth/google/login",
+  async (_, { rejectWithValue }) => {
+    return new Promise((resolve, reject) => {
+      const popup = window.open(
+        "http://localhost:3001/auth/google",
+        "_blank",
+        "width=500,height=600"
+      );
+
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== "http://localhost:3001") return;
+
+        window.removeEventListener("message", handleMessage);
+
+        if (event.data.success) {
+          resolve(event.data);
+        } else {
+          reject(rejectWithValue(event.data));
+        }
+
+        popup?.close();
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      if (!popup) {
+        return rejectWithValue({
+          message: "Allow popups to continue with Google login.",
+        });
+      }
+    });
+  }
+);
+
 export const sendOTP = createAsyncThunk(
   "auth/sendOTP",
   async (data: any, { rejectWithValue }) => {
@@ -106,6 +141,29 @@ const authSlice = createSlice({
         );
       })
       .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as { message: string }).message;
+      })
+      .addCase(googleLogin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(googleLogin.fulfilled, (state, action) => {
+        state.loading = false;
+        const { data } = action.payload;
+
+        state.token = data.access_token;
+        state.user = {
+          name: data.name,
+          username: data.username,
+          email: data.email,
+          id: getUserId(data.access_token),
+        };
+
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("user", JSON.stringify(state.user));
+      })
+      .addCase(googleLogin.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as { message: string }).message;
       })

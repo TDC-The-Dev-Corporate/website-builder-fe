@@ -15,6 +15,10 @@ export const loginUser = async (data: any) => {
   return response.data;
 };
 
+export const googleAuth = async () => {
+  window.location.href = "http://localhost:3001/auth/google";
+};
+
 export const sendOtp = async (data: any) => {
   const response = await api.post("auth/sendOTP", data);
   return response.data;
