@@ -137,7 +137,7 @@ const authSlice = createSlice({
         localStorage.setItem("token", action.payload.data.access_token);
         localStorage.setItem(
           "user",
-          JSON.stringify({ ...action.payload.data, id: id })
+          JSON.stringify({ ...action.payload.data })
         );
       })
       .addCase(login.rejected, (state, action) => {
@@ -152,12 +152,11 @@ const authSlice = createSlice({
         state.loading = false;
         const { data } = action.payload;
 
-        state.token = data.access_token;
+        const { access_token, ...rest } = data;
+
+        state.token = access_token;
         state.user = {
-          name: data.name,
-          username: data.username,
-          email: data.email,
-          id: getUserId(data.access_token),
+          ...rest,
         };
 
         localStorage.setItem("token", data.access_token);
