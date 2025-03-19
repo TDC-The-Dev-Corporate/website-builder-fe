@@ -11,7 +11,7 @@ const OAuthRedirect = () => {
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem("access_token", token as string);
+      localStorage.setItem("token", token as string);
       router.push("/AIWebsiteBuilders/template-selector");
     }
   }, [token, router]);
