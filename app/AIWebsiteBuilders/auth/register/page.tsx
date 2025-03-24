@@ -97,7 +97,6 @@ export default function Register() {
           values.profileImage = data.secure_url;
         }
 
-        console.log("values", values);
         const result = await dispatch(registerUser(values));
         if (result.payload.success) {
           router.push("/AIWebsiteBuilders/auth/verify-otp");
