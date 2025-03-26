@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import {
   Dialog,
   DialogTitle,
@@ -9,7 +10,13 @@ import {
   Box,
   Typography,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
 } from "@mui/material";
+
 import { Upload, X } from "lucide-react";
 
 interface SectionEditDialogProps {
@@ -30,12 +37,16 @@ export default function SectionEditDialog({
   onSave,
 }: SectionEditDialogProps) {
   const [content, setContent] = useState<any>(section?.content || {});
+  const [sectionStyles, setSectionStyles] = useState<any>(
+    section?.styles || {}
+  );
   const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
     if (section?.content) {
       setContent(section?.content);
+      setSectionStyles(section?.styles);
       setFetching(false);
     }
   }, [section]);
@@ -139,7 +150,11 @@ export default function SectionEditDialog({
   );
 
   const handleSave = () => {
-    onSave(content);
+    let updatedJson = {
+      content: { ...content },
+      styles: { ...sectionStyles },
+    };
+    onSave(updatedJson);
     onClose();
   };
 
@@ -149,78 +164,668 @@ export default function SectionEditDialog({
     switch (section.type) {
       case "hero":
         return (
-          <>
-            <TextField
-              fullWidth
-              label="Heading"
-              value={content.heading || ""}
-              onChange={(e) =>
-                setContent({ ...content, heading: e.target.value })
-              }
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Subheading"
-              value={content.subheading || ""}
-              onChange={(e) =>
-                setContent({ ...content, subheading: e.target.value })
-              }
-              sx={{ mb: 2 }}
-            />
-            <ImageUploadField
-              label="Background Image"
-              value={content.image}
-              onChange={(e: any) =>
-                setContent({ ...content, image: e.target.value })
-              }
-              onUpload={(e: any) => handleImageUpload(e, "image")}
-            />
-          </>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Heading"
+                value={content.heading || ""}
+                onChange={(e) =>
+                  setContent({ ...content, heading: e.target.value })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Subheading"
+                value={content.subheading || ""}
+                onChange={(e) =>
+                  setContent({ ...content, subheading: e.target.value })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <ImageUploadField
+                label="Background Image"
+                value={content.image}
+                onChange={(e: any) =>
+                  setContent({ ...content, image: e.target.value })
+                }
+                onUpload={(e: any) => handleImageUpload(e, "image")}
+              />
+            </Grid>
+
+            {/* Font Family */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Font Family</InputLabel>
+                <Select
+                  label="Font Family"
+                  value={section.styles.fontFamily || "Arial, sans-serif"}
+                  onChange={(e) =>
+                    setSectionStyles({
+                      ...sectionStyles,
+                      fontFamily: e.target.value,
+                    })
+                  }
+                >
+                  {[
+                    "Arial, sans-serif",
+                    "Verdana, sans-serif",
+                    "Times New Roman, serif",
+                    "Georgia, serif",
+                    "Courier New, monospace",
+                    "Tahoma, sans-serif",
+                    "Trebuchet MS, sans-serif",
+                    "Lucida Console, monospace",
+                    "Montserrat, sans-serif",
+                  ].map((font) => (
+                    <MenuItem key={font} value={font}>
+                      {font}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            {/* Font Size */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Font Size</InputLabel>
+                <Select
+                  label="Font Size"
+                  value={section.styles.fontSize || "base"}
+                  onChange={(e) =>
+                    setSectionStyles({
+                      ...sectionStyles,
+                      fontSize: e.target.value,
+                    })
+                  }
+                >
+                  {[
+                    "xs",
+                    "sm",
+                    "base",
+                    "lg",
+                    "xl",
+                    "2xl",
+                    "3xl",
+                    "4xl",
+                    "5xl",
+                  ].map((size) => (
+                    <MenuItem key={size} value={size}>
+                      {size}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            {/* Font Style */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Font Style</InputLabel>
+                <Select
+                  label="Font Style"
+                  value={section.styles.fontStyle || "normal"}
+                  onChange={(e) =>
+                    setSectionStyles({
+                      ...sectionStyles,
+                      fontStyle: e.target.value,
+                    })
+                  }
+                >
+                  {["normal", "italic", "oblique"].map((style) => (
+                    <MenuItem key={style} value={style}>
+                      {style}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box display="flex" alignItems="center" gap={2}>
+                <TextField
+                  disabled
+                  fullWidth
+                  label="Text Color"
+                  variant="outlined"
+                  value={sectionStyles.textColor || "#000000"}
+                  onChange={(e) =>
+                    setSectionStyles((prev) => ({
+                      ...prev,
+                      textColor: e.target.value,
+                    }))
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <Box
+                        sx={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "4px",
+                          border: "1px solid #ddd",
+                          backgroundColor: sectionStyles.textColor || "#000000",
+                          marginRight: 1,
+                        }}
+                      />
+                    ),
+                  }}
+                />
+
+                {/* Color Picker */}
+                <TextField
+                  type="color"
+                  value={sectionStyles.textColor || "#000000"}
+                  onChange={(e) =>
+                    setSectionStyles((prev) => ({
+                      ...prev,
+                      textColor: e.target.value,
+                    }))
+                  }
+                  sx={{
+                    width: 50,
+                    minWidth: 45,
+                    padding: 0,
+                    border: "none",
+                  }}
+                />
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box display="flex" alignItems="center" gap={2}>
+                <TextField
+                  disabled
+                  fullWidth
+                  label="Background Color"
+                  variant="outlined"
+                  value={sectionStyles.backgroundColor || "#000000"}
+                  onChange={(e) =>
+                    setSectionStyles((prev) => ({
+                      ...prev,
+                      backgroundColor: e.target.value,
+                    }))
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <Box
+                        sx={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "4px",
+                          border: "1px solid #ddd",
+                          backgroundColor:
+                            sectionStyles.backgroundColor || "#000000",
+                          marginRight: 1,
+                        }}
+                      />
+                    ),
+                  }}
+                />
+
+                {/* Color Picker */}
+                <TextField
+                  type="color"
+                  value={sectionStyles.backgroundColor || "#000000"}
+                  onChange={(e) =>
+                    setSectionStyles((prev) => ({
+                      ...prev,
+                      backgroundColor: e.target.value,
+                    }))
+                  }
+                  sx={{
+                    width: 50,
+                    minWidth: 45,
+                    padding: 0,
+                    border: "none",
+                  }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
         );
+
       case "about":
         return (
-          <>
-            <TextField
-              fullWidth
-              label="Heading"
-              value={content.heading || ""}
-              onChange={(e) =>
-                setContent({ ...content, heading: e.target.value })
-              }
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              label="Description"
-              value={content.description || ""}
-              onChange={(e) =>
-                setContent({ ...content, description: e.target.value })
-              }
-            />
-          </>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Heading"
+                value={content.heading || ""}
+                onChange={(e) =>
+                  setContent({ ...content, heading: e.target.value })
+                }
+                sx={{ mb: 2 }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Description"
+                value={content.description || ""}
+                onChange={(e) =>
+                  setContent({ ...content, description: e.target.value })
+                }
+              />
+            </Grid>
+
+            {/* Font Family */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Font Family</InputLabel>
+                <Select
+                  label="Font Family"
+                  value={section.styles.fontFamily || "Arial, sans-serif"}
+                  onChange={(e) =>
+                    setSectionStyles({
+                      ...sectionStyles,
+                      fontFamily: e.target.value,
+                    })
+                  }
+                >
+                  {[
+                    "Arial, sans-serif",
+                    "Verdana, sans-serif",
+                    "Times New Roman, serif",
+                    "Georgia, serif",
+                    "Courier New, monospace",
+                    "Tahoma, sans-serif",
+                    "Trebuchet MS, sans-serif",
+                    "Lucida Console, monospace",
+                    "Montserrat, sans-serif",
+                  ].map((font) => (
+                    <MenuItem key={font} value={font}>
+                      {font}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            {/* Font Size */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Font Size</InputLabel>
+                <Select
+                  label="Font Size"
+                  value={section.styles.fontSize || "base"}
+                  onChange={(e) =>
+                    setSectionStyles({
+                      ...sectionStyles,
+                      fontSize: e.target.value,
+                    })
+                  }
+                >
+                  {[
+                    "xs",
+                    "sm",
+                    "base",
+                    "lg",
+                    "xl",
+                    "2xl",
+                    "3xl",
+                    "4xl",
+                    "5xl",
+                  ].map((size) => (
+                    <MenuItem key={size} value={size}>
+                      {size}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            {/* Font Style */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Font Style</InputLabel>
+                <Select
+                  label="Font Style"
+                  value={section.styles.fontStyle || "normal"}
+                  onChange={(e) =>
+                    setSectionStyles({
+                      ...sectionStyles,
+                      fontStyle: e.target.value,
+                    })
+                  }
+                >
+                  {["normal", "italic", "oblique"].map((style) => (
+                    <MenuItem key={style} value={style}>
+                      {style}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box display="flex" alignItems="center" gap={2}>
+                <TextField
+                  disabled
+                  fullWidth
+                  label="Text Color"
+                  variant="outlined"
+                  value={sectionStyles.textColor || "#000000"}
+                  onChange={(e) =>
+                    setSectionStyles((prev) => ({
+                      ...prev,
+                      textColor: e.target.value,
+                    }))
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <Box
+                        sx={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "4px",
+                          border: "1px solid #ddd",
+                          backgroundColor: sectionStyles.textColor || "#000000",
+                          marginRight: 1,
+                        }}
+                      />
+                    ),
+                  }}
+                />
+
+                {/* Color Picker */}
+                <TextField
+                  type="color"
+                  value={sectionStyles.textColor || "#000000"}
+                  onChange={(e) =>
+                    setSectionStyles((prev) => ({
+                      ...prev,
+                      textColor: e.target.value,
+                    }))
+                  }
+                  sx={{
+                    width: 50,
+                    minWidth: 45,
+                    padding: 0,
+                    border: "none",
+                  }}
+                />
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box display="flex" alignItems="center" gap={2}>
+                <TextField
+                  disabled
+                  fullWidth
+                  label="Background Color"
+                  variant="outlined"
+                  value={sectionStyles.backgroundColor || "#000000"}
+                  onChange={(e) =>
+                    setSectionStyles((prev) => ({
+                      ...prev,
+                      backgroundColor: e.target.value,
+                    }))
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <Box
+                        sx={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "4px",
+                          border: "1px solid #ddd",
+                          backgroundColor:
+                            sectionStyles.backgroundColor || "#000000",
+                          marginRight: 1,
+                        }}
+                      />
+                    ),
+                  }}
+                />
+
+                {/* Color Picker */}
+                <TextField
+                  type="color"
+                  value={sectionStyles.backgroundColor || "#000000"}
+                  onChange={(e) =>
+                    setSectionStyles((prev) => ({
+                      ...prev,
+                      backgroundColor: e.target.value,
+                    }))
+                  }
+                  sx={{
+                    width: 50,
+                    minWidth: 45,
+                    padding: 0,
+                    border: "none",
+                  }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
         );
       case "projects":
         return (
           <>
-            <TextField
-              fullWidth
-              label="Heading"
-              value={content.heading || ""}
-              onChange={(e) =>
-                setContent({ ...content, heading: e.target.value })
-              }
-              sx={{ mb: 3 }}
-            />
-            <Typography variant="subtitle1" sx={{ mb: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Heading"
+                  value={content.heading || ""}
+                  onChange={(e) =>
+                    setContent({ ...content, heading: e.target.value })
+                  }
+                  sx={{ mb: 3 }}
+                />
+              </Grid>
+              {/* Font Family */}
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Font Family</InputLabel>
+                  <Select
+                    label="Font Family"
+                    value={section.styles.fontFamily || "Arial, sans-serif"}
+                    onChange={(e) =>
+                      setSectionStyles({
+                        ...sectionStyles,
+                        fontFamily: e.target.value,
+                      })
+                    }
+                  >
+                    {[
+                      "Arial, sans-serif",
+                      "Verdana, sans-serif",
+                      "Times New Roman, serif",
+                      "Georgia, serif",
+                      "Courier New, monospace",
+                      "Tahoma, sans-serif",
+                      "Trebuchet MS, sans-serif",
+                      "Lucida Console, monospace",
+                      "Montserrat, sans-serif",
+                    ].map((font) => (
+                      <MenuItem key={font} value={font}>
+                        {font}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Font Size */}
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Font Size</InputLabel>
+                  <Select
+                    label="Font Size"
+                    value={section.styles.fontSize || "base"}
+                    onChange={(e) =>
+                      setSectionStyles({
+                        ...sectionStyles,
+                        fontSize: e.target.value,
+                      })
+                    }
+                  >
+                    {[
+                      "xs",
+                      "sm",
+                      "base",
+                      "lg",
+                      "xl",
+                      "2xl",
+                      "3xl",
+                      "4xl",
+                      "5xl",
+                    ].map((size) => (
+                      <MenuItem key={size} value={size}>
+                        {size}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Font Style */}
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Font Style</InputLabel>
+                  <Select
+                    label="Font Style"
+                    value={section.styles.fontStyle || "normal"}
+                    onChange={(e) =>
+                      setSectionStyles({
+                        ...sectionStyles,
+                        fontStyle: e.target.value,
+                      })
+                    }
+                  >
+                    {["normal", "italic", "oblique"].map((style) => (
+                      <MenuItem key={style} value={style}>
+                        {style}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <TextField
+                    disabled
+                    fullWidth
+                    label="Text Color"
+                    variant="outlined"
+                    value={sectionStyles.textColor || "#000000"}
+                    onChange={(e) =>
+                      setSectionStyles((prev) => ({
+                        ...prev,
+                        textColor: e.target.value,
+                      }))
+                    }
+                    InputProps={{
+                      startAdornment: (
+                        <Box
+                          sx={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: "4px",
+                            border: "1px solid #ddd",
+                            backgroundColor:
+                              sectionStyles.textColor || "#000000",
+                            marginRight: 1,
+                          }}
+                        />
+                      ),
+                    }}
+                  />
+
+                  {/* Color Picker */}
+                  <TextField
+                    type="color"
+                    value={sectionStyles.textColor || "#000000"}
+                    onChange={(e) =>
+                      setSectionStyles((prev) => ({
+                        ...prev,
+                        textColor: e.target.value,
+                      }))
+                    }
+                    sx={{
+                      width: 50,
+                      minWidth: 45,
+                      padding: 0,
+                      border: "none",
+                    }}
+                  />
+                </Box>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <TextField
+                    disabled
+                    fullWidth
+                    label="Background Color"
+                    variant="outlined"
+                    value={sectionStyles.backgroundColor || "#000000"}
+                    onChange={(e) =>
+                      setSectionStyles((prev) => ({
+                        ...prev,
+                        backgroundColor: e.target.value,
+                      }))
+                    }
+                    InputProps={{
+                      startAdornment: (
+                        <Box
+                          sx={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: "4px",
+                            border: "1px solid #ddd",
+                            backgroundColor:
+                              sectionStyles.backgroundColor || "#000000",
+                            marginRight: 1,
+                          }}
+                        />
+                      ),
+                    }}
+                  />
+
+                  {/* Color Picker */}
+                  <TextField
+                    type="color"
+                    value={sectionStyles.backgroundColor || "#000000"}
+                    onChange={(e) =>
+                      setSectionStyles((prev) => ({
+                        ...prev,
+                        backgroundColor: e.target.value,
+                      }))
+                    }
+                    sx={{
+                      width: 50,
+                      minWidth: 45,
+                      padding: 0,
+                      border: "none",
+                    }}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+            <Typography variant="subtitle1" sx={{ mb: 2, mt: 2 }}>
               Projects
             </Typography>
             {(content.projects || []).map((project: any, index: number) => (
               <Box
                 key={index}
-                sx={{ mb: 3, p: 2, bgcolor: "grey.100", borderRadius: 1 }}
+                sx={{
+                  mb: 3,
+                  p: 2,
+                  bgcolor: "grey.100",
+                  borderRadius: 1,
+                }}
               >
                 <Typography variant="subtitle2" sx={{ mb: 2 }}>
                   Project {index + 1}
