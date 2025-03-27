@@ -90,7 +90,7 @@ export default function SectionEditDialog({
     }
   };
 
-  const ImageUploadField = ({ value, onChange, onUpload, label }: any) => (
+  const ImageUploadField = ({ value, onChange, onUpload, label, id }: any) => (
     <Box sx={{ mb: 2 }}>
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
         {label}
@@ -105,11 +105,11 @@ export default function SectionEditDialog({
         <input
           accept="image/*"
           type="file"
-          id="image-upload"
+          id={id}
           style={{ display: "none" }}
           onChange={onUpload}
         />
-        <label htmlFor="image-upload">
+        <label htmlFor={id}>
           <IconButton
             component="span"
             disabled={uploading}
@@ -194,6 +194,7 @@ export default function SectionEditDialog({
                   setContent({ ...content, image: e.target.value })
                 }
                 onUpload={(e: any) => handleImageUpload(e, "image")}
+                id={`image-upload-hero`}
               />
             </Grid>
 
@@ -322,6 +323,7 @@ export default function SectionEditDialog({
                     setContent({ ...content, projects: newProjects });
                   }}
                   onUpload={(e: any) => handleImageUpload(e, "image", index)}
+                  id={`image-upload-${index}`}
                 />
               </Box>
             ))}
