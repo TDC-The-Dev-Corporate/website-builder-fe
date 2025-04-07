@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Box,
@@ -34,7 +34,13 @@ export default function Editor({ template, onSave }: EditorProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
   const [navEditDialogOpen, setNavEditDialogOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [saveButton, setSaveButton] = useState(true);
+
+  useEffect(() => {
+    localStorage.getItem("published") === "true"
+      ? setSaveButton(false)
+      : setSaveButton(true);
+  }, []);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -146,13 +152,18 @@ export default function Editor({ template, onSave }: EditorProps) {
           </Button>
         )}
 
-        <Button
-          variant="contained"
-          onClick={() => onSave(layout)}
-          sx={{ mt: "auto" }}
-        >
-          Save Changes
-        </Button>
+        {saveButton && (
+          <Button
+            variant="contained"
+            onClick={() => {
+              setSaveButton(false);
+              onSave(layout);
+            }}
+            sx={{ mt: "auto" }}
+          >
+            Save Changes
+          </Button>
+        )}
       </Box>
 
       <Box sx={{ flex: 1, bgcolor: "grey.100", overflow: "auto" }}>
