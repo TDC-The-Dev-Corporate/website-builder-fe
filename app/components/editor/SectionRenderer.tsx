@@ -2,6 +2,8 @@ import React from "react";
 
 import { Box, Typography } from "@mui/material";
 
+import { getFontSize } from "@/lib/utils";
+
 interface SectionRendererProps {
   section: Section;
 }
@@ -39,11 +41,31 @@ export default function SectionRenderer({ section }: SectionRendererProps) {
           <Box sx={{ position: "relative", zIndex: 1 }}>
             <Typography
               variant="h3"
-              sx={{ color: section.styles.textColor, mb: 2 }}
+              sx={{
+                color: section.styles.textColor,
+                mb: 2,
+                fontSize: section.styles.fontSize
+                  ? getFontSize(section.styles.fontSize)
+                  : getFontSize("4xl"),
+                fontStyle: section.styles.fontStyle || "normal",
+                fontFamily: section.styles.fontFamily || "Helvetica",
+                fontWeight: section.styles.fontWeight || "800",
+              }}
             >
               {section.content.heading}
             </Typography>
-            <Typography variant="h5" sx={{ color: section.styles.textColor }}>
+            <Typography
+              variant="h5"
+              sx={{
+                color: section.styles.textColor,
+                fontSize: section.styles.fontSize
+                  ? getFontSize(section.styles.fontSize)
+                  : getFontSize("4xl"),
+                fontStyle: section.styles.fontStyle || "normal",
+                fontFamily: section.styles.fontFamily || "Helvetica",
+                fontWeight: section.styles.fontWeight || "800",
+              }}
+            >
               {section.content.subheading}
             </Typography>
           </Box>
@@ -53,18 +75,33 @@ export default function SectionRenderer({ section }: SectionRendererProps) {
       return (
         <Box
           sx={{
-            backgroundColor: section.styles.backgroundColor,
+            backgroundColor: section.styles.backgroundColor || "white",
             py: 4,
             px: 3,
           }}
         >
           <Typography
             variant="h4"
-            sx={{ color: section.styles.textColor, mb: 3 }}
+            sx={{
+              color: section.styles.textColor,
+              mb: 3,
+              fontSize: section.styles.fontSize
+                ? getFontSize(section.styles.fontSize)
+                : getFontSize("lg"),
+              fontStyle: section.styles.fontStyle || "normal",
+              fontFamily: section.styles.fontFamily || "Helvetica",
+              fontWeight: section.styles.fontWeight || "500",
+            }}
           >
             {section.content.heading}
           </Typography>
-          <Typography variant="body1" sx={{ color: section.styles.textColor }}>
+          <Typography
+            variant="body1"
+            sx={{
+              color: section.styles.textColor || "black",
+              fontFamily: section.styles.fontFamily || "Helvetica",
+            }}
+          >
             {section.content.description}
           </Typography>
         </Box>
@@ -73,14 +110,23 @@ export default function SectionRenderer({ section }: SectionRendererProps) {
       return (
         <Box
           sx={{
-            backgroundColor: section.styles.backgroundColor,
+            backgroundColor: section.styles.backgroundColor || "white",
             py: 4,
             px: 3,
           }}
         >
           <Typography
             variant="h4"
-            sx={{ color: section.styles.textColor, mb: 4 }}
+            sx={{
+              color: section.styles.textColor || "black",
+              mb: 4,
+              fontSize: section.styles.fontSize
+                ? getFontSize(section.styles.fontSize)
+                : getFontSize("xl"),
+              fontStyle: section.styles.fontStyle || "normal",
+              fontFamily: section.styles.fontFamily || "Helvetica",
+              fontWeight: section.styles.fontWeight || "600",
+            }}
           >
             {section.content.heading}
           </Typography>
@@ -112,10 +158,28 @@ export default function SectionRenderer({ section }: SectionRendererProps) {
                   }}
                 />
                 <Box sx={{ p: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 1 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 1,
+                      fontSize: section.styles.fontSize
+                        ? getFontSize(section.styles.fontSize)
+                        : getFontSize("xl"),
+                      fontStyle: section.styles.fontStyle || "normal",
+                      fontFamily: section.styles.fontFamily || "Helvetica",
+                      fontWeight: section.styles.fontWeight || "600",
+                      color: section.styles.textColor || "black",
+                    }}
+                  >
                     {project.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: section.styles.textColor || "black",
+                      fontFamily: section.styles.fontFamily || "Helvetica",
+                    }}
+                  >
                     {project.description}
                   </Typography>
                 </Box>

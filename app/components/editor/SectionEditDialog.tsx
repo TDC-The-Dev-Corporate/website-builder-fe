@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import {
   Dialog,
   DialogTitle,
@@ -9,8 +10,13 @@ import {
   Box,
   Typography,
   IconButton,
+  Grid,
 } from "@mui/material";
+
 import { Upload, X } from "lucide-react";
+
+import FontSettings from "./FontSettings";
+import ColorPicker from "./ColorPicker";
 
 interface SectionEditDialogProps {
   open: boolean;
@@ -30,12 +36,16 @@ export default function SectionEditDialog({
   onSave,
 }: SectionEditDialogProps) {
   const [content, setContent] = useState<any>(section?.content || {});
+  const [sectionStyles, setSectionStyles] = useState<any>(
+    section?.styles || {}
+  );
   const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
     if (section?.content) {
       setContent(section?.content);
+      setSectionStyles(section?.styles);
       setFetching(false);
     }
   }, [section]);
@@ -80,7 +90,7 @@ export default function SectionEditDialog({
     }
   };
 
-  const ImageUploadField = ({ value, onChange, onUpload, label }: any) => (
+  const ImageUploadField = ({ value, onChange, onUpload, label, id }: any) => (
     <Box sx={{ mb: 2 }}>
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
         {label}
@@ -95,11 +105,11 @@ export default function SectionEditDialog({
         <input
           accept="image/*"
           type="file"
-          id="image-upload"
+          id={id}
           style={{ display: "none" }}
           onChange={onUpload}
         />
-        <label htmlFor="image-upload">
+        <label htmlFor={id}>
           <IconButton
             component="span"
             disabled={uploading}
@@ -139,7 +149,11 @@ export default function SectionEditDialog({
   );
 
   const handleSave = () => {
-    onSave(content);
+    let updatedJson = {
+      content: { ...content },
+      styles: { ...sectionStyles },
+    };
+    onSave(updatedJson);
     onClose();
   };
 
@@ -149,78 +163,128 @@ export default function SectionEditDialog({
     switch (section.type) {
       case "hero":
         return (
-          <>
-            <TextField
-              fullWidth
-              label="Heading"
-              value={content.heading || ""}
-              onChange={(e) =>
-                setContent({ ...content, heading: e.target.value })
-              }
-              sx={{ mb: 2 }}
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Heading"
+                value={content.heading || ""}
+                onChange={(e) =>
+                  setContent({ ...content, heading: e.target.value })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Subheading"
+                value={content.subheading || ""}
+                onChange={(e) =>
+                  setContent({ ...content, subheading: e.target.value })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <ImageUploadField
+                label="Background Image"
+                value={content.image}
+                onChange={(e: any) =>
+                  setContent({ ...content, image: e.target.value })
+                }
+                onUpload={(e: any) => handleImageUpload(e, "image")}
+                id={`image-upload-hero`}
+              />
+            </Grid>
+
+            <FontSettings
+              sectionStyles={sectionStyles}
+              setSectionStyles={setSectionStyles}
             />
-            <TextField
-              fullWidth
-              label="Subheading"
-              value={content.subheading || ""}
-              onChange={(e) =>
-                setContent({ ...content, subheading: e.target.value })
-              }
-              sx={{ mb: 2 }}
+
+            <ColorPicker
+              sectionStyles={sectionStyles}
+              setSectionStyles={setSectionStyles}
             />
-            <ImageUploadField
-              label="Background Image"
-              value={content.image}
-              onChange={(e: any) =>
-                setContent({ ...content, image: e.target.value })
-              }
-              onUpload={(e: any) => handleImageUpload(e, "image")}
-            />
-          </>
+          </Grid>
         );
+
       case "about":
         return (
-          <>
-            <TextField
-              fullWidth
-              label="Heading"
-              value={content.heading || ""}
-              onChange={(e) =>
-                setContent({ ...content, heading: e.target.value })
-              }
-              sx={{ mb: 2 }}
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Heading"
+                value={content.heading || ""}
+                onChange={(e) =>
+                  setContent({ ...content, heading: e.target.value })
+                }
+                sx={{ mb: 2 }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Description"
+                value={content.description || ""}
+                onChange={(e) =>
+                  setContent({ ...content, description: e.target.value })
+                }
+              />
+            </Grid>
+
+            <FontSettings
+              sectionStyles={sectionStyles}
+              setSectionStyles={setSectionStyles}
             />
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              label="Description"
-              value={content.description || ""}
-              onChange={(e) =>
-                setContent({ ...content, description: e.target.value })
-              }
+
+            <ColorPicker
+              sectionStyles={sectionStyles}
+              setSectionStyles={setSectionStyles}
             />
-          </>
+          </Grid>
         );
       case "projects":
         return (
           <>
-            <TextField
-              fullWidth
-              label="Heading"
-              value={content.heading || ""}
-              onChange={(e) =>
-                setContent({ ...content, heading: e.target.value })
-              }
-              sx={{ mb: 3 }}
-            />
-            <Typography variant="subtitle1" sx={{ mb: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Heading"
+                  value={content.heading || ""}
+                  onChange={(e) =>
+                    setContent({ ...content, heading: e.target.value })
+                  }
+                  sx={{ mb: 3 }}
+                />
+              </Grid>
+              <FontSettings
+                sectionStyles={sectionStyles}
+                setSectionStyles={setSectionStyles}
+              />
+
+              <ColorPicker
+                sectionStyles={sectionStyles}
+                setSectionStyles={setSectionStyles}
+              />
+            </Grid>
+            <Typography variant="subtitle1" sx={{ mb: 2, mt: 2 }}>
               Projects
             </Typography>
             {(content.projects || []).map((project: any, index: number) => (
               <Box
                 key={index}
-                sx={{ mb: 3, p: 2, bgcolor: "grey.100", borderRadius: 1 }}
+                sx={{
+                  mb: 3,
+                  p: 2,
+                  bgcolor: "grey.100",
+                  borderRadius: 1,
+                }}
               >
                 <Typography variant="subtitle2" sx={{ mb: 2 }}>
                   Project {index + 1}
@@ -259,6 +323,7 @@ export default function SectionEditDialog({
                     setContent({ ...content, projects: newProjects });
                   }}
                   onUpload={(e: any) => handleImageUpload(e, "image", index)}
+                  id={`image-upload-${index}`}
                 />
               </Box>
             ))}
