@@ -11,6 +11,7 @@ import {
   Button,
   Divider,
 } from "@mui/material";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 export default function ViewProfile() {
   const router = useRouter();
@@ -37,15 +38,23 @@ export default function ViewProfile() {
               overflow: "hidden",
               margin: "0 auto",
               mb: 2,
+              backgroundColor: "#f0f0f0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            <Image
-              src={user.profileImage || "/default-avatar.png"}
-              alt="Profile"
-              width={200}
-              height={200}
-              style={{ objectFit: "cover" }}
-            />
+            {user.profileImage ? (
+              <Image
+                src={user.profileImage}
+                alt="Profile"
+                width={200}
+                height={200}
+                style={{ objectFit: "cover" }}
+              />
+            ) : (
+              <AccountCircleIcon sx={{ fontSize: 100, color: "#9e9e9e" }} />
+            )}
           </Box>
           <Button
             variant="contained"

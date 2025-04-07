@@ -42,7 +42,7 @@ const validationSchema = Yup.object({
   tradeSpecialization: Yup.string().required(
     "Trade specialization is required"
   ),
-  profileImage: Yup.mixed(),
+  profileImage: Yup.mixed().notRequired(),
 });
 
 const tradeSpecializations = [
