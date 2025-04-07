@@ -17,6 +17,7 @@ import {
   CircularProgress,
   IconButton,
 } from "@mui/material";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -164,13 +165,20 @@ export default function EditProfile() {
                     overflow: "hidden",
                   }}
                 >
-                  <Image
-                    src={imagePreview || "/default-avatar.png"}
-                    alt="Profile"
-                    width={200}
-                    height={200}
-                    style={{ objectFit: "cover" }}
-                  />
+                  {imagePreview && (
+                    <Image
+                      src={imagePreview || "/default-avatar.png"}
+                      alt="Profile"
+                      width={200}
+                      height={200}
+                      style={{ objectFit: "cover" }}
+                    />
+                  )}
+                  {!imagePreview && (
+                    <AccountCircleIcon
+                      sx={{ fontSize: 200, color: "#9e9e9e" }}
+                    />
+                  )}
                 </Box>
                 <IconButton
                   sx={{
