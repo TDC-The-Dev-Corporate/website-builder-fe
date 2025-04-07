@@ -61,12 +61,18 @@ export default function Editor({ template, onSave }: EditorProps) {
     setEditDialogOpen(true);
   };
 
-  const handleEditSave = (content: any) => {
+  const handleEditSave = (updatedSection: any) => {
     if (currentSection) {
       setLayout({
         ...layout,
         sections: layout.sections.map((section) =>
-          section.id === currentSection.id ? { ...section, content } : section
+          section.id === currentSection.id
+            ? {
+                ...section,
+                content: updatedSection.content,
+                styles: updatedSection.styles,
+              }
+            : section
         ),
       });
     }
