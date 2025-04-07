@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 export default function Home() {
   const router = useRouter();
   const theme = useTheme();
+  const token = localStorage.getItem("token");
 
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
@@ -95,9 +96,11 @@ export default function Home() {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() =>
-                    router.push("/AIWebsiteBuilders/template-selector")
-                  }
+                  onClick={() => {
+                    if (token)
+                      router.push("/AIWebsiteBuilders/template-selector");
+                    else router.push("/AIWebsiteBuilders/auth/login");
+                  }}
                   sx={{
                     bgcolor: "#fff",
                     color: theme.palette.primary.main,
