@@ -40,8 +40,6 @@ export default function Home() {
         }
 
         const data = await response;
-        console.log("response", response);
-        console.log("data", data);
         setPortfolio(data);
         setLoading(false);
         data
