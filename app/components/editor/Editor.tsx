@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   Box,
@@ -35,6 +36,8 @@ export default function Editor({ template, onSave }: EditorProps) {
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
   const [navEditDialogOpen, setNavEditDialogOpen] = useState(false);
   const [saveButton, setSaveButton] = useState(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     localStorage.getItem("published") === "true"
@@ -109,6 +112,14 @@ export default function Editor({ template, onSave }: EditorProps) {
           Editor
         </Typography>
 
+        <Button
+          variant="outlined"
+          onClick={() => router.push("/AIWebsiteBuilders/template-selector")}
+          sx={{ mb: 2 }}
+        >
+          ← Back to Templates
+        </Button>
+
         <Tabs
           value={editMode}
           onChange={(_, newValue) => setEditMode(newValue)}
@@ -151,7 +162,6 @@ export default function Editor({ template, onSave }: EditorProps) {
             Edit Navigation
           </Button>
         )}
-
         {saveButton && (
           <Button
             variant="contained"

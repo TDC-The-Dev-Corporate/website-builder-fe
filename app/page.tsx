@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -19,7 +20,12 @@ import { motion } from "framer-motion";
 export default function Home() {
   const router = useRouter();
   const theme = useTheme();
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+  }, []);
 
   const fadeIn = {
     initial: { opacity: 0, y: 20 },

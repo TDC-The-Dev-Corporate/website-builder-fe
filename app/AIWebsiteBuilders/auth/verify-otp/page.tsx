@@ -29,8 +29,13 @@ export default function VerifyOTP() {
 
   const onSubmit = async (data: any) => {
     const result = await dispatch(verifyUser(data));
+    const token = localStorage.getItem("token");
     if (result.payload.success) {
-      router.push("/AIWebsiteBuilders/auth/login");
+      if (token === null) {
+        router.push("/AIWebsiteBuilders/auth/login");
+      } else {
+        router.push("/AIWebsiteBuilders/auth/forgot-password/reset-password");
+      }
     }
   };
 
