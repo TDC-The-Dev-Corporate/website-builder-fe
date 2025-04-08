@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -23,6 +23,9 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 
 import { Edit as EditIcon } from "lucide-react";
+
+import ImageCropper from "@/app/components/ImageEditModal/imageEditModal";
+
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { update } from "@/lib/redux/slices/authSlice";
 
@@ -50,13 +53,27 @@ const tradeSpecializations = [
 
 export default function EditProfile() {
   const router = useRouter();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const [user, setUser] = useState<any>(null);
+
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [imagePreview, setImagePreview] = useState(user?.profileImage || null);
+  const [openCropper, setOpenCropper] = useState(false);
+  const [rawImage, setRawImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        setImagePreview(JSON.parse(storedUser).profileImage);
+      }
+    }
+  }, []);
 
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
       name: user?.name || "",
       username: user?.username || "",
@@ -117,22 +134,15 @@ export default function EditProfile() {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      formik.setFieldValue("profileImage", file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        setRawImage(reader.result as string);
+        setOpenCropper(true);
       };
       reader.readAsDataURL(file);
     }
+    event.target.value = "";
   };
-
-  if (!user) {
-    return (
-      <Container>
-        <Typography>Please log in to edit your profile.</Typography>
-      </Container>
-    );
-  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 8 }}>
@@ -330,89 +340,6 @@ export default function EditProfile() {
               </Grid>
             </Grid>
 
-            {/* <Grid item xs={12}>
-              <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-                Business Hours
-              </Typography>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Day</TableCell>
-                        <TableCell>Open Time</TableCell>
-                        <TableCell>Close Time</TableCell>
-                        <TableCell>Open/Closed</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {businessHours.map((hours) => (
-                        <TableRow key={hours.day}>
-                          <TableCell>{hours.day}</TableCell>
-                          <TableCell>
-                            <TimePicker
-                              disabled={!hours.isOpen}
-                              value={new Date(`2024-01-01T${hours.openTime}`)}
-                              onChange={(newValue) => {
-                                if (newValue) {
-                                  const timeString = newValue
-                                    .toLocaleTimeString("en-US", {
-                                      hour12: false,
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })
-                                    .replace("24:", "00:");
-                                  handleHoursChange(
-                                    hours.day,
-                                    "openTime",
-                                    timeString
-                                  );
-                                }
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <TimePicker
-                              disabled={!hours.isOpen}
-                              value={new Date(`2024-01-01T${hours.closeTime}`)}
-                              onChange={(newValue) => {
-                                if (newValue) {
-                                  const timeString = newValue
-                                    .toLocaleTimeString("en-US", {
-                                      hour12: false,
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })
-                                    .replace("24:", "00:");
-                                  handleHoursChange(
-                                    hours.day,
-                                    "closeTime",
-                                    timeString
-                                  );
-                                }
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Switch
-                              checked={hours.isOpen}
-                              onChange={(e) =>
-                                handleHoursChange(
-                                  hours.day,
-                                  "isOpen",
-                                  e.target.checked
-                                )
-                              }
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </LocalizationProvider>
-            </Grid> */}
-
             <Grid item xs={12} sx={{ mt: 4 }}>
               <Button
                 type="submit"
@@ -436,6 +363,18 @@ export default function EditProfile() {
           </Grid>
         </Box>
       </Paper>
+
+      {openCropper && rawImage && (
+        <ImageCropper
+          imageSrc={rawImage}
+          onCancel={() => setOpenCropper(false)}
+          onCropComplete={(croppedBlob) => {
+            formik.setFieldValue("profileImage", croppedBlob);
+            setImagePreview(URL.createObjectURL(croppedBlob));
+            setOpenCropper(false);
+          }}
+        />
+      )}
     </Container>
   );
 }
