@@ -23,3 +23,8 @@ export const sendOtpEmail = async (data: any) => {
   const response = await api.post("auth/sendOTP", data);
   return response.data;
 };
+
+export const resetForgottenPassword = async (data: ForgotPassword) => {
+  const response = await api.put("auth/reset-forget-password", data);
+  return response.data;
+};

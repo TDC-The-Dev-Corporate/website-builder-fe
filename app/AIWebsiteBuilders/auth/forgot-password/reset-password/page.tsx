@@ -18,8 +18,8 @@ import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 
 import { AppDispatch, RootState } from "@/lib/redux/store";
+import { forgetPassword } from "@/lib/redux/slices/authSlice";
 
-// Validation schema using Yup
 const validationSchema = Yup.object({
   newPassword: Yup.string()
     .min(8, "Password must be at least 8 characters")
@@ -31,7 +31,7 @@ const validationSchema = Yup.object({
       "Password must contain at least one special character"
     )
     .required("New password is required"),
-  confirmPassword: Yup.string()
+  confirmNewPassword: Yup.string()
     .oneOf([Yup.ref("newPassword"), null], "Passwords must match")
     .required("Confirm password is required"),
 });
@@ -42,10 +42,14 @@ export default function ResetPassword() {
   const { loading, error } = useSelector((state: RootState) => state.auth);
 
   const onSubmit = async (values: any) => {
-    // const result = await dispatch(sendOTP(values));
-    // if (result.type === "auth/sendOTP/fulfilled") {
-    //   router.push("/AIWebsiteBuilders/auth/verify-otp");
-    // }
+    const payload = {
+      email: localStorage.getItem("email"),
+      ...values,
+    };
+    const result = await dispatch(forgetPassword(payload));
+    if (result) {
+      router.push("/AIWebsiteBuilders/auth/login");
+    }
   };
 
   return (
@@ -66,7 +70,7 @@ export default function ResetPassword() {
         <Formik
           initialValues={{
             newPassword: "",
-            confirmPassword: "",
+            confirmNewPassword: "",
           }}
           validationSchema={validationSchema}
           onSubmit={onSubmit}
@@ -90,10 +94,14 @@ export default function ResetPassword() {
                 margin="normal"
                 fullWidth
                 label="Confirm Password"
-                name="confirmPassword"
+                name="confirmNewPassword"
                 type="password"
-                error={touched.confirmPassword && !!errors.confirmPassword}
-                helperText={touched.confirmPassword && errors.confirmPassword}
+                error={
+                  touched.confirmNewPassword && !!errors.confirmNewPassword
+                }
+                helperText={
+                  touched.confirmNewPassword && errors.confirmNewPassword
+                }
                 sx={{ mb: 2 }}
               />
 
