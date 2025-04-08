@@ -23,7 +23,16 @@ import AppLoader from "@/app/components/loader/AppLoader";
 import { logoutUser } from "@/lib/utils";
 
 export default function Home() {
-  const username = JSON.parse(localStorage.getItem("user"))?.username || "";
+  const [username, setUsername] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUsername(JSON.parse(storedUser).username);
+      }
+    }
+  }, []);
 
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
