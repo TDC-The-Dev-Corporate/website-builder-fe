@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -53,7 +53,17 @@ const tradeSpecializations = [
 
 export default function EditProfile() {
   const router = useRouter();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    }
+  }, []);
+
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -62,6 +72,7 @@ export default function EditProfile() {
   const [rawImage, setRawImage] = useState<string | null>(null);
 
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
       name: user?.name || "",
       username: user?.username || "",
