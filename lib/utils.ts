@@ -9,6 +9,9 @@ export function cn(...inputs: ClassValue[]) {
 export function logoutUser() {
   localStorage.removeItem("template");
   localStorage.removeItem("token");
+  localStorage.removeItem("published");
+  localStorage.removeItem("verified");
+  localStorage.removeItem("email");
   localStorage.removeItem("user");
   window.location.href = "/AIWebsiteBuilders/auth/login";
 }
