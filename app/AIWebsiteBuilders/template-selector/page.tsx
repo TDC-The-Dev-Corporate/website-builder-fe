@@ -23,7 +23,7 @@ import AppLoader from "@/app/components/loader/AppLoader";
 import { logoutUser } from "@/lib/utils";
 
 export default function Home() {
-  const username = JSON.parse(localStorage.getItem("user")).username;
+  const username = JSON.parse(localStorage.getItem("user"))?.username || "";
 
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,8 +40,6 @@ export default function Home() {
         }
 
         const data = await response;
-        console.log("response", response);
-        console.log("data", data);
         setPortfolio(data);
         setLoading(false);
         data
