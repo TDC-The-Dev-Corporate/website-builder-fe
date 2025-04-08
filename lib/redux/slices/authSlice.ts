@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginUser, registerUser, verify } from "../api/auth";
+import { loginUser, registerUser, sendOtpEmail, verify } from "../api/auth";
 import { getUserId } from "@/lib/utils";
 import { updateUser } from "../api/profile";
 
@@ -104,7 +104,7 @@ export const sendOTP = createAsyncThunk(
   "auth/sendOTP",
   async (data: any, { rejectWithValue }) => {
     try {
-      const response = await sendOTP(data);
+      const response = await sendOtpEmail(data);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error);

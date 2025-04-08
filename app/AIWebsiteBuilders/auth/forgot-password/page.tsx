@@ -29,7 +29,7 @@ export default function ForgotPassword() {
 
   const onSubmit = async (data: any) => {
     const result = await dispatch(sendOTP(data));
-    if (result.payload.success) {
+    if (result.type === "auth/sendOTP/fulfilled") {
       router.push("/AIWebsiteBuilders/auth/verify-otp");
     }
   };
