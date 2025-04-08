@@ -17,6 +17,7 @@ import { Upload, X } from "lucide-react";
 
 import FontSettings from "./FontSettings";
 import ColorPicker from "./ColorPicker";
+import ImageCropper from "../ImageEditModal/imageEditModal";
 
 interface SectionEditDialogProps {
   open: boolean;
@@ -41,6 +42,11 @@ export default function SectionEditDialog({
   );
   const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [pendingUpload, setPendingUpload] = useState<{
+    field: string;
+    projectIndex?: number;
+  } | null>(null);
 
   useEffect(() => {
     if (section?.content) {
@@ -50,7 +56,7 @@ export default function SectionEditDialog({
     }
   }, [section]);
 
-  const handleImageUpload = async (
+  const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: string,
     projectIndex?: number
@@ -58,9 +64,21 @@ export default function SectionEditDialog({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageToCrop(reader.result as string);
+      setPendingUpload({ field, projectIndex });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCroppedImageUpload = async (croppedImage: Blob) => {
+    if (!pendingUpload) return;
+
     setUploading(true);
+
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", croppedImage);
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
     try {
@@ -73,20 +91,22 @@ export default function SectionEditDialog({
       );
       const data = await response.json();
 
-      if (projectIndex !== undefined) {
+      if (pendingUpload.projectIndex !== undefined) {
         const newProjects = [...content.projects];
-        newProjects[projectIndex] = {
-          ...newProjects[projectIndex],
-          [field]: data.secure_url,
+        newProjects[pendingUpload.projectIndex] = {
+          ...newProjects[pendingUpload.projectIndex],
+          [pendingUpload.field]: data.secure_url,
         };
         setContent({ ...content, projects: newProjects });
       } else {
-        setContent({ ...content, [field]: data.secure_url });
+        setContent({ ...content, [pendingUpload.field]: data.secure_url });
       }
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error("Error uploading cropped image:", error);
     } finally {
       setUploading(false);
+      setImageToCrop(null);
+      setPendingUpload(null);
     }
   };
 
@@ -359,6 +379,16 @@ export default function SectionEditDialog({
           Save
         </Button>
       </DialogActions>
+      {imageToCrop && (
+        <ImageCropper
+          imageSrc={imageToCrop}
+          onCancel={() => {
+            setImageToCrop(null);
+            setPendingUpload(null);
+          }}
+          onCropComplete={handleCroppedImageUpload}
+        />
+      )}
     </Dialog>
   );
 }
