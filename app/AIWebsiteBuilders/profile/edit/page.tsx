@@ -55,21 +55,22 @@ export default function EditProfile() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    }
-  }, []);
-
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [imagePreview, setImagePreview] = useState(user?.profileImage || null);
   const [openCropper, setOpenCropper] = useState(false);
   const [rawImage, setRawImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        setImagePreview(JSON.parse(storedUser).profileImage);
+      }
+    }
+  }, []);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -140,6 +141,7 @@ export default function EditProfile() {
       };
       reader.readAsDataURL(file);
     }
+    event.target.value = "";
   };
 
   return (
