@@ -27,7 +27,8 @@ import { Edit as EditIcon } from "lucide-react";
 import ImageCropper from "@/app/components/ImageEditModal/imageEditModal";
 
 import { useAppDispatch } from "@/lib/redux/hooks";
-import { update } from "@/lib/redux/slices/authSlice";
+import { deleteAccount, update } from "@/lib/redux/slices/authSlice";
+import { logoutUser } from "@/lib/utils";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Full name is required"),
@@ -57,6 +58,7 @@ export default function EditProfile() {
 
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [imagePreview, setImagePreview] = useState(user?.profileImage || null);
   const [openCropper, setOpenCropper] = useState(false);
@@ -142,6 +144,15 @@ export default function EditProfile() {
       reader.readAsDataURL(file);
     }
     event.target.value = "";
+  };
+
+  const handleAccountDeletion = async () => {
+    setDeleting(true);
+    const result = await dispatch(deleteAccount());
+    if (result.type === "user/delete/fulfilled") {
+      await logoutUser();
+      setDeleting(false);
+    }
   };
 
   return (
@@ -341,24 +352,43 @@ export default function EditProfile() {
             </Grid>
 
             <Grid item xs={12} sx={{ mt: 4 }}>
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={loading}
-                sx={{ mr: 2 }}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
-                {loading ? <CircularProgress size={24} /> : "Save Changes"}
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                onClick={() =>
-                  router.push("/AIWebsiteBuilders/template-selector")
-                }
-              >
-                Cancel
-              </Button>
+                <Box>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    disabled={loading}
+                    sx={{ mr: 2 }}
+                  >
+                    {loading ? <CircularProgress size={24} /> : "Save Changes"}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    onClick={() =>
+                      router.push("/AIWebsiteBuilders/template-selector")
+                    }
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+
+                <Button
+                  variant="contained"
+                  size="large"
+                  disabled={deleting}
+                  onClick={() => handleAccountDeletion()}
+                >
+                  {loading ? <CircularProgress size={24} /> : "Delete Account"}
+                </Button>
+              </Box>
             </Grid>
           </Grid>
         </Box>
