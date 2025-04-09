@@ -7,7 +7,7 @@ import {
   verify,
 } from "../api/auth";
 import { getUserId } from "@/lib/utils";
-import { updateUser } from "../api/profile";
+import { removeUser, updateUser } from "../api/profile";
 
 interface AuthState {
   user: any;
@@ -40,6 +40,18 @@ export const update = createAsyncThunk(
   async (data: any, { rejectWithValue }) => {
     try {
       const response = await updateUser(data);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const deleteAccount = createAsyncThunk(
+  "user/delete",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await removeUser();
       return response;
     } catch (error: any) {
       return rejectWithValue(error);
@@ -170,6 +182,18 @@ const authSlice = createSlice({
         localStorage.setItem("user", JSON.stringify({ ...action.payload }));
       })
       .addCase(update.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as { message: string }).message;
+      })
+      .addCase(deleteAccount.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteAccount.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(deleteAccount.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as { message: string }).message;
       })
