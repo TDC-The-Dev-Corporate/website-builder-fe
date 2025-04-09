@@ -44,3 +44,9 @@ interface NavItem {
   label: string;
   href: string;
 }
+
+interface ForgotPassword {
+  email: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}

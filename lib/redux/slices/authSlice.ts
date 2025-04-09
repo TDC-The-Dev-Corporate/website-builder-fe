@@ -1,5 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginUser, registerUser, sendOtpEmail, verify } from "../api/auth";
+import {
+  loginUser,
+  registerUser,
+  resetForgottenPassword,
+  sendOtpEmail,
+  verify,
+} from "../api/auth";
 import { getUserId } from "@/lib/utils";
 import { updateUser } from "../api/profile";
 
@@ -105,7 +111,19 @@ export const sendOTP = createAsyncThunk(
   async (data: any, { rejectWithValue }) => {
     try {
       const response = await sendOtpEmail(data);
-      return response.data;
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const forgetPassword = createAsyncThunk(
+  "auth/resetForgetPassword",
+  async (data: ForgotPassword, { rejectWithValue }) => {
+    try {
+      const response = await resetForgottenPassword(data);
+      return response.success;
     } catch (error: any) {
       return rejectWithValue(error);
     }
@@ -198,8 +216,23 @@ const authSlice = createSlice({
       })
       .addCase(sendOTP.fulfilled, (state, action) => {
         state.loading = false;
+        const { message, user } = action.payload;
+        if (user.is_emailVerified) localStorage.setItem("verified", "true");
+        else localStorage.setItem("verified", "false");
+        localStorage.setItem("email", user.email);
       })
       .addCase(sendOTP.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as { message: string }).message;
+      })
+      .addCase(forgetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(forgetPassword.fulfilled, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(forgetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as { message: string }).message;
       })
