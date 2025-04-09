@@ -176,7 +176,13 @@ export default function Editor({ template, onSave }: EditorProps) {
         )}
       </Box>
 
-      <Box sx={{ flex: 1, bgcolor: "grey.100", overflow: "auto" }}>
+      <Box
+        sx={{
+          flex: 1,
+          bgcolor: layout.styles.backgroundColor || "grey.100",
+          overflow: "auto",
+        }}
+      >
         <Box
           sx={{
             width:
