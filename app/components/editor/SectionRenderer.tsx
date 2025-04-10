@@ -1,8 +1,13 @@
 import React from "react";
+import dynamic from "next/dynamic";
 
 import { Box, Typography } from "@mui/material";
 
 import { getFontSize } from "@/lib/utils";
+
+const RichTextEditor = dynamic(() => import("../TextEditor/RichTextEditor"), {
+  ssr: false,
+});
 
 interface SectionRendererProps {
   section: Section;

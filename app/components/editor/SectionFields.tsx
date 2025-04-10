@@ -3,6 +3,11 @@ import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { ImageUploadField } from "./ImageUploadField";
 import FontSettings from "./FontSettings";
 import ColorPicker from "./ColorPicker";
+import dynamic from "next/dynamic";
+
+const RichTextEditor = dynamic(() => import("../TextEditor/RichTextEditor"), {
+  ssr: false,
+});
 
 export const renderFields = (
   section,
@@ -17,12 +22,10 @@ export const renderFields = (
       return (
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Heading"
+            <RichTextEditor
               value={content.heading || ""}
-              onChange={(e) =>
-                setContent({ ...content, heading: e.target.value })
+              onChange={(value) =>
+                setContent((prev) => ({ ...prev, heading: value }))
               }
             />
           </Grid>
