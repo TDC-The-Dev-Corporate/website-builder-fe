@@ -41,6 +41,7 @@ export default function SectionRenderer({ section }: SectionRendererProps) {
           <Box sx={{ position: "relative", zIndex: 1 }}>
             <Typography
               variant="h3"
+              dangerouslySetInnerHTML={{ __html: section.content.heading }}
               sx={{
                 color: section.styles.textColor,
                 mb: 2,
@@ -50,10 +51,24 @@ export default function SectionRenderer({ section }: SectionRendererProps) {
                 fontStyle: section.styles.fontStyle || "normal",
                 fontFamily: section.styles.fontFamily || "Helvetica",
                 fontWeight: section.styles.fontWeight || "800",
+                "& ul, & ol": {
+                  paddingLeft: "1.5rem",
+                  marginTop: "0.5rem",
+                  marginBottom: "0.5rem",
+                },
+                "& li": {
+                  paddingLeft: "0.25rem",
+                  marginBottom: "0.25rem",
+                },
+                "& ul": {
+                  listStyleType: "disc",
+                },
+                "& ol": {
+                  listStyleType: "decimal",
+                },
               }}
-            >
-              {section.content.heading}
-            </Typography>
+            />
+
             <Typography
               variant="h5"
               sx={{
