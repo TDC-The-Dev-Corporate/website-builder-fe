@@ -3,6 +3,7 @@ import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { ImageUploadField } from "./ImageUploadField";
 import FontSettings from "./FontSettings";
 import ColorPicker from "./ColorPicker";
+import RichTextEditor from "../TextEditor/RichTextEditor";
 
 export const renderFields = (
   section,
@@ -16,14 +17,18 @@ export const renderFields = (
     case "hero":
       return (
         <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Heading"
-              value={content.heading || ""}
-              onChange={(e) =>
-                setContent({ ...content, heading: e.target.value })
-              }
+          <Grid
+            item
+            xs={12}
+            sx={{
+              position: "relative",
+              minHeight: "300px",
+              zIndex: 1,
+            }}
+          >
+            <RichTextEditor
+              value={content.heading}
+              onChange={(e) => setContent({ ...content, heading: e })}
             />
           </Grid>
 

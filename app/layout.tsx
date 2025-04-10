@@ -10,6 +10,9 @@ import { useAppDispatch } from "@/lib/redux/hooks";
 import { clearError } from "@/lib/redux/slices/authSlice";
 import { store } from "@/lib/redux/store";
 
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import "../app/globals.css";
+
 function ErrorClearer() {
   const dispatch = useAppDispatch();
   const pathname = usePathname();
@@ -34,7 +37,18 @@ export default function RootLayout({
       <body style={{ margin: 0, padding: 0, width: "100%", height: "100%" }}>
         <Provider store={store}>
           <ErrorClearer />
-          <ProtectRoute>{children}</ProtectRoute>
+          <ProtectRoute>
+            <div
+              style={{
+                height: "100vh",
+                position: "relative",
+                overflow: "visible", // Add this
+                isolation: "isolate", // Creates new stacking context
+              }}
+            >
+              {children}
+            </div>
+          </ProtectRoute>
         </Provider>
       </body>
     </html>

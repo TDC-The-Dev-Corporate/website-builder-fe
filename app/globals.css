@@ -80,3 +80,31 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Ensure editor container has relative positioning */
+.DraftEditor-root {
+  position: relative;
+}
+
+/* Fix editor dropdowns */
+.rdw-dropdown-optionwrapper {
+  z-index: 9999 !important; /* Increase z-index */
+  top: 100% !important; /* Position below toolbar */
+  left: -1px !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.rdw-dropdown-selectedtext {
+  z-index: auto !important;
+}
+
+.rdw-editor-toolbar {
+  position: relative !important;
+  z-index: auto !important;
+}
+
+/* Fix MUI Paper container */
+.MuiPaper-root {
+  overflow: visible !important;
+  transform: none !important;
+}
