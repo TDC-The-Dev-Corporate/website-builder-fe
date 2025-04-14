@@ -13,7 +13,7 @@ import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
 export default function PortfolioPage() {
   const params = useParams();
   const username = params.username as string;
-  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
+  const [portfolio, setPortfolio] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +40,13 @@ export default function PortfolioPage() {
   return (
     <AppLoader loading={loading}>
       {loading ? null : portfolio ? (
-        <Portfolio template={portfolio.layout} />
+        <Box
+          sx={{
+            minHeight: "100vh",
+            padding: 4,
+          }}
+          dangerouslySetInnerHTML={{ __html: portfolio.htmlContent }}
+        />
       ) : (
         <Box
           sx={{
