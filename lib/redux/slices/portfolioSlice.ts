@@ -22,9 +22,8 @@ export const generatePortfolio = createAsyncThunk<
     const response = await createPortfolio(data);
     return response;
   } catch (error: any) {
-    return rejectWithValue(
-      error.response?.data || "Failed to create portfolio"
-    );
+    const errorMessage = error.message || "Failed to create portfolio";
+    return rejectWithValue(errorMessage);
   }
 });
 
