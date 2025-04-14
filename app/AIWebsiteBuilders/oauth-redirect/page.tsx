@@ -12,7 +12,7 @@ const OAuthRedirect = () => {
   useEffect(() => {
     if (token) {
       localStorage.setItem("token", token as string);
-      router.push("/AIWebsiteBuilders/template-selector");
+      router.push("/AIWebsiteBuilders/home");
     }
   }, [token, router]);
 
