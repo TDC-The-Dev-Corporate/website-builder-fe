@@ -7,6 +7,9 @@ import { Box, Button, Modal, Typography } from "@mui/material";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
 import "@grapesjs/studio-sdk/style";
+import { tableComponent } from "@grapesjs/studio-sdk-plugins";
+import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
+import { accordionComponent } from "@grapesjs/studio-sdk-plugins";
 
 import { carpenterTemplate } from "@/lib/templates/carpenter";
 import { hvacTemplate } from "@/lib/templates/hvac";
@@ -116,12 +119,23 @@ export default function Home() {
 
           <StudioEditor
             onEditor={(editor) => {
-              editorRef.current = editor; // Save the editor instance
+              editorRef.current = editor;
             }}
             options={{
               licenseKey:
                 "0cb318930d184f8e9810afdb895ca6313e4f5cfdb488449aaec3d6441f159243",
               plugins: [
+                tableComponent.init({
+                  block: { category: "Extra", label: "My Table" },
+                }),
+                iconifyComponent.init({
+                  block: { category: "Extra", label: "Iconify" },
+                }),
+                accordionComponent.init({
+                  block: { category: "My Accordions" },
+                  blockGroup: { category: "My Accordions" },
+                }),
+
                 (editor) =>
                   editor.onReady(() => {
                     editor.runCommand("studio:layoutToggle", {
