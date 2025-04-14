@@ -106,10 +106,6 @@ export default function Home() {
             >
               Choose a Template
             </Button>
-            {/* <Typography variant="h5" sx={{ mb: 2 }}>
-              Choose a Template
-            </Typography>
-            <TemplateSelector /> */}
           </Paper>
         </Container>
       </Box>
