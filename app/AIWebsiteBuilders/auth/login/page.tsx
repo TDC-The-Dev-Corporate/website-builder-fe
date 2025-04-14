@@ -31,14 +31,14 @@ export default function Login() {
   const onSubmit = async (data: any) => {
     const result = await dispatch(login(data));
     if (result.payload.success) {
-      router.push("/AIWebsiteBuilders/template-selector");
+      router.push("/AIWebsiteBuilders/home");
     }
   };
 
   const handleGoogleLogin = async () => {
     const result = await dispatch(googleLogin());
     if (result.payload.success) {
-      router.push("/AIWebsiteBuilders/template-selector");
+      router.push("/AIWebsiteBuilders/home");
     }
   };
 

@@ -123,7 +123,7 @@ export default function EditProfile() {
         const profileResponse = await dispatch(update(updatedProfiledata));
 
         if (profileResponse.type === "user/update/fulfilled")
-          router.push("/AIWebsiteBuilders/template-selector");
+          router.push("/AIWebsiteBuilders/home");
         else throw new Error("Failed to update profile");
       } catch (err) {
         setError(err.message);
@@ -372,9 +372,7 @@ export default function EditProfile() {
                   <Button
                     variant="outlined"
                     size="large"
-                    onClick={() =>
-                      router.push("/AIWebsiteBuilders/template-selector")
-                    }
+                    onClick={() => router.push("/AIWebsiteBuilders/home")}
                   >
                     Cancel
                   </Button>

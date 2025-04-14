@@ -114,7 +114,7 @@ export default function Editor({ template, onSave }: EditorProps) {
 
         <Button
           variant="outlined"
-          onClick={() => router.push("/AIWebsiteBuilders/template-selector")}
+          onClick={() => router.push("/AIWebsiteBuilders/home")}
           sx={{ mb: 2 }}
         >
           ← Back to Templates

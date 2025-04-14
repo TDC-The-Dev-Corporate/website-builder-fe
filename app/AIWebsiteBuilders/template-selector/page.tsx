@@ -1,108 +1,108 @@
 "use client";
 
+import Head from "next/head";
 import { useEffect, useState } from "react";
 
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import {
-  Container,
-  Box,
-  Typography,
-  Paper,
-  AppBar,
-  Toolbar,
-  Button,
-} from "@mui/material";
+import StudioEditor from "@grapesjs/studio-sdk/react";
+import "@grapesjs/studio-sdk/style";
 
-import ViewProfile from "../profile/page";
-import ProfileURLCard from "../profile/profileUrl";
-import TemplateSelector from "@/app/components/TemplateSelector";
-
-import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
-import AppLoader from "@/app/components/loader/AppLoader";
-
-import { logoutUser } from "@/lib/utils";
+import { carpenterTemplate } from "@/lib/templates/carpenter";
+import { hvacTemplate } from "@/lib/templates/hvac";
+import { plumberTemplate } from "@/lib/templates/plumber";
+import { electricianTemplate } from "@/lib/templates/electrician";
+import { landscaperTemplate } from "@/lib/templates/landscaper";
 
 export default function Home() {
-  const [username, setUsername] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUsername(JSON.parse(storedUser).username);
-      }
-    }
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
   }, []);
 
-  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchPortfolio() {
-      if (!username) return;
-
-      try {
-        const response = getPortfolioByUserName(username);
-        if (!response) {
-          localStorage.setItem("published", "false");
-          throw new Error("Failed to fetch portfolio");
+  return (
+    <>
+      <Head>
+        <title>Portfolio Builder</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      {isLoading ? (
+        <div className="loading-screen">
+          <div className="spinner"></div>
+          <p>Loading Templates...</p>
+        </div>
+      ) : (
+        <div style={{ height: "100vh" }}>
+          <StudioEditor
+            options={{
+              licenseKey:
+                "0cb318930d184f8e9810afdb895ca6313e4f5cfdb488449aaec3d6441f159243",
+              plugins: [
+                (editor) =>
+                  editor.onReady(() => {
+                    editor.runCommand("studio:layoutToggle", {
+                      id: "template-selector",
+                      header: false,
+                      placer: {
+                        type: "dialog",
+                        title: "Choose a Template",
+                        size: "l",
+                      },
+                      layout: {
+                        type: "panelTemplates",
+                        content: { itemsPerRow: 3 },
+                        onSelect: ({ loadTemplate, template }) => {
+                          loadTemplate(template);
+                          editor.runCommand("studio:layoutRemove", {
+                            id: "template-selector",
+                          });
+                        },
+                      },
+                    });
+                  }),
+              ],
+              templates: {
+                onLoad: async () => [
+                  carpenterTemplate,
+                  hvacTemplate,
+                  plumberTemplate,
+                  electricianTemplate,
+                  landscaperTemplate,
+                ],
+              },
+            }}
+          />
+        </div>
+      )}
+      <style jsx global>{`
+        .loading-screen {
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: #f5f5f5;
         }
 
-        const data = await response;
-        setPortfolio(data);
-        setLoading(false);
-        data
-          ? localStorage.setItem("published", "true")
-          : localStorage.setItem("published", "false");
-      } catch (error) {
-        localStorage.setItem("published", "false");
-        console.error("Error fetching portfolio:", error);
-      }
-    }
+        .spinner {
+          width: 50px;
+          height: 50px;
+          border: 5px solid #f3f3f3;
+          border-top: 5px solid #3498db;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin-bottom: 1rem;
+        }
 
-    fetchPortfolio();
-  }, [username]);
-
-  return (
-    <AppLoader loading={loading}>
-      <Box sx={{ minHeight: "100vh", bgcolor: "grey.100" }}>
-        <AppBar position="static" elevation={1} color="default">
-          <Toolbar>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              AI Website Builders
-            </Typography>
-            <Button sx={{ color: "#0d47a1" }} onClick={() => logoutUser()}>
-              <LogoutOutlinedIcon />
-            </Button>
-          </Toolbar>
-        </AppBar>
-
-        <Container
-          maxWidth={false}
-          sx={{
-            py: 4,
-            width: "100%",
-            mx: "auto",
-          }}
-        >
-          <Paper elevation={3} sx={{ p: 5, mb: 2 }}>
-            <ViewProfile />
-          </Paper>
-          {portfolio && (
-            <Paper elevation={3} sx={{ p: 5, mb: 2 }}>
-              <ProfileURLCard
-                url={`http://localhost:3000/AIWebsiteBuilders/portfolio/${username}`}
-              />
-            </Paper>
-          )}
-          <Paper elevation={3} sx={{ p: 5 }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>
-              Choose a Template
-            </Typography>
-            <TemplateSelector />
-          </Paper>
-        </Container>
-      </Box>
-    </AppLoader>
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
+    </>
   );
 }

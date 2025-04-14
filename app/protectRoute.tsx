@@ -12,7 +12,7 @@ export const ProtectRoute: React.FC<ProtectRouteProps> = ({ children }) => {
   const router = useRouter();
 
   const protectedRoutes = [
-    "/AIWebsiteBuilders/template-selector",
+    "/AIWebsiteBuilders/home",
     "/AIWebsiteBuilders/editor",
   ];
 

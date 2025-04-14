@@ -103,8 +103,7 @@ export default function Home() {
                   variant="contained"
                   size="large"
                   onClick={() => {
-                    if (token)
-                      router.push("/AIWebsiteBuilders/template-selector");
+                    if (token) router.push("/AIWebsiteBuilders/home");
                     else router.push("/AIWebsiteBuilders/auth/login");
                   }}
                   sx={{
