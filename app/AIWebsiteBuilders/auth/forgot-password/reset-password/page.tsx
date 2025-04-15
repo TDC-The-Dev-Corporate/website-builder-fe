@@ -115,7 +115,7 @@ export default function ResetPassword() {
                 {isSubmitting || loading ? (
                   <CircularProgress size={24} />
                 ) : (
-                  "Send OTP"
+                  "Reset Password"
                 )}
               </Button>
             </Form>
