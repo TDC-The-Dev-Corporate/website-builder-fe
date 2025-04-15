@@ -29,6 +29,7 @@ import ImageCropper from "@/app/components/ImageEditModal/imageEditModal";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { deleteAccount, update } from "@/lib/redux/slices/authSlice";
 import { logoutUser } from "@/lib/utils";
+import { tradeSpecializations } from "@/app/types/constants";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Full name is required"),
@@ -41,16 +42,6 @@ const validationSchema = Yup.object({
   licenseNumber: Yup.string().optional(),
   tradeSpecialization: Yup.string().optional(),
 });
-
-const tradeSpecializations = [
-  "Electrician",
-  "Plumber",
-  "Carpenter",
-  "HVAC Technician",
-  "Painter",
-  "General Contractor",
-  "Other",
-];
 
 export default function EditProfile() {
   const router = useRouter();
@@ -355,11 +346,20 @@ export default function EditProfile() {
               <Box
                 sx={{
                   display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
                   justifyContent: "space-between",
-                  alignItems: "center",
+                  alignItems: { xs: "stretch", sm: "center" },
+                  gap: 2,
                 }}
               >
-                <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 2,
+                    flex: 1,
+                  }}
+                >
                   <Button
                     type="submit"
                     variant="contained"

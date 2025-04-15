@@ -36,7 +36,12 @@ const validationSchema = Yup.object({
     .required("Password is required")
     .min(8, "Password must be at least 8 characters"),
   companyName: Yup.string().required("Company name is required"),
-  phoneNumber: Yup.string().required("Phone number is required"),
+  phoneNumber: Yup.string()
+    .required("Phone number is required")
+    .matches(
+      /^\+?[0-9]{7,15}$/,
+      "Phone number must be valid and contain 7 to 15 digits"
+    ),
   address: Yup.string().required("Business address is required"),
   licenseNumber: Yup.string().required("License number is required"),
   tradeSpecialization: Yup.string().required(
@@ -338,7 +343,10 @@ export default function Register() {
             </Grid>
 
             <Grid item xs={12} sx={{ textAlign: "center" }}>
-              <Link href="/auth/login" style={{ textDecoration: "none" }}>
+              <Link
+                href="/AIWebsiteBuilders/auth/login"
+                style={{ textDecoration: "none" }}
+              >
                 <Typography color="primary">
                   Already have an account? Sign in
                 </Typography>
