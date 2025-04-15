@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 
 import { Box, Typography } from "@mui/material";
 
-import Portfolio from "./portfolio";
 import AppLoader from "@/app/components/loader/AppLoader";
 
 import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
