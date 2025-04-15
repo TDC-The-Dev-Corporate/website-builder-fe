@@ -14,6 +14,8 @@ export const ProtectRoute: React.FC<ProtectRouteProps> = ({ children }) => {
   const protectedRoutes = [
     "/AIWebsiteBuilders/home",
     "/AIWebsiteBuilders/editor",
+    "/AIWebsiteBuilders/profile/edit",
+    "/AIWebsiteBuilders/template-selector",
   ];
 
   const isRouteProtected = (route: string) =>

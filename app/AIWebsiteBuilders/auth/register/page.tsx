@@ -24,6 +24,8 @@ import * as Yup from "yup";
 import { AppDispatch, RootState } from "@/lib/redux/store";
 import { register as registerUser } from "@/lib/redux/slices/authSlice";
 
+import { tradeSpecializations } from "@/app/types/constants";
+
 const validationSchema = Yup.object({
   email: Yup.string()
     .email("Invalid email address")
@@ -49,16 +51,6 @@ const validationSchema = Yup.object({
   ),
   profileImage: Yup.mixed().notRequired(),
 });
-
-const tradeSpecializations = [
-  "Electrician",
-  "Plumber",
-  "Carpenter",
-  "HVAC Technician",
-  "Painter",
-  "General Contractor",
-  "Other",
-];
 
 export default function Register() {
   const dispatch = useDispatch<AppDispatch>();
