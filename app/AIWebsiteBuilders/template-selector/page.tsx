@@ -29,6 +29,50 @@ export default function Home() {
   const { error } = useAppSelector((state) => state.portfolio);
   const dispatch = useAppDispatch();
 
+  const CLOUDINARY_UPLOAD_PRESET =
+    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET; // replace with your actual preset
+  const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME; // replace with your actual cloud name
+
+  const uploadToCloudinary = async (files) => {
+    const uploadedAssets = [];
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to upload to Cloudinary");
+
+      const data = await res.json();
+
+      uploadedAssets.push({
+        id: data.public_id,
+        src: data.secure_url,
+        name: file.name,
+        mimeType: file.type,
+        size: file.size,
+      });
+    }
+
+    return uploadedAssets;
+  };
+
+  const deleteFromCloudinary = async (assets) => {
+    // Cloudinary deletion via API requires a signed request from the backend
+    // You'd typically call your server here to delete assets by public_id
+    console.warn(
+      "Deletion must be implemented via backend API with proper auth."
+    );
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
@@ -124,6 +168,22 @@ export default function Home() {
             options={{
               licenseKey:
                 "0cb318930d184f8e9810afdb895ca6313e4f5cfdb488449aaec3d6441f159243",
+              assets: {
+                storageType: "self",
+                onUpload: async ({ files }) => {
+                  try {
+                    const results = await uploadToCloudinary(files);
+                    return results;
+                  } catch (error) {
+                    console.error("Cloudinary Upload Error:", error);
+                    return [];
+                  }
+                },
+                onDelete: async ({ assets }) => {
+                  await deleteFromCloudinary(assets);
+                },
+              },
+
               plugins: [
                 tableComponent.init({
                   block: { category: "Extra", label: "My Table" },
