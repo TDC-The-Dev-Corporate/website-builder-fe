@@ -32,7 +32,7 @@ export default function Home() {
   const CLOUDINARY_UPLOAD_PRESET =
     process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET; // replace with your actual preset
   const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME; // replace with your actual cloud name
-
+  const licenseKey = process.env.NEXT_PUBLIC_GRAPESJS_LICENSE_KEY;
   const uploadToCloudinary = async (files) => {
     const uploadedAssets = [];
 
@@ -166,8 +166,7 @@ export default function Home() {
               editorRef.current = editor;
             }}
             options={{
-              licenseKey:
-                "0cb318930d184f8e9810afdb895ca6313e4f5cfdb488449aaec3d6441f159243",
+              licenseKey: licenseKey,
               assets: {
                 storageType: "self",
                 onUpload: async ({ files }) => {
