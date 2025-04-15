@@ -18,6 +18,7 @@ import { electricianTemplate } from "@/lib/templates/electrician";
 import { landscaperTemplate } from "@/lib/templates/landscaper";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { generatePortfolio } from "@/lib/redux/slices/portfolioSlice";
+import { painterTemplate } from "@/lib/templates/painter";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,9 +30,17 @@ export default function Home() {
   const { error } = useAppSelector((state) => state.portfolio);
   const dispatch = useAppDispatch();
 
+  const [saveButton, setSaveButton] = useState(true);
+
+  useEffect(() => {
+    localStorage.getItem("published") === "true"
+      ? setSaveButton(false)
+      : setSaveButton(true);
+  }, []);
+
   const CLOUDINARY_UPLOAD_PRESET =
-    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET; // replace with your actual preset
-  const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME; // replace with your actual cloud name
+    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const licenseKey = process.env.NEXT_PUBLIC_GRAPESJS_LICENSE_KEY;
   const uploadToCloudinary = async (files) => {
     const uploadedAssets = [];
@@ -63,14 +72,6 @@ export default function Home() {
     }
 
     return uploadedAssets;
-  };
-
-  const deleteFromCloudinary = async (assets) => {
-    // Cloudinary deletion via API requires a signed request from the backend
-    // You'd typically call your server here to delete assets by public_id
-    console.warn(
-      "Deletion must be implemented via backend API with proper auth."
-    );
   };
 
   useEffect(() => {
@@ -147,19 +148,24 @@ export default function Home() {
         </div>
       ) : (
         <div style={{ height: "100vh" }}>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            sx={{
-              m: 1,
-              mx: "auto",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            Save Changes
-          </Button>
+          {saveButton && (
+            <Button
+              variant="contained"
+              onClick={() => {
+                setSaveButton(false);
+                handleSave();
+              }}
+              sx={{
+                m: 1,
+                mx: "auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              Save Changes
+            </Button>
+          )}
 
           <StudioEditor
             onEditor={(editor) => {
@@ -177,9 +183,6 @@ export default function Home() {
                     console.error("Cloudinary Upload Error:", error);
                     return [];
                   }
-                },
-                onDelete: async ({ assets }) => {
-                  await deleteFromCloudinary(assets);
                 },
               },
 
@@ -225,6 +228,7 @@ export default function Home() {
                   plumberTemplate,
                   electricianTemplate,
                   landscaperTemplate,
+                  painterTemplate,
                 ],
               },
             }}
