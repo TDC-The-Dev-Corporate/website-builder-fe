@@ -10,6 +10,7 @@ import "@grapesjs/studio-sdk/style";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
 import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
 import { accordionComponent } from "@grapesjs/studio-sdk-plugins";
+import { rteTinyMce } from "@grapesjs/studio-sdk-plugins";
 
 import { carpenterTemplate } from "@/lib/templates/carpenter";
 import { hvacTemplate } from "@/lib/templates/hvac";
@@ -187,6 +188,29 @@ export default function Home() {
               },
 
               plugins: [
+                rteTinyMce.init({
+                  enableOnClick: true,
+                  // Custom TinyMCE configuration
+                  loadConfig: ({ component, config }) => {
+                    const demoRte = component.get("demorte");
+                    if (demoRte === "fixed") {
+                      return {
+                        toolbar:
+                          "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | link image media",
+                        fixed_toolbar_container_target:
+                          document.querySelector(".rteContainer"),
+                      };
+                    } else if (demoRte === "quickbar") {
+                      return {
+                        plugins: `${config.plugins} quickbars`,
+                        toolbar: false,
+                        quickbars_selection_toolbar:
+                          "bold italic underline strikethrough | quicklink image",
+                      };
+                    }
+                    return {};
+                  },
+                }),
                 tableComponent.init({
                   block: { category: "Extra", label: "My Table" },
                 }),
@@ -221,6 +245,30 @@ export default function Home() {
                     });
                   }),
               ],
+              layout: {
+                default: {
+                  type: "row",
+                  style: { height: "100%" },
+                  children: [
+                    { type: "sidebarLeft" },
+                    {
+                      type: "column",
+                      style: { flexGrow: 1 },
+                      children: [
+                        { type: "sidebarTop" },
+                        { type: "canvas" },
+                        // Empty container for the fixed RTE toolbar
+                        {
+                          type: "row",
+                          className: "rteContainer",
+                          style: { justifyContent: "center" },
+                        },
+                      ],
+                    },
+                    { type: "sidebarRight" },
+                  ],
+                },
+              },
               templates: {
                 onLoad: async () => [
                   carpenterTemplate,
