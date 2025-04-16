@@ -32,12 +32,29 @@ export default function Home() {
   const dispatch = useAppDispatch();
 
   const [saveButton, setSaveButton] = useState(true);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   useEffect(() => {
     localStorage.getItem("published") === "true"
       ? setSaveButton(false)
       : setSaveButton(true);
   }, []);
+
+  useEffect(() => {
+    const template = localStorage.getItem("selectedTemplate");
+    if (template) {
+      setSelectedTemplate(JSON.parse(template));
+      localStorage.removeItem("selectedTemplate");
+    }
+  }, []);
+
+  const loadSelectedTemplate = (editor) => {
+    if (selectedTemplate) {
+      editor.DomComponents.clear();
+      editor.CssComposer.clear();
+      editor.setComponents(selectedTemplate.data.pages[0].component);
+    }
+  };
 
   const CLOUDINARY_UPLOAD_PRESET =
     process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -171,6 +188,7 @@ export default function Home() {
           <StudioEditor
             onEditor={(editor) => {
               editorRef.current = editor;
+              loadSelectedTemplate(editor);
             }}
             options={{
               licenseKey: licenseKey,
@@ -222,28 +240,39 @@ export default function Home() {
                   blockGroup: { category: "My Accordions" },
                 }),
 
-                (editor) =>
-                  editor.onReady(() => {
-                    editor.runCommand("studio:layoutToggle", {
+                (editor) => {
+                  if (selectedTemplate) {
+                    editor.runCommand("studio:layoutRemove", {
                       id: "template-selector",
-                      header: false,
-                      placer: {
-                        type: "dialog",
-                        title: "Choose a Template",
-                        size: "l",
-                      },
-                      layout: {
-                        type: "panelTemplates",
-                        content: { itemsPerRow: 3 },
-                        onSelect: ({ loadTemplate, template }) => {
-                          loadTemplate(template);
-                          editor.runCommand("studio:layoutRemove", {
-                            id: "template-selector",
-                          });
-                        },
-                      },
                     });
-                  }),
+                  }
+
+                  editor.onReady(() => {
+                    if (selectedTemplate) {
+                      loadSelectedTemplate(editor);
+                    } else {
+                      editor.runCommand("studio:layoutToggle", {
+                        id: "template-selector",
+                        header: false,
+                        placer: {
+                          type: "dialog",
+                          title: "Choose a Template",
+                          size: "l",
+                        },
+                        layout: {
+                          type: "panelTemplates",
+                          content: { itemsPerRow: 3 },
+                          onSelect: ({ loadTemplate, template }) => {
+                            loadTemplate(template);
+                            editor.runCommand("studio:layoutRemove", {
+                              id: "template-selector",
+                            });
+                          },
+                        },
+                      });
+                    }
+                  });
+                },
               ],
               layout: {
                 default: {
@@ -257,7 +286,6 @@ export default function Home() {
                       children: [
                         { type: "sidebarTop" },
                         { type: "canvas" },
-                        // Empty container for the fixed RTE toolbar
                         {
                           type: "row",
                           className: "rteContainer",

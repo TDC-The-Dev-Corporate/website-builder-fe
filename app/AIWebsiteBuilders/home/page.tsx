@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
@@ -15,12 +16,12 @@ import {
 
 import ViewProfile from "../profile/page";
 import ProfileURLCard from "../profile/profileUrl";
+import TemplateViewer from "@/app/components/TemplatesViewer/templateViewer";
 
 import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
 import AppLoader from "@/app/components/loader/AppLoader";
 
 import { logoutUser } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [username, setUsername] = useState<any>(null);
@@ -63,10 +64,6 @@ export default function Home() {
     fetchPortfolio();
   }, [username]);
 
-  const handleTemplateSelecion = () => {
-    router.push("/AIWebsiteBuilders/template-selector");
-  };
-
   return (
     <AppLoader loading={loading}>
       <Box sx={{ minHeight: "100vh", bgcolor: "grey.100" }}>
@@ -99,14 +96,8 @@ export default function Home() {
               />
             </Paper>
           )}
-          <Paper elevation={3} sx={{ p: 5 }}>
-            <Button
-              sx={{ color: "#0d47a1" }}
-              onClick={() => handleTemplateSelecion()}
-            >
-              Choose a Template
-            </Button>
-          </Paper>
+
+          <TemplateViewer />
         </Container>
       </Box>
     </AppLoader>
