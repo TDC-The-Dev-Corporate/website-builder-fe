@@ -7,46 +7,108 @@ export const landscaperTemplate = {
         component: `
           <div class="site-wrapper">
             <!-- Drawer Navigation -->
-            <nav class="drawer-nav">
+            <nav class="drawer-nav" id="drawer">
               <div class="drawer-header">
                 <span class="logo-icon">🌿</span>
                 <h1>GreenScape</h1>
-                <button class="close-drawer">×</button>
+                <button class="close-drawer" onclick="document.getElementById('drawer').classList.remove('active'); document.getElementById('overlay').classList.remove('active')">×</button>
               </div>
               <div class="nav-links">
-                <a href="#home" class="nav-link active">
+                <a href="#home" class="nav-link active" onclick="closeDrawer()">
                   <span class="link-icon">🏠</span>
                   Home
                 </a>
-                <a href="#services" class="nav-link">
+                <a href="#services" class="nav-link" onclick="closeDrawer()">
                   <span class="link-icon">🌳</span>
                   Services
                 </a>
-                <a href="#gallery" class="nav-link">
+                <a href="#gallery" class="nav-link" onclick="closeDrawer()">
                   <span class="link-icon">🖼️</span>
                   Gallery
                 </a>
-                <a href="#process" class="nav-link">
+                <a href="#process" class="nav-link" onclick="closeDrawer()">
                   <span class="link-icon">📋</span>
                   Process
                 </a>
-                <a href="#contact" class="nav-link">
+                <a href="#contact" class="nav-link" onclick="closeDrawer()">
                   <span class="link-icon">📞</span>
                   Contact
                 </a>
               </div>
               <div class="drawer-footer">
-                <button class="quote-btn">Get Free Quote</button>
+                <button class="quote-btn" onclick="openModal('quoteModal')">Get Free Quote</button>
               </div>
             </nav>
+
+            <!-- Overlay -->
+            <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+            <!-- Quote Modal -->
+            <div class="modal" id="quoteModal">
+              <div class="modal-content">
+                <button class="modal-close" onclick="closeModal('quoteModal')">×</button>
+                <h2>Get a Free Quote</h2>
+                <form class="quote-form">
+                  <div class="form-group">
+                    <input type="text" placeholder="Your Name" required />
+                  </div>
+                  <div class="form-group">
+                    <input type="email" placeholder="Your Email" required />
+                  </div>
+                  <div class="form-group">
+                    <select required>
+                      <option value="">Select Service</option>
+                      <option value="design">Landscape Design</option>
+                      <option value="maintenance">Garden Maintenance</option>
+                      <option value="irrigation">Irrigation Systems</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <textarea placeholder="Project Details" required></textarea>
+                  </div>
+                  <button type="submit" class="submit-btn">Request Quote</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Portfolio Modal -->
+            <div class="modal" id="portfolioModal">
+              <div class="modal-content">
+                <button class="modal-close" onclick="closeModal('portfolioModal')">×</button>
+                <h2>Our Portfolio</h2>
+                <div class="portfolio-grid">
+                  <div class="portfolio-item">
+                    <img src="https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&q=80&w=800" alt="Modern Garden" />
+                    <div class="item-overlay">
+                      <h3>Modern Garden Design</h3>
+                      <p>Contemporary landscape with sustainable features</p>
+                    </div>
+                  </div>
+                  <div class="portfolio-item">
+                    <img src="https://images.unsplash.com/photo-1598902108854-10e335adac99?auto=format&fit=crop&q=80&w=800" alt="Zen Garden" />
+                    <div class="item-overlay">
+                      <h3>Zen Garden Retreat</h3>
+                      <p>Peaceful Japanese-inspired garden</p>
+                    </div>
+                  </div>
+                  <div class="portfolio-item">
+                    <img src="https://images.unsplash.com/photo-1584479898061-15742e14f50d?auto=format&fit=crop&q=80&w=800" alt="Family Garden" />
+                    <div class="item-overlay">
+                      <h3>Family Entertainment Space</h3>
+                      <p>Multi-functional outdoor living area</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <!-- Main Content -->
             <main class="main-content">
               <!-- Mobile Header -->
               <header class="mobile-header">
-                <button class="menu-toggle">☰</button>
+                <button class="menu-toggle" onclick="openDrawer()">☰</button>
                 <span class="mobile-logo">GreenScape</span>
-                <button class="mobile-quote">💬</button>
+                <button class="mobile-quote" onclick="openModal('quoteModal')">💬</button>
               </header>
 
               <!-- Hero Section -->
@@ -55,8 +117,8 @@ export const landscaperTemplate = {
                   <h1 class="reveal-text">Transform Your Outdoor Space</h1>
                   <p class="fade-up">Professional landscaping and garden design services</p>
                   <div class="hero-buttons">
-                    <button class="primary-btn scale-in">View Our Work</button>
-                    <button class="secondary-btn scale-in">Free Consultation</button>
+                    <button class="primary-btn scale-in" onclick="openModal('portfolioModal')">View Our Work</button>
+                    <button class="secondary-btn scale-in" onclick="openModal('quoteModal')">Free Consultation</button>
                   </div>
                   <div class="achievement-cards">
                     <div class="achievement-card fade-up">
@@ -92,7 +154,7 @@ export const landscaperTemplate = {
                         <li>Plant Selection</li>
                         <li>Hardscape Planning</li>
                       </ul>
-                      <button class="learn-more">Learn More →</button>
+                      <button class="learn-more" onclick="openModal('quoteModal')">Get Quote →</button>
                     </div>
                   </div>
                   <div class="service-card zoom-in">
@@ -107,7 +169,7 @@ export const landscaperTemplate = {
                         <li>Lawn Care</li>
                         <li>Pest Control</li>
                       </ul>
-                      <button class="learn-more">Learn More →</button>
+                      <button class="learn-more" onclick="openModal('quoteModal')">Get Quote →</button>
                     </div>
                   </div>
                   <div class="service-card zoom-in">
@@ -122,7 +184,7 @@ export const landscaperTemplate = {
                         <li>Drip Systems</li>
                         <li>Water Conservation</li>
                       </ul>
-                      <button class="learn-more">Learn More →</button>
+                      <button class="learn-more" onclick="openModal('quoteModal')">Get Quote →</button>
                     </div>
                   </div>
                 </div>
@@ -132,27 +194,30 @@ export const landscaperTemplate = {
               <section id="gallery" class="gallery">
                 <h2>Our Work</h2>
                 <div class="gallery-grid">
-                  <div class="gallery-item">
+                  <div class="gallery-item" onclick="openModal('portfolioModal')">
                     <img src="https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&q=80&w=800" alt="Modern Garden" />
                     <div class="item-overlay">
                       <h3>Modern Garden</h3>
                       <p>Contemporary design with sustainable features</p>
                     </div>
                   </div>
-                  <div class="gallery-item">
+                  <div class="gallery-item" onclick="openModal('portfolioModal')">
                     <img src="https://images.unsplash.com/photo-1598902108854-10e335adac99?auto=format&fit=crop&q=80&w=800" alt="Zen Garden" />
                     <div class="item-overlay">
                       <h3>Zen Garden</h3>
                       <p>Peaceful retreat with Japanese influences</p>
                     </div>
                   </div>
-                  <div class="gallery-item">
+                  <div class="gallery-item" onclick="openModal('portfolioModal')">
                     <img src="https://images.unsplash.com/photo-1584479898061-15742e14f50d?auto=format&fit=crop&q=80&w=800" alt="Family Garden" />
                     <div class="item-overlay">
                       <h3>Family Garden</h3>
                       <p>Kid-friendly space with entertainment areas</p>
                     </div>
                   </div>
+                </div>
+                <div class="gallery-cta">
+                  <button class="primary-btn" onclick="openModal('portfolioModal')">View Full Portfolio</button>
                 </div>
               </section>
 
@@ -243,8 +308,112 @@ export const landscaperTemplate = {
                   </form>
                 </div>
               </section>
+
+              <!-- Footer -->
+              <footer class="footer">
+                <div class="footer-content">
+                  <div class="footer-section">
+                    <h3>GreenScape</h3>
+                    <p>Creating beautiful outdoor spaces since 2008</p>
+                  </div>
+                  <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                      <li><a href="#services">Services</a></li>
+                      <li><a href="#gallery">Gallery</a></li>
+                      <li><a href="#process">Process</a></li>
+                      <li><a href="#contact">Contact</a></li>
+                    </ul>
+                  </div>
+                  <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>123 Garden Lane<br>Greenville, GV 12345</p>
+                    <p>Phone: (555) 123-4567<br>Email: info@greenscape.com</p>
+                  </div>
+                  <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                      <a href="#" class="social-link">Facebook</a>
+                      <a href="#" class="social-link">Instagram</a>
+                      <a href="#" class="social-link">Pinterest</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="footer-bottom">
+                  <p>&copy; 2024 GreenScape. All rights reserved.</p>
+                </div>
+              </footer>
             </main>
           </div>
+
+          <script>
+            // Drawer Functions
+            function openDrawer() {
+              document.getElementById('drawer').classList.add('active');
+              document.getElementById('overlay').classList.add('active');
+            }
+
+            function closeDrawer() {
+              document.getElementById('drawer').classList.remove('active');
+              document.getElementById('overlay').classList.remove('active');
+            }
+
+            // Modal Functions
+            function openModal(modalId) {
+              document.getElementById(modalId).classList.add('active');
+              document.getElementById('overlay').classList.add('active');
+            }
+
+            function closeModal(modalId) {
+              document.getElementById(modalId).classList.remove('active');
+              document.getElementById('overlay').classList.remove('active');
+            }
+
+            // Close modals when clicking outside
+            window.onclick = function(event) {
+              if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+                document.getElementById('overlay').classList.remove('active');
+              }
+            }
+
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+              anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                  behavior: 'smooth'
+                });
+              });
+            });
+
+            // Parallax effect for hero image
+            window.addEventListener('scroll', () => {
+              const parallax = document.querySelector('.parallax');
+              if (parallax) {
+                const scrolled = window.pageYOffset;
+                parallax.style.transform = 'translateY(' + (scrolled * 0.4) + 'px)';
+              }
+            });
+
+            // Intersection Observer for animations
+            const observerOptions = {
+              threshold: 0.1,
+              rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('visible');
+                }
+              });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in, .fade-up, .zoom-in, .scale-in').forEach((el) => {
+              observer.observe(el);
+            });
+          </script>
 
           <style>
             /* Base Styles */
@@ -289,7 +458,7 @@ export const landscaperTemplate = {
               flex-direction: column;
               z-index: 1000;
               transform: translateX(-100%);
-              transition: var(--transition);
+              transition: transform 0.3s ease-in-out;
             }
 
             .drawer-nav.active {
@@ -368,6 +537,80 @@ export const landscaperTemplate = {
 
             .quote-btn:hover {
               background: var(--primary);
+            }
+
+            /* Overlay */
+            .overlay {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.5);
+              opacity: 0;
+              visibility: hidden;
+              z-index: 999;
+              transition: all 0.3s ease-in-out;
+            }
+
+            .overlay.active {
+              opacity: 1;
+              visibility: visible;
+            }
+
+            /* Modal Styles */
+            .modal {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              opacity: 0;
+              visibility: hidden;
+              z-index: 1001;
+              transition: all 0.3s ease-in-out;
+            }
+
+            .modal.active {
+              opacity: 1;
+              visibility: visible;
+            }
+
+            .modal-content {
+              background: var(--white);
+              padding: 2rem;
+              border-radius: 15px;
+              box-shadow: var(--shadow);
+              max-width: 500px;
+              width: 90%;
+              max-height: 90vh;
+              overflow-y: auto;
+              position: relative;
+              transform: scale(0.7);
+              transition: transform 0.3s ease-in-out;
+            }
+
+            .modal.active .modal-content {
+              transform: scale(1);
+            }
+
+            .modal-close {
+              position: absolute;
+              top: 1rem;
+              right: 1rem;
+              background: none;
+              border: none;
+              font-size: 1.5rem;
+              cursor: pointer;
+              color: var(--text-light);
+              transition: color 0.3s ease;
+            }
+
+            .modal-close:hover {
+              color: var(--primary);
             }
 
             /* Mobile Header */
@@ -640,6 +883,7 @@ export const landscaperTemplate = {
               border-radius: 15px;
               overflow: hidden;
               aspect-ratio: 4/3;
+              cursor: pointer;
             }
 
             .gallery-item img {
@@ -666,6 +910,11 @@ export const landscaperTemplate = {
 
             .gallery-item:hover img {
               transform: scale(1.1);
+            }
+
+            .gallery-cta {
+              text-align: center;
+              margin-top: 3rem;
             }
 
             /* Process Section */
@@ -813,10 +1062,73 @@ export const landscaperTemplate = {
               background: var(--primary-dark);
             }
 
+            /* Footer */
+            .footer {
+              background: var(--primary-dark);
+              color: var(--white);
+              padding: 4rem 5% 2rem;
+            }
+
+            .footer-content {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+              gap: 3rem;
+              max-width: 1200px;
+              margin: 0 auto;
+            }
+
+            .footer-section h3 {
+              margin-bottom: 1.5rem;
+              font-size: 1.2rem;
+            }
+
+            .footer-section ul {
+              list-style: none;
+            }
+
+            .footer-section ul li {
+              margin-bottom: 0.5rem;
+            }
+
+            .footer-section a {
+              color: var(--white);
+              text-decoration: none;
+              transition: var(--transition);
+            }
+
+            .footer-section a:hover {
+              color: var(--accent);
+            }
+
+            .social-links {
+              display: flex;
+              gap: 1rem;
+            }
+
+            .social-link {
+              padding: 0.5rem 1rem;
+              border: 1px solid var(--white);
+              border-radius: 20px;
+              transition: var(--transition);
+            }
+
+            .social-link:hover {
+              background: var(--white);
+              color: var(--primary-dark);
+            }
+
+            .footer-bottom {
+              text-align: center;
+              margin-top: 3rem;
+              padding-top: 2rem;
+              border-top: 1px solid rgba(255,255,255,0.1);
+            }
+
             /* Responsive Design */
             @media (max-width: 768px) {
               .drawer-nav {
                 transform: translateX(-100%);
+                width: 85%;
               }
 
               .main-content {
@@ -850,9 +1162,21 @@ export const landscaperTemplate = {
               .contact-container {
                 grid-template-columns: 1fr;
               }
+
+              .modal-content {
+                width: 95%;
+                margin: 1rem;
+                padding: 1.5rem;
+              }
+            }
+
+            /* Animation Classes */
+            .visible {
+              opacity: 1;
+              transform: translateY(0) scale(1);
             }
           </style>
-          `,
+        `,
       },
     ],
   },
