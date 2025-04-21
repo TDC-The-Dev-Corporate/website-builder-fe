@@ -13,6 +13,7 @@ export function logoutUser() {
   localStorage.removeItem("verified");
   localStorage.removeItem("email");
   localStorage.removeItem("user");
+  localStorage.clear();
   window.location.href = "/AIWebsiteBuilders/auth/login";
 }
 

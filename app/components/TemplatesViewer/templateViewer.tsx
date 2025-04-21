@@ -20,6 +20,7 @@ import { hvacTemplate } from "@/lib/templates/hvac";
 import { landscaperTemplate } from "@/lib/templates/landscaper";
 import { painterTemplate } from "@/lib/templates/painter";
 import { plumberTemplate } from "@/lib/templates/plumber";
+import { multiPageTemplate } from "@/lib/templates/multipage";
 
 export default function TemplateViewer() {
   const router = useRouter();
@@ -31,6 +32,7 @@ export default function TemplateViewer() {
     landscaperTemplate,
     painterTemplate,
     plumberTemplate,
+    multiPageTemplate,
   ];
 
   const handleView = (template) => {
@@ -41,22 +43,25 @@ export default function TemplateViewer() {
     }
   };
 
-  const handleEdit = (template) => {
-    console.log("template", template);
-    localStorage.setItem("selectedTemplate", JSON.stringify(template));
+  const handleTemplateSelecion = () => {
+    // localStorage.setItem("selectedTemplate", JSON.stringify(template));
     router.push("/AIWebsiteBuilders/template-selector");
   };
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       <Container sx={{ pt: 10, pb: 8 }}>
-        <Typography
-          variant="h3"
-          component="h1"
-          sx={{ mb: 4, fontWeight: "bold" }}
-        >
-          Available Templates
-        </Typography>
+        <Grid>
+          <Typography sx={{ mb: 4, fontWeight: "bold", fontSize: "38px" }}>
+            Available Templates
+          </Typography>
+          <Button
+            sx={{ color: "#0d47a1" }}
+            onClick={() => handleTemplateSelecion()}
+          >
+            Open Editor
+          </Button>
+        </Grid>
         <Grid container spacing={3}>
           {templates.map((template) => (
             <Grid item xs={12} sm={6} md={4} key={template.id}>
@@ -110,13 +115,13 @@ export default function TemplateViewer() {
                   >
                     View
                   </Button>
-                  <Button
+                  {/* <Button
                     size="small"
                     variant="contained"
                     onClick={() => handleEdit(template)}
                   >
                     Edit
-                  </Button>
+                  </Button> */}
                 </CardActions>
               </Card>
             </Grid>

@@ -20,6 +20,7 @@ import { landscaperTemplate } from "@/lib/templates/landscaper";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { generatePortfolio } from "@/lib/redux/slices/portfolioSlice";
 import { painterTemplate } from "@/lib/templates/painter";
+import { multiPageTemplate } from "@/lib/templates/multipage";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -43,8 +44,15 @@ export default function Home() {
   useEffect(() => {
     const template = localStorage.getItem("selectedTemplate");
     if (template) {
-      setSelectedTemplate(JSON.parse(template));
+      const parsedTemplate = JSON.parse(template);
+      setSelectedTemplate(parsedTemplate);
+      console.log("selectedTemplate", selectedTemplate);
       localStorage.removeItem("selectedTemplate");
+
+      return () => {
+        console.log("running clean up");
+        setSelectedTemplate(null);
+      };
     }
   }, []);
 
@@ -52,7 +60,17 @@ export default function Home() {
     if (selectedTemplate) {
       editor.DomComponents.clear();
       editor.CssComposer.clear();
-      editor.setComponents(selectedTemplate.data.pages[0].component);
+
+      selectedTemplate.data.pages.forEach((page) => {
+        editor.Pages.add({
+          id: page.id,
+          name: page.name,
+          component: page.component,
+          styles: page.styles || "",
+        });
+      });
+
+      editor.Pages.select(selectedTemplate.data.pages[0].id);
     }
   };
 
@@ -96,52 +114,70 @@ export default function Home() {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
-
-  const getFullHtml = () => {
-    if (!editorRef.current) return "";
+  const getFullHtmlForAllPages = () => {
+    if (!editorRef.current) return [];
 
     const editor = editorRef.current;
-    const html = editor.getHtml();
+    const pages = editor.Pages.getAll();
     const css = editor.getCss();
 
-    const fullHtml = `
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Portfolio</title>
-    <style>
-      ${css}
-    </style>
-  </head>
-  <body>
-    ${html}
-  </body>
-  </html>`;
+    return pages.map((page) => {
+      const pageId = page.getId();
+      const pageName = page.getName();
+      const html = editor.getHtml({ pageId });
 
-    return fullHtml;
+      const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${pageName}</title>
+  <style>${css}</style>
+</head>
+<body>${html}</body>
+</html>`;
+
+      return {
+        pageId,
+        pageName,
+        html: fullHtml,
+      };
+    });
   };
 
   const handleSave = async () => {
-    const fullHtml = getFullHtml();
-    if (!fullHtml) return;
+    const pages = getFullHtmlForAllPages();
+    const processedPages = pages.map((page) => {
+      const processedHtml = page.html.replace(
+        /href="#!" data-gjs-nav="([^"]+)"/g,
+        (match, pageName) => {
+          const targetPage =
+            pages.find(
+              (p) => p.pageName.toLowerCase() === pageName.toLowerCase()
+            ) ||
+            selectedTemplate?.data.pages.find(
+              (p) => p.name.toLowerCase() === pageName.toLowerCase()
+            );
+          return targetPage
+            ? `href="/${targetPage.id || targetPage.pageId}.html"`
+            : match;
+        }
+      );
+
+      return {
+        ...page,
+        html: processedHtml,
+      };
+    });
+
+    console.log("All pages:", processedPages);
 
     const user = JSON.parse(localStorage.getItem("user"));
     const data = {
       userId: user.id,
-      htmlContent: fullHtml,
+      pages: processedPages,
+      mainPageId: editorRef.current.Pages.getSelected().getId(),
     };
-
-    try {
-      const res = await dispatch(generatePortfolio(data));
-      const link = `${window.location.origin}/AIWebsiteBuilders/portfolio/${res.payload.user.username}`;
-      setPortfolioLink(link);
-      setOpenModal(true);
-    } catch (err) {
-      console.error("err", err);
-      alert(error);
-    }
   };
 
   const handleCopy = () => {
@@ -249,8 +285,10 @@ export default function Home() {
 
                   editor.onReady(() => {
                     if (selectedTemplate) {
+                      console.log("selected template");
                       loadSelectedTemplate(editor);
                     } else {
+                      console.log("no selected template");
                       editor.runCommand("studio:layoutToggle", {
                         id: "template-selector",
                         header: false,
@@ -305,6 +343,7 @@ export default function Home() {
                   electricianTemplate,
                   landscaperTemplate,
                   painterTemplate,
+                  multiPageTemplate,
                 ],
               },
             }}
