@@ -1,25 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
 import {
   Box,
   Button,
-  Card,
   CardActions,
   CardContent,
-  CardMedia,
-  Container,
   Grid,
   Typography,
+  Chip,
 } from "@mui/material";
-
+import { Eye, Edit2, Star } from "lucide-react";
 import { carpenterTemplate } from "@/lib/templates/carpenter";
 import { electricianTemplate } from "@/lib/templates/electrician";
 import { hvacTemplate } from "@/lib/templates/hvac";
 import { landscaperTemplate } from "@/lib/templates/landscaper";
 import { painterTemplate } from "@/lib/templates/painter";
 import { plumberTemplate } from "@/lib/templates/plumber";
+import MotionBox from "@/app/components/animations/MotionBox";
+import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 
 export default function TemplateViewer() {
   const router = useRouter();
@@ -42,49 +41,63 @@ export default function TemplateViewer() {
   };
 
   const handleEdit = (template) => {
-    console.log("template", template);
     localStorage.setItem("selectedTemplate", JSON.stringify(template));
     router.push("/AIWebsiteBuilders/template-selector");
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      <Container sx={{ pt: 10, pb: 8 }}>
+    <Box>
+      <Box sx={{ mb: 6, textAlign: "center" }}>
         <Typography
-          variant="h3"
-          component="h1"
-          sx={{ mb: 4, fontWeight: "bold" }}
+          variant="h4"
+          sx={{ color: "white", mb: 2, fontWeight: 700 }}
         >
-          Available Templates
+          Professional Templates
         </Typography>
-        <Grid container spacing={3}>
-          {templates.map((template) => (
-            <Grid item xs={12} sm={6} md={4} key={template.id}>
-              <Card
+        <Typography
+          variant="body1"
+          sx={{ color: "rgba(255, 255, 255, 0.7)", maxWidth: 600, mx: "auto" }}
+        >
+          Choose from our collection of professionally designed templates
+          tailored for trade businesses
+        </Typography>
+      </Box>
+
+      <Grid container spacing={4}>
+        {templates.map((template, index) => (
+          <Grid item xs={12} sm={6} lg={4} key={template.id}>
+            <MotionBox
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <GlassMorphism
+                blur={10}
+                opacity={0.1}
                 sx={{
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
+                  transition: "all 0.3s ease",
                   "&:hover": {
-                    transform: "translateY(-4px)",
-                    transition: "all 0.3s ease-in-out",
-                    boxShadow: 4,
+                    transform: "translateY(-8px)",
+                    boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
                   },
                 }}
               >
-                <CardMedia
-                  component="div"
+                <Box
                   sx={{
                     position: "relative",
-                    height: 200,
+                    height: 240,
                     overflow: "hidden",
+                    borderRadius: "12px 12px 0 0",
                   }}
                 >
                   <iframe
                     srcDoc={template.data.pages[0].component}
                     style={{
                       width: "200%",
-                      height: "400px",
+                      height: "480px",
                       border: "none",
                       transform: "scale(0.5)",
                       transformOrigin: "top left",
@@ -92,37 +105,94 @@ export default function TemplateViewer() {
                     }}
                     title={template.name}
                   />
-                </CardMedia>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 16,
+                      right: 16,
+                      display: "flex",
+                      gap: 1,
+                    }}
+                  >
+                    <Chip
+                      icon={<Star size={14} />}
+                      label="Premium"
+                      sx={{
+                        backgroundColor: "rgba(59, 130, 246, 0.9)",
+                        color: "white",
+                        backdropFilter: "blur(4px)",
+                        "& .MuiChip-icon": {
+                          color: "white",
+                        },
+                      }}
+                    />
+                    <Chip
+                      label={template.name.split(" ")[0]}
+                      sx={{
+                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        color: "white",
+                        backdropFilter: "blur(4px)",
+                      }}
+                    />
+                  </Box>
+                </Box>
+
                 <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography gutterBottom variant="h5" component="h2">
+                  <Typography
+                    variant="h6"
+                    sx={{ color: "white", mb: 1, fontWeight: 600 }}
+                  >
                     {template.name}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Click view to see the full template or edit to customize it
-                    in the editor.
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                  >
+                    Professional template designed specifically for{" "}
+                    {template.name.toLowerCase()} services. Includes service
+                    sections, testimonials, and contact forms.
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ p: 2, pt: 0 }}>
+
+                <CardActions sx={{ p: 2, pt: 0, gap: 1 }}>
                   <Button
-                    size="small"
                     variant="outlined"
                     onClick={() => handleView(template)}
+                    startIcon={<Eye size={18} />}
+                    sx={{
+                      flex: 1,
+                      color: "white",
+                      borderColor: "rgba(255, 255, 255, 0.2)",
+                      "&:hover": {
+                        borderColor: "white",
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      },
+                    }}
                   >
-                    View
+                    Preview
                   </Button>
                   <Button
-                    size="small"
                     variant="contained"
                     onClick={() => handleEdit(template)}
+                    startIcon={<Edit2 size={18} />}
+                    sx={{
+                      flex: 1,
+                      background:
+                        "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
+                      "&:hover": {
+                        background:
+                          "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
+                      },
+                    }}
                   >
-                    Edit
+                    Customize
                   </Button>
                 </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
+              </GlassMorphism>
+            </MotionBox>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }

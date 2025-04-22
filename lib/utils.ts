@@ -114,3 +114,86 @@ export const getCroppedImg = async (
     );
   });
 };
+
+export const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+export const slideUp = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+export const staggerChildren = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+export const scale = {
+  hidden: { scale: 0.95, opacity: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.34, 1.56, 0.64, 1],
+    },
+  },
+};
+
+// Custom easing functions
+export const springs = {
+  gentle: [0.34, 1.56, 0.64, 1],
+  bounce: [0.22, 1.2, 0.36, 1],
+  swift: [0.55, 0, 0.1, 1],
+  smooth: [0.4, 0, 0.2, 1],
+};
+
+// Helper for constructing linear gradients
+export const linearGradient = (
+  direction: string,
+  color1: string,
+  position1: number,
+  color2: string,
+  position2: number
+) =>
+  `linear-gradient(${direction}, ${color1} ${position1}%, ${color2} ${position2}%)`;
+
+// Format trade type from slug
+export const formatTradeType = (tradeType: string): string => {
+  return tradeType
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+// Generate motivational quotes for tradesmen
+export const tradesmanQuotes = [
+  "Build your online presence as solidly as you build your projects",
+  "Your craftsmanship deserves to be showcased professionally",
+  "Connect with clients who value quality as much as you do",
+  "Turn your skilled hands into a thriving digital business",
+  "Showcase your expertise to clients who need your skills",
+  "Building trust online as you do on every job site",
+  "Craft your online reputation with the same care as your trade",
+  "Your trade skills deserve professional digital representation",
+  "Your experience matters. Let's help the world see it",
+];
+
+// Get random quote
+export const getRandomQuote = (): string => {
+  return tradesmanQuotes[Math.floor(Math.random() * tradesmanQuotes.length)];
+};
