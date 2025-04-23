@@ -9,6 +9,8 @@ import {
   Grid,
   Typography,
   Chip,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { Eye, Edit2, Star } from "lucide-react";
 import { carpenterTemplate } from "@/lib/templates/carpenter";
@@ -22,6 +24,7 @@ import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 
 export default function TemplateViewer() {
   const router = useRouter();
+  const theme = useTheme();
 
   const templates = [
     carpenterTemplate,
@@ -46,7 +49,7 @@ export default function TemplateViewer() {
   };
 
   return (
-    <Box>
+    <Box sx={{ width: "100%" }}>
       <Box sx={{ mb: 6, textAlign: "center" }}>
         <Typography
           variant="h4"
@@ -56,7 +59,12 @@ export default function TemplateViewer() {
         </Typography>
         <Typography
           variant="body1"
-          sx={{ color: "rgba(255, 255, 255, 0.7)", maxWidth: 600, mx: "auto" }}
+          sx={{
+            color: "rgba(255, 255, 255, 0.7)",
+            maxWidth: 600,
+            mx: "auto",
+            px: { xs: 2, sm: 0 },
+          }}
         >
           Choose from our collection of professionally designed templates
           tailored for trade businesses
@@ -70,6 +78,7 @@ export default function TemplateViewer() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
+              sx={{ height: "100%", display: "flex", flexDirection: "column" }}
             >
               <GlassMorphism
                 blur={10}
@@ -78,11 +87,7 @@ export default function TemplateViewer() {
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-                  },
+                  justifyContent: "space-between",
                 }}
               >
                 <Box
@@ -137,7 +142,16 @@ export default function TemplateViewer() {
                   </Box>
                 </Box>
 
-                <CardContent sx={{ flexGrow: 1 }}>
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    px: 0,
+                    pt: 2,
+                    pb: 1,
+                  }}
+                >
                   <Typography
                     variant="h6"
                     sx={{ color: "white", mb: 1, fontWeight: 600 }}
@@ -146,7 +160,14 @@ export default function TemplateViewer() {
                   </Typography>
                   <Typography
                     variant="body2"
-                    sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                    sx={{
+                      color: "rgba(255, 255, 255, 0.7)",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
                   >
                     Professional template designed specifically for{" "}
                     {template.name.toLowerCase()} services. Includes service
@@ -154,7 +175,7 @@ export default function TemplateViewer() {
                   </Typography>
                 </CardContent>
 
-                <CardActions sx={{ p: 2, pt: 0, gap: 1 }}>
+                <CardActions sx={{ px: 0, pt: 2, gap: 1 }}>
                   <Button
                     variant="outlined"
                     onClick={() => handleView(template)}

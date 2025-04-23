@@ -3,33 +3,27 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-
 import {
-  Container,
   Box,
   Typography,
   Grid,
   TextField,
   Button,
-  Paper,
   MenuItem,
   Alert,
   CircularProgress,
   IconButton,
 } from "@mui/material";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-
+import { Edit, Camera, Trash2, ArrowLeft } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
-import { Edit as EditIcon } from "lucide-react";
-
+import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 import ImageCropper from "@/app/components/ImageEditModal/imageEditModal";
-
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { deleteAccount, update } from "@/lib/redux/slices/authSlice";
 import { logoutUser } from "@/lib/utils";
 import { tradeSpecializations } from "@/app/types/constants";
+import MotionBox from "@/app/components/animations/MotionBox";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Full name is required"),
@@ -43,10 +37,47 @@ const validationSchema = Yup.object({
   tradeSpecialization: Yup.string().optional(),
 });
 
+const inputStyles = {
+  "& .MuiOutlinedInput-root": {
+    color: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backdropFilter: "blur(10px)",
+    "& fieldset": {
+      borderColor: "rgba(255, 255, 255, 0.1)",
+    },
+    "&:hover fieldset": {
+      borderColor: "rgba(255, 255, 255, 0.2)",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "#3b82f6",
+    },
+    "&.Mui-disabled": {
+      backgroundColor: "rgba(255, 255, 255, 0.02)",
+      "& fieldset": {
+        borderColor: "rgba(255, 255, 255, 0.05)",
+      },
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "rgba(255, 255, 255, 0.7)",
+    "&.Mui-focused": {
+      color: "#3b82f6",
+    },
+    "&.Mui-disabled": {
+      color: "rgba(255, 255, 255, 0.3)",
+    },
+  },
+  "& .MuiFormHelperText-root": {
+    color: "rgba(255, 255, 255, 0.5)",
+    "&.Mui-error": {
+      color: "#ef4444",
+    },
+  },
+};
+
 export default function EditProfile() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -147,250 +178,354 @@ export default function EditProfile() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 8 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+        p: 3,
+      }}
+    >
+      <MotionBox
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Button
+          variant="text"
+          startIcon={<ArrowLeft size={20} />}
+          onClick={() => router.push("/AIWebsiteBuilders/home")}
+          sx={{
+            color: "white",
+            mb: 3,
+            "&:hover": {
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+            },
+          }}
+        >
+          Back to Dashboard
+        </Button>
 
-        <Box component="form" onSubmit={formik.handleSubmit}>
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
-              <Box
+        <GlassMorphism blur={10} opacity={0.1}>
+          <Box sx={{ p: 4 }}>
+            {error && (
+              <Alert
+                severity="error"
                 sx={{
-                  width: 200,
-                  height: 200,
-                  borderRadius: "50%",
-                  margin: "0 auto",
-                  mb: 2,
-                  position: "relative",
-                  display: "inline-flex",
+                  mb: 4,
+                  backgroundColor: "rgba(239, 68, 68, 0.1)",
+                  color: "#ef4444",
+                  border: "1px solid rgba(239, 68, 68, 0.2)",
                 }}
               >
-                <Box
-                  sx={{
-                    width: 200,
-                    height: 200,
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                  }}
-                >
-                  {imagePreview && (
-                    <Image
-                      src={imagePreview || "/default-avatar.png"}
-                      alt="Profile"
-                      width={200}
-                      height={200}
-                      style={{ objectFit: "cover" }}
-                    />
-                  )}
-                  {!imagePreview && (
-                    <AccountCircleIcon
-                      sx={{ fontSize: 200, color: "#9e9e9e" }}
-                    />
-                  )}
-                </Box>
-                <IconButton
-                  sx={{
-                    position: "absolute",
-                    right: "10px",
-                    bottom: "10px",
-                    backgroundColor: "primary.main",
-                    zIndex: 2,
-                    "&:hover": { backgroundColor: "primary.dark" },
-                    borderRadius: "50%",
-                    width: 40,
-                    height: 40,
-                  }}
-                  component="label"
-                >
-                  <EditIcon color="white" />
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
-                </IconButton>
-              </Box>
-            </Grid>
+                {error}
+              </Alert>
+            )}
 
-            <Grid item xs={12} md={8}>
-              <Typography variant="h5" gutterBottom>
-                Personal Information
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Full Name"
-                    {...formik.getFieldProps("name")}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={
-                      formik.touched.name && formik.errors.name
-                        ? formik.errors.name.toString()
-                        : undefined
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    disabled
-                    fullWidth
-                    label="User Name"
-                    {...formik.getFieldProps("username")}
-                    error={
-                      formik.touched.username && Boolean(formik.errors.username)
-                    }
-                    helperText={
-                      formik.touched.username && formik.errors.username
-                        ? formik.errors.username.toString()
-                        : undefined
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Company Name"
-                    {...formik.getFieldProps("companyName")}
-                    error={
-                      formik.touched.companyName &&
-                      Boolean(formik.errors.companyName)
-                    }
-                    helperText={
-                      formik.touched.companyName && formik.errors.companyName
-                        ? formik.errors.companyName.toString()
-                        : undefined
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Phone Number"
-                    {...formik.getFieldProps("phoneNumber")}
-                    error={
-                      formik.touched.phoneNumber &&
-                      Boolean(formik.errors.phoneNumber)
-                    }
-                    helperText={
-                      formik.touched.phoneNumber && formik.errors.phoneNumber
-                        ? formik.errors.phoneNumber.toString()
-                        : undefined
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="License Number"
-                    {...formik.getFieldProps("licenseNumber")}
-                    error={
-                      formik.touched.licenseNumber &&
-                      Boolean(formik.errors.licenseNumber)
-                    }
-                    helperText={
-                      formik.touched.licenseNumber &&
-                      formik.errors.licenseNumber
-                        ? formik.errors.licenseNumber.toString()
-                        : undefined
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Business Address"
-                    {...formik.getFieldProps("address")}
-                    error={
-                      formik.touched.address && Boolean(formik.errors.address)
-                    }
-                    helperText={
-                      formik.touched.address && formik.errors.address
-                        ? formik.errors.address.toString()
-                        : undefined
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    select
-                    label="Trade Specialization"
-                    {...formik.getFieldProps("tradeSpecialization")}
-                    error={
-                      formik.touched.tradeSpecialization &&
-                      Boolean(formik.errors.tradeSpecialization)
-                    }
-                    helperText={
-                      formik.touched.tradeSpecialization &&
-                      formik.errors.tradeSpecialization
-                        ? formik.errors.tradeSpecialization.toString()
-                        : undefined
-                    }
+            <Box component="form" onSubmit={formik.handleSubmit}>
+              <Grid container spacing={4}>
+                <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
+                  <Box
+                    sx={{
+                      width: 220,
+                      height: 220,
+                      position: "relative",
+                      margin: "0 auto",
+                      mb: 3,
+                    }}
                   >
-                    {tradeSpecializations.map((trade) => (
-                      <MenuItem key={trade} value={trade}>
-                        {trade}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                    <Box
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "20px",
+                        overflow: "hidden",
+                        background:
+                          "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
+                        border: "4px solid rgba(255, 255, 255, 0.1)",
+                        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+                      }}
+                    >
+                      {imagePreview ? (
+                        <Image
+                          src={imagePreview}
+                          alt="Profile"
+                          width={220}
+                          height={220}
+                          style={{ objectFit: "cover" }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Edit size={80} color="white" />
+                        </Box>
+                      )}
+                    </Box>
+                    <IconButton
+                      sx={{
+                        position: "absolute",
+                        right: "10px",
+                        bottom: "10px",
+                        background:
+                          "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
+                        "&:hover": {
+                          background:
+                            "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
+                        },
+                        width: 44,
+                        height: 44,
+                        boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
+                      }}
+                      component="label"
+                    >
+                      <Camera size={20} color="white" />
+                      <input
+                        type="file"
+                        hidden
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </IconButton>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} md={8}>
+                  <Typography
+                    variant="h5"
+                    sx={{ color: "white", mb: 3, fontWeight: 600 }}
+                  >
+                    Personal Information
+                  </Typography>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Full Name"
+                        {...formik.getFieldProps("name")}
+                        error={
+                          formik.touched.name && Boolean(formik.errors.name)
+                        }
+                        helperText={
+                          formik.touched.name && formik.errors.name
+                            ? formik.errors.name.toString()
+                            : undefined
+                        }
+                        sx={inputStyles}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        disabled
+                        fullWidth
+                        label="User Name"
+                        {...formik.getFieldProps("username")}
+                        error={
+                          formik.touched.username &&
+                          Boolean(formik.errors.username)
+                        }
+                        helperText={
+                          formik.touched.username && formik.errors.username
+                            ? formik.errors.username.toString()
+                            : undefined
+                        }
+                        sx={inputStyles}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Company Name"
+                        {...formik.getFieldProps("companyName")}
+                        error={
+                          formik.touched.companyName &&
+                          Boolean(formik.errors.companyName)
+                        }
+                        helperText={
+                          formik.touched.companyName &&
+                          formik.errors.companyName
+                            ? formik.errors.companyName.toString()
+                            : undefined
+                        }
+                        sx={inputStyles}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Phone Number"
+                        {...formik.getFieldProps("phoneNumber")}
+                        error={
+                          formik.touched.phoneNumber &&
+                          Boolean(formik.errors.phoneNumber)
+                        }
+                        helperText={
+                          formik.touched.phoneNumber &&
+                          formik.errors.phoneNumber
+                            ? formik.errors.phoneNumber.toString()
+                            : undefined
+                        }
+                        sx={inputStyles}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="License Number"
+                        {...formik.getFieldProps("licenseNumber")}
+                        error={
+                          formik.touched.licenseNumber &&
+                          Boolean(formik.errors.licenseNumber)
+                        }
+                        helperText={
+                          formik.touched.licenseNumber &&
+                          formik.errors.licenseNumber
+                            ? formik.errors.licenseNumber.toString()
+                            : undefined
+                        }
+                        sx={inputStyles}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        select
+                        label="Trade Specialization"
+                        {...formik.getFieldProps("tradeSpecialization")}
+                        error={
+                          formik.touched.tradeSpecialization &&
+                          Boolean(formik.errors.tradeSpecialization)
+                        }
+                        helperText={
+                          formik.touched.tradeSpecialization &&
+                          formik.errors.tradeSpecialization
+                            ? formik.errors.tradeSpecialization.toString()
+                            : undefined
+                        }
+                        sx={inputStyles}
+                      >
+                        {tradeSpecializations.map((trade) => (
+                          <MenuItem
+                            key={trade}
+                            value={trade}
+                            sx={{
+                              color: "white",
+                              "&:hover": {
+                                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                              },
+                            }}
+                          >
+                            {trade}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Business Address"
+                        {...formik.getFieldProps("address")}
+                        error={
+                          formik.touched.address &&
+                          Boolean(formik.errors.address)
+                        }
+                        helperText={
+                          formik.touched.address && formik.errors.address
+                            ? formik.errors.address.toString()
+                            : undefined
+                        }
+                        sx={inputStyles}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 2,
+                      mt: 2,
+                      flexDirection: { xs: "column", sm: "row" },
+                    }}
+                  >
+                    <Box sx={{ display: "flex", gap: 2 }}>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={loading}
+                        sx={{
+                          background:
+                            "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
+                          "&:hover": {
+                            background:
+                              "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
+                          },
+                          px: 4,
+                          py: 1.5,
+                          minWidth: 140,
+                        }}
+                      >
+                        {loading ? (
+                          <CircularProgress size={24} />
+                        ) : (
+                          "Save Changes"
+                        )}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        onClick={() => router.push("/AIWebsiteBuilders/home")}
+                        sx={{
+                          color: "white",
+                          borderColor: "rgba(255, 255, 255, 0.2)",
+                          "&:hover": {
+                            borderColor: "white",
+                            backgroundColor: "rgba(255, 255, 255, 0.1)",
+                          },
+                          px: 4,
+                          py: 1.5,
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </Box>
+
+                    <Button
+                      variant="contained"
+                      onClick={handleAccountDeletion}
+                      disabled={deleting}
+                      startIcon={<Trash2 size={18} />}
+                      sx={{
+                        backgroundColor: "rgba(239, 68, 68, 0.1)",
+                        color: "#ef4444",
+                        "&:hover": {
+                          backgroundColor: "rgba(239, 68, 68, 0.2)",
+                        },
+                        px: 4,
+                        py: 1.5,
+                        minWidth: 160,
+                      }}
+                    >
+                      {deleting ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        "Delete Account"
+                      )}
+                    </Button>
+                  </Box>
                 </Grid>
               </Grid>
-            </Grid>
-
-            <Grid item xs={12} sx={{ mt: 4 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  justifyContent: "space-between",
-                  alignItems: { xs: "stretch", sm: "center" },
-                  gap: 2,
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", sm: "row" },
-                    gap: 2,
-                    flex: 1,
-                  }}
-                >
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    disabled={loading}
-                    sx={{ mr: 2 }}
-                  >
-                    {loading ? <CircularProgress size={24} /> : "Save Changes"}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    onClick={() => router.push("/AIWebsiteBuilders/home")}
-                  >
-                    Cancel
-                  </Button>
-                </Box>
-
-                <Button
-                  variant="contained"
-                  size="large"
-                  disabled={deleting}
-                  onClick={() => handleAccountDeletion()}
-                >
-                  {loading ? <CircularProgress size={24} /> : "Delete Account"}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
+            </Box>
+          </Box>
+        </GlassMorphism>
+      </MotionBox>
 
       {openCropper && rawImage && (
         <ImageCropper
@@ -403,6 +538,6 @@ export default function EditProfile() {
           }}
         />
       )}
-    </Container>
+    </Box>
   );
 }

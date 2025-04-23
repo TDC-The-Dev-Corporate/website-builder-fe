@@ -211,7 +211,7 @@ export default function Login() {
                 >
                   Google
                 </Button>
-                <Button
+                {/* <Button
                   fullWidth
                   variant="outlined"
                   onClick={handleFacebookLogin}
@@ -231,7 +231,7 @@ export default function Login() {
                   }}
                 >
                   Facebook
-                </Button>
+                </Button> */}
               </Stack>
 
               <Stack
