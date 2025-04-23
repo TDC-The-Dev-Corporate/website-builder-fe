@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+
 import {
   Box,
   Container,
@@ -11,11 +13,15 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+
 import { motion, useScroll, useTransform } from "framer-motion";
+
 import { ArrowRight } from "lucide-react";
+
 import MotionBox from "../animations/MotionBox";
-import { GlassMorphism } from "../animations/GlassMorphism";
-import { useRouter } from "next/navigation";
+import { ShinyText } from "../animations/ShinyText";
+
+import { websiteExamples } from "@/app/types/constants";
 
 const ShowcaseWrapper = styled(Box)(({ theme }) => ({
   position: "relative",
@@ -62,27 +68,13 @@ const DeviceScreen = styled(Box)(({ theme }) => ({
   },
 }));
 
-// Sample websites for different trades
-const websiteExamples = [
-  {
-    title: "Carpentry & Woodworking",
-    image:
-      "https://images.pexels.com/photos/5582597/pexels-photo-5582597.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    description: "Showcase your craftsmanship with detailed project galleries",
-  },
-  {
-    title: "Plumbing Services",
-    image:
-      "https://images.pexels.com/photos/6419762/pexels-photo-6419762.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    description: "Highlight your plumbing expertise and emergency services",
-  },
-  {
-    title: "Electrical Contractors",
-    image:
-      "https://images.pexels.com/photos/8005368/pexels-photo-8005368.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    description: "Display your electrical projects and certifications",
-  },
-];
+const GradientText = styled(Typography)(({ theme }) => ({
+  backgroundClip: "text",
+  WebkitBackgroundClip: "text",
+  color: "transparent",
+  backgroundImage: `linear-gradient(135deg, ${theme.palette.appleGreen.main} 0%, ${theme.palette.appleGray.main} 100%)`,
+  display: "inline-block",
+}));
 
 const Showcase = () => {
   const theme = useTheme();
@@ -155,23 +147,11 @@ const Showcase = () => {
               transition={{ duration: 0.6 }}
               sx={{ mb: 2 }}
             >
-              <GlassMorphism
-                elevation={0}
-                sx={{
-                  display: "inline-block",
-                  px: 2,
-                  py: 1,
-                  mb: 2,
-                  borderColor: theme.palette.primary.main,
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{ fontWeight: 600, color: "primary.main" }}
-                >
-                  Showcase Your Work
-                </Typography>
-              </GlassMorphism>
+              <Typography sx={{ fontWeight: "700px", color: "primary.main" }}>
+                <ShinyText color="primary.main">
+                  <GradientText>Showcase Your Work</GradientText>
+                </ShinyText>
+              </Typography>
             </MotionBox>
 
             <MotionBox

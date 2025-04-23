@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { getRandomQuote } from "@/lib/utils";
 import MotionBox from "../animations/MotionBox";
 import { useRouter } from "next/navigation";
+import { ShinyText } from "../animations/ShinyText";
 
 const CTAWrapper = styled(Box)(({ theme }) => ({
   position: "relative",
@@ -48,38 +49,6 @@ const buttonVariants = {
   tap: { scale: 0.98 },
 };
 
-const ShinyText = styled(Typography)(({ theme }) => ({
-  position: "relative",
-  display: "inline-block",
-  color: theme.palette.common.white,
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    background:
-      "linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%)",
-    backgroundSize: "200% 100%",
-    backgroundPosition: "100% 0",
-    animation: "shine 3s infinite",
-  },
-  "@keyframes shine": {
-    "0%": {
-      backgroundPosition: "100% 0",
-      opacity: 0,
-    },
-    "20%": {
-      opacity: 1,
-    },
-    "100%": {
-      backgroundPosition: "-100% 0",
-      opacity: 0,
-    },
-  },
-}));
-
 const CallToAction = () => {
   const theme = useTheme();
   const quote = getRandomQuote();
@@ -112,7 +81,8 @@ const CallToAction = () => {
                 mb: 2,
               }}
             >
-              Ready to <ShinyText>Elevate</ShinyText> Your Trade Business?
+              Ready to <ShinyText color="white">Elevate</ShinyText> Your Trade
+              Business?
             </Typography>
 
             <Typography
@@ -149,7 +119,6 @@ const CallToAction = () => {
                 px: 4,
                 boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)",
                 backgroundColor: theme.palette.common.white,
-                // color: theme.palette.primary.main,
                 fontSize: "1.1rem",
                 fontWeight: 600,
                 borderRadius: "12px",

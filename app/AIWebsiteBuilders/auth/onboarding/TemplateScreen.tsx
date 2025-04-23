@@ -186,6 +186,7 @@ interface OptionCardProps {
 }
 
 const OptionCard = ({ option, isSelected, onSelect }: OptionCardProps) => {
+  const isDisabled = option.id === "ai";
   return (
     <MotionBox
       component={Paper}
@@ -196,7 +197,7 @@ const OptionCard = ({ option, isSelected, onSelect }: OptionCardProps) => {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        cursor: "pointer",
+        cursor: isDisabled ? "not-allowed" : "pointer",
         backgroundColor: "transparent",
         border: `2px solid ${
           isSelected ? "#3b82f6" : "rgba(255, 255, 255, 0.1)"
@@ -205,6 +206,7 @@ const OptionCard = ({ option, isSelected, onSelect }: OptionCardProps) => {
         transition: "all 0.3s ease",
         position: "relative",
         overflow: "hidden",
+        pointerEvents: isDisabled ? "none" : "auto",
         "&::before": isSelected
           ? {
               content: '""',

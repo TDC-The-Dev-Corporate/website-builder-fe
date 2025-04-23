@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+
 import {
   AppBar,
   Toolbar,
@@ -17,9 +19,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { Menu as MenuIcon, X as CloseIcon } from "lucide-react";
 import { styled, useTheme } from "@mui/material/styles";
-import Link from "next/link";
+
+import { Menu as MenuIcon, X as CloseIcon } from "lucide-react";
 
 interface NavSection {
   id: string;
@@ -101,6 +103,10 @@ const Navbar = ({ sections }: NavbarProps) => {
           >
             <Link href="/" style={{ textDecoration: "none", color: "white" }}>
               <Box
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
                 sx={{
                   fontWeight: 700,
                   fontSize: { xs: "1.5rem", md: "1.8rem" },
@@ -126,7 +132,6 @@ const Navbar = ({ sections }: NavbarProps) => {
               </IconButton>
             ) : (
               <Stack direction="row" spacing={2} alignItems="center">
-                {/* Navigation links moved here to the right */}
                 <Stack direction="row" spacing={1}>
                   {sections.map((section) => (
                     <NavButton
@@ -138,7 +143,6 @@ const Navbar = ({ sections }: NavbarProps) => {
                   ))}
                 </Stack>
 
-                {/* Auth buttons */}
                 <Stack direction="row" spacing={2}>
                   <Link
                     href="/AIWebsiteBuilders/auth/login"
