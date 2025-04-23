@@ -1,15 +1,19 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   Box,
   Container,
   Grid,
+  Tooltip,
   Typography,
-  Paper,
   useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { motion } from "framer-motion";
+
+import { motion, AnimatePresence } from "framer-motion";
+
 import {
   Palette,
   Wrench,
@@ -18,46 +22,9 @@ import {
   Smartphone,
   Award,
 } from "lucide-react";
+
 import MotionBox from "../animations/MotionBox";
-
-const FeatureCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  height: "100%",
-  borderRadius: theme.shape.borderRadius * 2,
-  transition: "all 0.3s ease-in-out",
-  position: "relative",
-  overflow: "hidden",
-  "&:hover": {
-    transform: "translateY(-8px)",
-    boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
-    "&::after": {
-      transform: "translateY(0)",
-    },
-  },
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    height: "4px",
-    background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-    transform: "translateY(4px)",
-    transition: "transform 0.3s ease-in-out",
-  },
-}));
-
-const IconBox = styled(Box)(({ theme }) => ({
-  width: 56,
-  height: 56,
-  borderRadius: "50%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  marginBottom: theme.spacing(2),
-  background: theme.palette.background.default,
-  boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)",
-}));
+import { GlassMorphism } from "../animations/GlassMorphism";
 
 const features = [
   {
@@ -66,6 +33,11 @@ const features = [
     title: "Professional Templates",
     description:
       "Choose from dozens of trade-specific templates designed to showcase your work professionally.",
+    details: [
+      "Pre-designed layouts for various trades",
+      "Customizable color schemes",
+      "Responsive designs that work on all devices",
+    ],
   },
   {
     icon: <Wrench size={24} />,
@@ -73,6 +45,11 @@ const features = [
     title: "Trade-Specific Features",
     description:
       "Tools tailored for tradesmen like quote builders, service listings, and project galleries.",
+    details: [
+      "Quote and invoice generators",
+      "Service area mapping",
+      "Project timeline visualization",
+    ],
   },
   {
     icon: <LineChart size={24} />,
@@ -80,6 +57,11 @@ const features = [
     title: "Business Growth",
     description:
       "Built-in SEO tools, booking systems, and analytics to grow your customer base.",
+    details: [
+      "SEO optimization wizard",
+      "Online booking integration",
+      "Customer analytics dashboard",
+    ],
   },
   {
     icon: <MessageSquare size={24} />,
@@ -87,6 +69,11 @@ const features = [
     title: "Client Communication",
     description:
       "Integrated messaging, quote requests, and contact forms to connect with potential clients easily.",
+    details: [
+      "Real-time messaging system",
+      "Automated quote responses",
+      "Client feedback collection",
+    ],
   },
   {
     icon: <Smartphone size={24} />,
@@ -94,6 +81,11 @@ const features = [
     title: "Mobile-First Design",
     description:
       "Websites that look amazing on any device, ensuring clients can find you wherever they are.",
+    details: [
+      "Mobile-optimized interfaces",
+      "Touch-friendly navigation",
+      "Fast loading on cellular networks",
+    ],
   },
   {
     icon: <Award size={24} />,
@@ -101,24 +93,61 @@ const features = [
     title: "Showcase Your Work",
     description:
       "Beautiful project galleries to highlight your quality craftsmanship with before/after comparisons.",
+    details: [
+      "Image gallery with zoom",
+      "Before/after slider",
+      "Project categorization",
+    ],
   },
 ];
 
-const cardVariants = {
-  hidden: { y: 50, opacity: 0 },
-  visible: (i: number) => ({
-    y: 0,
-    opacity: 1,
-    transition: {
-      delay: 0.1 * i,
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
+const FeatureIcon = styled(Box)(({ theme }) => ({
+  width: 64,
+  height: 64,
+  borderRadius: "16px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: theme.palette.background.paper,
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+  position: "relative",
+  overflow: "hidden",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background:
+      "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)",
+    opacity: 0,
+    transition: "opacity 0.3s ease",
+  },
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
+    "&::before": {
+      opacity: 1,
     },
-  }),
-};
+  },
+}));
 
 const Features = () => {
   const theme = useTheme();
+  const [selectedFeature, setSelectedFeature] = useState<number | null>(null);
+
+  const handleFeatureClick = (index: number) => {
+    setSelectedFeature(index);
+    document.body.style.overflow = "hidden";
+  };
+
+  const handleCloseFeature = () => {
+    setSelectedFeature(null);
+    document.body.style.overflow = "";
+  };
 
   return (
     <Box
@@ -127,23 +156,9 @@ const Features = () => {
         py: 12,
         position: "relative",
         backgroundColor: "background.paper",
-        overflow: "hidden",
       }}
     >
-      <Box
-        sx={{
-          position: "absolute",
-          width: "600px",
-          height: "600px",
-          borderRadius: "50%",
-          background: `radial-gradient(circle, ${theme.palette.primary.light}15 0%, rgba(255,255,255,0) 70%)`,
-          top: "-200px",
-          right: "-100px",
-          zIndex: 0,
-        }}
-      />
-
-      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
+      <Container maxWidth="lg">
         <MotionBox
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -193,42 +208,177 @@ const Features = () => {
             }}
           >
             Powerful tools designed specifically for tradespeople to grow their
-            business online and showcase their skills to potential clients.
+            business online.
           </Typography>
         </MotionBox>
 
-        <Grid container spacing={4}>
+        <Grid container spacing={4} justifyContent="center">
           {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
+            <Grid item xs={6} sm={4} md={3} key={index}>
               <MotionBox
-                component={motion.div}
-                custom={index}
-                variants={cardVariants}
-                initial="hidden"
-                whileInView="visible"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: "-50px" }}
-                sx={{ height: "100%" }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
               >
-                <FeatureCard elevation={2}>
-                  <IconBox sx={{ backgroundColor: `${feature.color}15` }}>
-                    <Box sx={{ color: feature.color }}>{feature.icon}</Box>
-                  </IconBox>
-                  <Typography
-                    variant="h6"
-                    component="h3"
-                    gutterBottom
-                    sx={{ fontWeight: 600 }}
+                <Tooltip title="Click to view details" placement="right">
+                  <FeatureIcon
+                    onClick={() => handleFeatureClick(index)}
+                    sx={{ backgroundColor: `${feature.color}15` }}
                   >
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </FeatureCard>
+                    <Box sx={{ color: feature.color }}>{feature.icon}</Box>
+                  </FeatureIcon>
+                </Tooltip>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mt: 2,
+                    textAlign: "center",
+                    fontWeight: 600,
+                    color: "text.primary",
+                  }}
+                >
+                  {feature.title}
+                </Typography>
               </MotionBox>
             </Grid>
           ))}
         </Grid>
+
+        <AnimatePresence>
+          {selectedFeature !== null && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100vw",
+                  height: "100vh",
+                  zIndex: 1200,
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  backdropFilter: "blur(8px)",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflowY: "auto",
+                }}
+                onClick={handleCloseFeature}
+              >
+                <GlassMorphism
+                  sx={{
+                    p: 4,
+                    maxHeight: "90vh",
+                    overflowY: "auto",
+                    backgroundColor: "white",
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: theme.palette.primary.main,
+                      borderRadius: "3px",
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: "20px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        mb: 3,
+                        backgroundColor: `${features[selectedFeature].color}20`,
+                      }}
+                    >
+                      <Box sx={{ color: features[selectedFeature].color }}>
+                        {features[selectedFeature].icon}
+                      </Box>
+                    </Box>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        mb: 2,
+                        fontWeight: 700,
+                        textAlign: "center",
+                        color: "text.primary",
+                      }}
+                    >
+                      {features[selectedFeature].title}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        mb: 3,
+                        textAlign: "center",
+                        color: "text.secondary",
+                        maxWidth: "600px",
+                      }}
+                    >
+                      {features[selectedFeature].description}
+                    </Typography>
+
+                    <Box sx={{ width: "100%", mt: 2 }}>
+                      <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                        Key Features:
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {features[selectedFeature].details.map((detail, i) => (
+                          <Grid item xs={12} sm={6} key={i}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                mb: 1,
+                                p: 1.5,
+                                borderRadius: "8px",
+                                backgroundColor: "rgba(255,255,255,0.05)",
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: "50%",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  mr: 2,
+                                  backgroundColor: `${features[selectedFeature].color}30`,
+                                  color: features[selectedFeature].color,
+                                }}
+                              >
+                                {i + 1}
+                              </Box>
+                              <Typography variant="body2">{detail}</Typography>
+                            </Box>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Box>
+                  </Box>
+                </GlassMorphism>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </Container>
     </Box>
   );

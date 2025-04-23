@@ -44,7 +44,7 @@ export default function Dashboard() {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(true);
-  const [selectedSection, setSelectedSection] = useState("dashboard");
+  const [selectedSection, setSelectedSection] = useState("templates");
   const [user, setUser] = useState<any>(null);
 
   const router = useRouter();
@@ -92,9 +92,8 @@ export default function Dashboard() {
   }, [username]);
 
   const menuItems = [
-    { text: "Dashboard", icon: <Home size={20} />, id: "dashboard" },
-    { text: "Profile", icon: <User size={20} />, id: "profile" },
     { text: "Templates", icon: <Layout size={20} />, id: "templates" },
+    { text: "Profile", icon: <User size={20} />, id: "profile" },
     { text: "Website", icon: <Globe size={20} />, id: "website" },
     { text: "Appearance", icon: <Palette size={20} />, id: "appearance" },
     { text: "Settings", icon: <Settings size={20} />, id: "settings" },
