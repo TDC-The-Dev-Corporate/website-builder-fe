@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
 import {
   Box,
   Typography,
@@ -18,6 +19,7 @@ import {
   Divider,
   Avatar,
 } from "@mui/material";
+
 import {
   Menu,
   Home,
@@ -28,14 +30,17 @@ import {
   Globe,
   Palette,
 } from "lucide-react";
+
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 import ViewProfile from "../profile/page";
 import ProfileURLCard from "../profile/profileUrl";
 import TemplateViewer from "@/app/components/TemplatesViewer/templateViewer";
-import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
+
 import AppLoader from "@/app/components/loader/AppLoader";
-import { logoutUser } from "@/lib/utils";
 import MotionBox from "@/app/components/animations/MotionBox";
+
+import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
+import { logoutUser } from "@/lib/utils";
 
 const DRAWER_WIDTH = 280;
 
@@ -94,9 +99,9 @@ export default function Dashboard() {
   const menuItems = [
     { text: "Templates", icon: <Layout size={20} />, id: "templates" },
     { text: "Profile", icon: <User size={20} />, id: "profile" },
-    { text: "Website", icon: <Globe size={20} />, id: "website" },
-    { text: "Appearance", icon: <Palette size={20} />, id: "appearance" },
-    { text: "Settings", icon: <Settings size={20} />, id: "settings" },
+    // { text: "Website", icon: <Globe size={20} />, id: "website" },
+    // { text: "Appearance", icon: <Palette size={20} />, id: "appearance" },
+    // { text: "Settings", icon: <Settings size={20} />, id: "settings" },
   ];
 
   const renderContent = () => {
@@ -107,6 +112,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            sx={{ width: "100%" }}
           >
             <GlassMorphism
               blur={10}
@@ -119,22 +125,23 @@ export default function Dashboard() {
         );
       case "templates":
         return <TemplateViewer />;
-      case "website":
-        return (
-          portfolio && (
-            <MotionBox
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <GlassMorphism blur={10} opacity={0.1}>
-                <ProfileURLCard
-                  url={`http://localhost:3000/AIWebsiteBuilders/portfolio/${username}`}
-                />
-              </GlassMorphism>
-            </MotionBox>
-          )
-        );
+      // case "website":
+      //   return (
+      //     portfolio && (
+      //       <MotionBox
+      //         initial={{ opacity: 0, y: 20 }}
+      //         animate={{ opacity: 1, y: 0 }}
+      //         transition={{ duration: 0.5 }}
+      //         sx={{ width: "100%" }}
+      //       >
+      //         <GlassMorphism blur={10} opacity={0.1}>
+      //           <ProfileURLCard
+      //             url={`http://localhost:3000/AIWebsiteBuilders/portfolio/${username}`}
+      //           />
+      //         </GlassMorphism>
+      //       </MotionBox>
+      //     )
+      //   );
       default:
         return <TemplateViewer />;
     }
@@ -147,13 +154,20 @@ export default function Dashboard() {
           display: "flex",
           minHeight: "100vh",
           background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          width: "100%",
         }}
       >
         <AppBar
           position="fixed"
           sx={{
-            width: { md: `calc(100% - ${drawerOpen ? DRAWER_WIDTH : 0}px)` },
-            ml: { md: `${drawerOpen ? DRAWER_WIDTH : 0}px` },
+            width: {
+              sm: drawerOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : "100%",
+            },
+            ml: { sm: drawerOpen ? `${DRAWER_WIDTH}px` : 0 },
+            transition: theme.transitions.create(["margin", "width"], {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.leavingScreen,
+            }),
             backgroundColor: "rgba(255, 255, 255, 0.05)",
             backdropFilter: "blur(10px)",
             borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
@@ -224,7 +238,6 @@ export default function Dashboard() {
           <List sx={{ flex: 1, pt: 2 }}>
             {menuItems.map((item) => (
               <ListItem
-                // button
                 key={item.id}
                 onClick={() => setSelectedSection(item.id)}
                 sx={{
@@ -242,6 +255,7 @@ export default function Dashboard() {
                   "&:hover": {
                     backgroundColor: "rgba(59, 130, 246, 0.1)",
                   },
+                  cursor: "pointer",
                 }}
               >
                 <ListItemIcon
@@ -264,7 +278,6 @@ export default function Dashboard() {
 
           <List>
             <ListItem
-              // button
               onClick={() => logoutUser()}
               sx={{
                 mx: 2,
@@ -274,6 +287,7 @@ export default function Dashboard() {
                 "&:hover": {
                   backgroundColor: "rgba(239, 68, 68, 0.1)",
                 },
+                cursor: "pointer",
               }}
             >
               <ListItemIcon sx={{ color: "#ef4444", minWidth: 40 }}>
@@ -289,8 +303,13 @@ export default function Dashboard() {
           sx={{
             flexGrow: 1,
             p: 3,
-            width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+            width: { xs: "100%" },
             mt: 8,
+            transition: theme.transitions.create(["margin", "width"], {
+              easing: theme.transitions.easing.easeOut,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+            marginLeft: { sm: 0 },
           }}
         >
           {renderContent()}
