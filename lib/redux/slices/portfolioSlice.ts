@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { createPortfolio } from "../api/portfolio";
+import { createPortfolio, getPortfolios, publish } from "../api/portfolio";
 
 interface PortfolioState {
   layout: TemplateLayout;
@@ -27,6 +27,32 @@ export const generatePortfolio = createAsyncThunk<
   }
 });
 
+export const getAllPortfolios = createAsyncThunk<
+  any,
+  void,
+  { rejectValue: string }
+>("portfolios/get", async (_, { rejectWithValue }) => {
+  try {
+    const response = await getPortfolios();
+    return response;
+  } catch (error: any) {
+    const errorMessage = error.message || "Failed to create portfolio";
+    return rejectWithValue(errorMessage);
+  }
+});
+
+export const publishPortfolio = createAsyncThunk(
+  "portfolio/publish",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const data = await publish(id);
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data || error.message);
+    }
+  }
+);
+
 const portfolioSlice = createSlice({
   name: "portfolio",
   initialState,
@@ -45,6 +71,28 @@ const portfolioSlice = createSlice({
         }
       )
       .addCase(generatePortfolio.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(getAllPortfolios.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllPortfolios.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(getAllPortfolios.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(publishPortfolio.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(publishPortfolio.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(publishPortfolio.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

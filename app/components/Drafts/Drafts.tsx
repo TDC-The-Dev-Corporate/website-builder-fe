@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -9,38 +10,35 @@ import {
   CardContent,
   Grid,
   Typography,
-  Chip,
-  useTheme,
 } from "@mui/material";
 
-import { Eye, Edit2, Star } from "lucide-react";
+import { Eye, Edit2 } from "lucide-react";
 
-import { carpenterTemplate } from "@/lib/templates/carpenter";
-import { electricianTemplate } from "@/lib/templates/electrician";
-import { hvacTemplate } from "@/lib/templates/hvac";
-import { landscaperTemplate } from "@/lib/templates/landscaper";
-import { painterTemplate } from "@/lib/templates/painter";
-import { plumberTemplate } from "@/lib/templates/plumber";
 import MotionBox from "@/app/components/animations/MotionBox";
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 
-export default function TemplateViewer() {
-  const router = useRouter();
-  const theme = useTheme();
+import { getAllPortfolios } from "@/lib/redux/slices/portfolioSlice";
+import { useAppDispatch } from "@/lib/redux/hooks";
 
-  const templates = [
-    carpenterTemplate,
-    electricianTemplate,
-    hvacTemplate,
-    landscaperTemplate,
-    painterTemplate,
-    plumberTemplate,
-  ];
+export default function Drafts() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [templates, setTemplates] = useState([]);
+
+  useEffect(() => {
+    const fetchDrafts = async () => {
+      const drafts = await dispatch(getAllPortfolios());
+      if (drafts.payload) {
+        setTemplates(drafts.payload);
+      }
+    };
+    fetchDrafts();
+  }, []);
 
   const handleView = (template) => {
     const newWindow = window.open("", "_blank");
     if (newWindow) {
-      newWindow.document.write(template.data.pages[0].component);
+      newWindow.document.write(template.htmlContent);
       newWindow.document.close();
     }
   };
@@ -57,7 +55,7 @@ export default function TemplateViewer() {
           variant="h4"
           sx={{ color: "white", mb: 2, fontWeight: 700 }}
         >
-          Professional Templates
+          My Templates & Drafts
         </Typography>
         <Typography
           variant="body1"
@@ -68,8 +66,8 @@ export default function TemplateViewer() {
             px: { xs: 2, sm: 0 },
           }}
         >
-          Choose from our collection of professionally designed templates
-          tailored for trade businesses
+          View and manage templates and drafts you've created for your trade
+          business
         </Typography>
       </Box>
 
@@ -101,7 +99,7 @@ export default function TemplateViewer() {
                   }}
                 >
                   <iframe
-                    srcDoc={template.data.pages[0].component}
+                    srcDoc={template.htmlContent}
                     style={{
                       width: "200%",
                       height: "480px",
@@ -112,36 +110,6 @@ export default function TemplateViewer() {
                     }}
                     title={template.name}
                   />
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 16,
-                      right: 16,
-                      display: "flex",
-                      gap: 1,
-                    }}
-                  >
-                    <Chip
-                      icon={<Star size={14} />}
-                      label="Premium"
-                      sx={{
-                        backgroundColor: "rgba(59, 130, 246, 0.9)",
-                        color: "white",
-                        backdropFilter: "blur(4px)",
-                        "& .MuiChip-icon": {
-                          color: "white",
-                        },
-                      }}
-                    />
-                    <Chip
-                      label={template.name.split(" ")[0]}
-                      sx={{
-                        backgroundColor: "rgba(0, 0, 0, 0.5)",
-                        color: "white",
-                        backdropFilter: "blur(4px)",
-                      }}
-                    />
-                  </Box>
                 </Box>
 
                 <CardContent
@@ -159,21 +127,6 @@ export default function TemplateViewer() {
                     sx={{ color: "white", mb: 1, fontWeight: 600 }}
                   >
                     {template.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "rgba(255, 255, 255, 0.7)",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    Professional template designed specifically for{" "}
-                    {template.name.toLowerCase()} services. Includes service
-                    sections, testimonials, and contact forms.
                   </Typography>
                 </CardContent>
 
