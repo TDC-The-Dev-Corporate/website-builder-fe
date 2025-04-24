@@ -20,24 +20,15 @@ import {
   Avatar,
 } from "@mui/material";
 
-import {
-  Menu,
-  Home,
-  User,
-  Settings,
-  Layout,
-  LogOut,
-  Globe,
-  Palette,
-} from "lucide-react";
+import { Menu, User, Layout, LogOut, DraftingCompass } from "lucide-react";
 
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 import ViewProfile from "../profile/page";
-import ProfileURLCard from "../profile/profileUrl";
 import TemplateViewer from "@/app/components/TemplatesViewer/templateViewer";
 
 import AppLoader from "@/app/components/loader/AppLoader";
 import MotionBox from "@/app/components/animations/MotionBox";
+import Drafts from "@/app/components/Drafts/Drafts";
 
 import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
 import { logoutUser } from "@/lib/utils";
@@ -98,10 +89,8 @@ export default function Dashboard() {
 
   const menuItems = [
     { text: "Templates", icon: <Layout size={20} />, id: "templates" },
+    { text: "Drafts", icon: <DraftingCompass size={20} />, id: "drafts" },
     { text: "Profile", icon: <User size={20} />, id: "profile" },
-    // { text: "Website", icon: <Globe size={20} />, id: "website" },
-    // { text: "Appearance", icon: <Palette size={20} />, id: "appearance" },
-    // { text: "Settings", icon: <Settings size={20} />, id: "settings" },
   ];
 
   const renderContent = () => {
@@ -125,23 +114,8 @@ export default function Dashboard() {
         );
       case "templates":
         return <TemplateViewer />;
-      // case "website":
-      //   return (
-      //     portfolio && (
-      //       <MotionBox
-      //         initial={{ opacity: 0, y: 20 }}
-      //         animate={{ opacity: 1, y: 0 }}
-      //         transition={{ duration: 0.5 }}
-      //         sx={{ width: "100%" }}
-      //       >
-      //         <GlassMorphism blur={10} opacity={0.1}>
-      //           <ProfileURLCard
-      //             url={`http://localhost:3000/AIWebsiteBuilders/portfolio/${username}`}
-      //           />
-      //         </GlassMorphism>
-      //       </MotionBox>
-      //     )
-      //   );
+      case "drafts":
+        return <Drafts />;
       default:
         return <TemplateViewer />;
     }

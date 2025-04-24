@@ -9,3 +9,13 @@ export const getPortfolioByUserName = async (name: string) => {
   const response = await api.get(`portfolios/userByName/${name}`);
   return response.data;
 };
+
+export const getPortfolios = async () => {
+  const response = await api.get(`portfolios`, {});
+  return response.data;
+};
+
+export const publish = async (id: string) => {
+  const response = await api.put(`portfolios/publish/${id}`);
+  return response.data;
+};
