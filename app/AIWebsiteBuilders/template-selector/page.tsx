@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 
 import { Save } from "lucide-react";
 
-import { Box, Button } from "@mui/material";
+import { Box, Button, Avatar, Chip } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
@@ -20,8 +21,9 @@ import { hvacTemplate } from "@/lib/templates/hvac";
 import { plumberTemplate } from "@/lib/templates/plumber";
 import { electricianTemplate } from "@/lib/templates/electrician";
 import { landscaperTemplate } from "@/lib/templates/landscaper";
-import DeploySuccessModal from "@/app/components/modals/DeploySuccessModal";
 import { painterTemplate } from "@/lib/templates/painter";
+
+import DeploySuccessModal from "@/app/components/modals/DeploySuccessModal";
 import ConfirmationModal from "@/app/components/modals/ConfirmationModal";
 import SuccessModal from "@/app/components/modals/SuccessModal";
 
@@ -33,8 +35,38 @@ import {
 } from "@/lib/redux/slices/portfolioSlice";
 
 import { isDefaultTemplate, uploadToCloudinary } from "@/lib/utils";
+import LoadingSpinner from "@/app/components/animations/LoadingSpinner";
 
-export default function Home() {
+const AppHeader = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: theme.spacing(1, 2),
+  background: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
+  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+  zIndex: 1000,
+  position: "relative",
+  color: "white",
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  textTransform: "none",
+  fontWeight: 500,
+  borderRadius: "8px",
+  padding: theme.spacing(1, 2),
+}));
+
+const LoadingScreen = styled(Box)(({ theme }) => ({
+  height: "100vh",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  background: theme.palette.background.default,
+}));
+
+export default function PortfolioBuilder() {
   const [isLoading, setIsLoading] = useState(true);
   const editorRef = useRef(null);
 
@@ -46,7 +78,6 @@ export default function Home() {
   const [portfolioId, setPortfolioId] = useState("");
 
   const dispatch = useAppDispatch();
-  const router = useRouter();
 
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
@@ -80,20 +111,20 @@ export default function Home() {
     const css = editor.getCss();
 
     return `
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Portfolio</title>
-    <style>
-      ${css}
-    </style>
-  </head>
-  <body>
-    ${html}
-  </body>
-  </html>`;
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>My Portfolio</title>
+        <style>
+          ${css}
+        </style>
+      </head>
+      <body>
+        ${html}
+      </body>
+      </html>`;
   };
 
   const handleSaveConfirm = async (draftName: string) => {
@@ -164,175 +195,319 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Portfolio Builder</title>
+        <title>Trade Portfolio Builder</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
       {isLoading ? (
-        <div className="loading-screen">
-          <div className="spinner"></div>
-          <p>Loading Templates...</p>
-        </div>
+        <LoadingScreen>
+          <LoadingSpinner />
+        </LoadingScreen>
       ) : (
         <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-          }}
+          style={{ display: "flex", flexDirection: "column", height: "100vh" }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 2,
-              background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-              boxShadow: 1,
-              zIndex: 1000,
-              position: "relative",
-            }}
-          >
-            <Button
-              variant="contained"
-              startIcon={<Save />}
-              onClick={() => setSaveConfirmationOpen(true)}
-              disabled={isSaving}
-              sx={{
-                background: isSaving
-                  ? "rgba(52, 199, 89, 0.7)"
-                  : "linear-gradient(135deg, #34C759 0%, #30B350 100%)",
-                "&:hover": {
-                  background:
-                    "linear-gradient(135deg, #30B350 0%, #2CA548 100%)",
-                },
-                minWidth: 180,
-                color: "white",
-              }}
-            >
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
-          </Box>
+          <AppHeader>
+            <Box display="flex" alignItems="center">
+              <Avatar
+                src="/images/TradesBuilderLogo.png"
+                alt="logo"
+                sx={{ width: 150, height: 80 }}
+              />
+              {selectedTemplate && (
+                <Chip
+                  label={selectedTemplate.name || "New Portfolio"}
+                  color="primary"
+                  size="small"
+                  sx={{ color: "white" }}
+                />
+              )}
+            </Box>
+
+            <Box display="flex" alignItems="center">
+              <ActionButton
+                variant="contained"
+                startIcon={<Save size={18} />}
+                onClick={() => setSaveConfirmationOpen(true)}
+                disabled={isSaving}
+                sx={{
+                  background: isSaving
+                    ? "rgba(52, 199, 89, 0.7)"
+                    : "linear-gradient(135deg, #34C759 0%, #30B350 100%)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg, #30B350 0%, #2CA548 100%)",
+                  },
+                  minWidth: 180,
+                  color: "white",
+                }}
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </ActionButton>
+            </Box>
+          </AppHeader>
 
           <Box sx={{ flex: 1, position: "relative", overflow: "hidden" }}>
             <StudioEditor
               onEditor={(editor) => {
                 editorRef.current = editor;
                 loadSelectedTemplate(editor);
+
+                // Customize the UI further
+                editor.on("load", () => {
+                  // Customize panels
+                  const panelManager = editor.Panels;
+
+                  // Simplify the top panel for trademen
+                  const devicesElement = document.createElement("div");
+                  devicesElement.className = "panel__devices";
+
+                  panelManager
+                    .getPanel("views-container")
+                    ?.set("appendContent", devicesElement);
+
+                  // Add custom blocks category for trademen
+                  editor.BlockManager.add("trade-section", {
+                    label: "Trade Section",
+                    content: `<div class="trade-section" style="padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                      <h3>Our Services</h3>
+                      <p>Professional trade services you can trust</p>
+                    </div>`,
+                    category: "Sections",
+                  });
+                });
               }}
               options={{
-                licenseKey: licenseKey,
-                assets: {
-                  storageType: "self",
-                  onUpload: async ({ files }) => {
-                    try {
-                      const results = await uploadToCloudinary(files);
-                      return results;
-                    } catch (error) {
-                      console.error("Cloudinary Upload Error:", error);
-                      return [];
-                    }
-                  },
-                },
-                plugins: [
-                  rteTinyMce.init({
-                    enableOnClick: true,
-                    loadConfig: ({ component, config }) => {
-                      const demoRte = component.get("demorte");
-                      if (demoRte === "fixed") {
-                        return {
-                          toolbar:
-                            "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | link image media",
-                          fixed_toolbar_container_target:
-                            document.querySelector(".rteContainer"),
-                        };
-                      } else if (demoRte === "quickbar") {
-                        return {
-                          plugins: `${config.plugins} quickbars`,
-                          toolbar: false,
-                          quickbars_selection_toolbar:
-                            "bold italic underline strikethrough | quicklink image",
-                        };
-                      }
-                      return {};
-                    },
-                  }),
-                  tableComponent.init({
-                    block: { category: "Extra", label: "My Table" },
-                  }),
-                  iconifyComponent.init({
-                    block: { category: "Extra", label: "Iconify" },
-                  }),
-                  accordionComponent.init({
-                    block: { category: "My Accordions" },
-                    blockGroup: { category: "My Accordions" },
-                  }),
-                  (editor) => {
-                    if (selectedTemplate) {
-                      editor.runCommand("studio:layoutRemove", {
-                        id: "template-selector",
-                      });
-                    }
+                ...{
+                  licenseKey: licenseKey,
 
-                    editor.onReady(() => {
+                  assets: {
+                    storageType: "self",
+                    onUpload: async ({ files }) => {
+                      try {
+                        const results = await uploadToCloudinary(files);
+                        return results;
+                      } catch (error) {
+                        console.error("Cloudinary Upload Error:", error);
+                        return [];
+                      }
+                    },
+                  },
+                  styleManager: {
+                    sectors: [
+                      {
+                        name: "General",
+                        properties: [
+                          "display",
+                          "flex-direction",
+                          "flex-wrap",
+                          "justify-content",
+                          "align-items",
+                          "align-content",
+                        ],
+                      },
+                      {
+                        name: "Dimension",
+                        properties: [
+                          "width",
+                          "height",
+                          "max-width",
+                          "min-height",
+                          "margin",
+                          "padding",
+                        ],
+                      },
+                      {
+                        name: "Typography",
+                        properties: [
+                          "font-family",
+                          "font-size",
+                          "font-weight",
+                          "letter-spacing",
+                          "color",
+                          "line-height",
+                          "text-align",
+                          "text-decoration",
+                        ],
+                      },
+                      {
+                        name: "Decorations",
+                        properties: [
+                          "background-color",
+                          "background",
+                          "box-shadow",
+                          "border-radius",
+                          "border",
+                        ],
+                      },
+                    ],
+                  },
+
+                  plugins: [
+                    rteTinyMce.init({
+                      enableOnClick: true,
+                      loadConfig: ({ component, config }) => {
+                        const demoRte = component.get("demorte");
+                        if (demoRte === "fixed") {
+                          return {
+                            toolbar:
+                              "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | link image media",
+                            fixed_toolbar_container_target:
+                              document.querySelector(".rteContainer"),
+                          };
+                        } else if (demoRte === "quickbar") {
+                          return {
+                            plugins: `${config.plugins} quickbars`,
+                            toolbar: false,
+                            quickbars_selection_toolbar:
+                              "bold italic underline strikethrough | quicklink image",
+                          };
+                        }
+                        return {};
+                      },
+                    }),
+                    tableComponent.init({
+                      block: { category: "Extra", label: "Table" },
+                    }),
+                    iconifyComponent.init({
+                      block: { category: "Icons", label: "Icon" },
+                    }),
+                    accordionComponent.init({
+                      block: { category: "Components", label: "Accordion" },
+                      blockGroup: { category: "Components" },
+                    }),
+                    (editor) => {
                       if (selectedTemplate) {
-                        loadSelectedTemplate(editor);
-                      } else {
-                        editor.runCommand("studio:layoutToggle", {
+                        editor.runCommand("studio:layoutRemove", {
                           id: "template-selector",
-                          header: false,
-                          placer: {
-                            type: "dialog",
-                            title: "Choose a Template",
-                            size: "l",
-                          },
-                          layout: {
-                            type: "panelTemplates",
-                            content: { itemsPerRow: 3 },
-                            onSelect: ({ loadTemplate, template }) => {
-                              loadTemplate(template);
-                              editor.runCommand("studio:layoutRemove", {
-                                id: "template-selector",
-                              });
-                            },
-                          },
                         });
                       }
-                    });
+
+                      editor.onReady(() => {
+                        if (selectedTemplate) {
+                          loadSelectedTemplate(editor);
+                        } else {
+                          editor.runCommand("studio:layoutToggle", {
+                            id: "template-selector",
+                            header: false,
+                            placer: {
+                              type: "dialog",
+                              title: "Choose a Template",
+                              size: "l",
+                            },
+                            layout: {
+                              type: "panelTemplates",
+                              content: { itemsPerRow: 3 },
+                              onSelect: ({ loadTemplate, template }) => {
+                                loadTemplate(template);
+                                editor.runCommand("studio:layoutRemove", {
+                                  id: "template-selector",
+                                });
+                              },
+                            },
+                          });
+                        }
+
+                        // Add custom blocks for trademen
+                        editor.BlockManager.add("service-card", {
+                          label: "Service Card",
+                          content: `<div class="service-card" style="padding: 20px; border-radius: 8px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                          <h3 style="margin-top: 0;">Service Name</h3>
+                          <p>Service description goes here.</p>
+                          <button style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Learn More</button>
+                        </div>`,
+                          category: "Trade Components",
+                        });
+
+                        editor.BlockManager.add("testimonial", {
+                          label: "Testimonial",
+                          content: `<div class="testimonial" style="padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                          <p style="font-style: italic;">"Great work! Highly recommend this tradesman."</p>
+                          <p style="font-weight: bold;">- Happy Customer</p>
+                        </div>`,
+                          category: "Trade Components",
+                        });
+                      });
+                    },
+                  ],
+                  layerManager: {
+                    appendTo: ".layers-container",
                   },
-                ],
-                layout: {
-                  default: {
-                    type: "row",
-                    style: { height: "100%" },
-                    children: [
-                      { type: "sidebarLeft" },
+                  selectorManager: {
+                    appendTo: ".styles-container",
+                  },
+                  deviceManager: {
+                    devices: [
                       {
-                        type: "column",
-                        style: { flexGrow: 1 },
-                        children: [
-                          { type: "sidebarTop" },
-                          { type: "canvas" },
+                        id: "desktop",
+                        name: "Desktop",
+                        width: "",
+                      },
+                      {
+                        id: "tablet",
+                        name: "Tablet",
+                        width: "768px",
+                        widthMedia: "992px",
+                      },
+                      {
+                        id: "mobile",
+                        name: "Mobile",
+                        width: "320px",
+                        widthMedia: "576px",
+                      },
+                    ],
+                  },
+                  panels: {
+                    defaults: [
+                      {
+                        id: "layers",
+                        el: ".panel__right",
+                        buttons: [
                           {
-                            type: "row",
-                            className: "rteContainer",
-                            style: { justifyContent: "center" },
+                            id: "layer-visibility",
+                            className: "fa fa-eye",
+                            command: "sw-visibility",
+                            attributes: { title: "Toggle visibility" },
                           },
                         ],
                       },
-                      { type: "sidebarRight" },
+                      {
+                        id: "panel-switcher",
+                        el: ".panel__switcher",
+                        buttons: [
+                          {
+                            id: "show-layers",
+                            className: "fa fa-bars",
+                            command: "show-layers",
+                            attributes: { title: "Layers" },
+                          },
+                          {
+                            id: "show-style",
+                            className: "fa fa-paint-brush",
+                            command: "show-styles",
+                            attributes: { title: "Styles" },
+                          },
+                          {
+                            id: "show-traits",
+                            className: "fa fa-cog",
+                            command: "show-traits",
+                            attributes: { title: "Settings" },
+                          },
+                        ],
+                      },
                     ],
                   },
-                },
-                templates: {
-                  onLoad: async () => [
-                    carpenterTemplate,
-                    hvacTemplate,
-                    plumberTemplate,
-                    electricianTemplate,
-                    landscaperTemplate,
-                    painterTemplate,
-                  ],
+                  templates: {
+                    onLoad: async () => [
+                      carpenterTemplate,
+                      hvacTemplate,
+                      plumberTemplate,
+                      electricianTemplate,
+                      electricianTemplate,
+                      landscaperTemplate,
+                      painterTemplate,
+                    ],
+                  },
                 },
               }}
             />
@@ -371,23 +546,6 @@ export default function Home() {
       />
 
       <style jsx global>{`
-        .loading-screen {
-          height: 100vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          background: #f5f5f5;
-        }
-        .spinner {
-          width: 50px;
-          height: 50px;
-          border: 5px solid #f3f3f3;
-          border-top: 5px solid #3498db;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin-bottom: 1rem;
-        }
         @keyframes spin {
           0% {
             transform: rotate(0deg);
@@ -395,6 +553,88 @@ export default function Home() {
           100% {
             transform: rotate(360deg);
           }
+        }
+
+        /* Customize GrapesJS UI */
+        .gjs-one-bg {
+          background-color: #f8fafc !important;
+        }
+
+        .gjs-two-color {
+          color: #1e293b !important;
+        }
+
+        .gjs-pn-panel {
+          background-color: white !important;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .gjs-block {
+          border-radius: 8px !important;
+          margin-bottom: 12px !important;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+          transition: all 0.2s ease;
+        }
+
+        .gjs-block:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .gjs-block-category {
+          font-weight: 500 !important;
+          color: #334155 !important;
+          padding: 12px 15px !important;
+          background: #f1f5f9 !important;
+          border-radius: 0 !important;
+        }
+
+        .gjs-cv-canvas {
+          background: white !important;
+        }
+
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+
+        /* Custom tabs */
+        .custom-tabs {
+          display: flex;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 0 20px;
+        }
+
+        .custom-tab {
+          padding: 12px 16px;
+          cursor: pointer;
+          border-bottom: 2px solid transparent;
+          color: #64748b;
+          font-weight: 500;
+          transition: all 0.2s ease;
+        }
+
+        .custom-tab:hover {
+          color: #334155;
+        }
+
+        .custom-tab.active {
+          color: #3b82f6;
+          border-bottom-color: #3b82f6;
         }
       `}</style>
     </>

@@ -18,6 +18,7 @@ import {
   Container,
   Stack,
   Typography,
+  Avatar,
 } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 
@@ -101,23 +102,12 @@ const Navbar = ({ sections }: NavbarProps) => {
               justifyContent: "space-between",
             }}
           >
-            <Link href="/" style={{ textDecoration: "none", color: "white" }}>
-              <Box
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                sx={{
-                  fontWeight: 700,
-                  fontSize: { xs: "1.5rem", md: "1.8rem" },
-                  letterSpacing: ".1rem",
-                  color: "white",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                TradesBuilder
-              </Box>
+            <Link href="/" style={{ textDecoration: "none" }}>
+              <Avatar
+                src="/images/TradesBuilderLogo.png"
+                alt="logo"
+                sx={{ width: 180, height: 80 }}
+              />
             </Link>
 
             {isMobile ? (
