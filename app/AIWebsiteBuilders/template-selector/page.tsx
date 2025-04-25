@@ -9,11 +9,11 @@ import { Save } from "lucide-react";
 import { Box, Button } from "@mui/material";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
-import "@grapesjs/studio-sdk/style";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
 import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
 import { accordionComponent } from "@grapesjs/studio-sdk-plugins";
 import { rteTinyMce } from "@grapesjs/studio-sdk-plugins";
+import "@grapesjs/studio-sdk/style";
 
 import { carpenterTemplate } from "@/lib/templates/carpenter";
 import { hvacTemplate } from "@/lib/templates/hvac";
@@ -29,9 +29,10 @@ import { useAppDispatch } from "@/lib/redux/hooks";
 import {
   generatePortfolio,
   publishPortfolio,
+  updateExistingPortfolio,
 } from "@/lib/redux/slices/portfolioSlice";
 
-import { uploadToCloudinary } from "@/lib/utils";
+import { isDefaultTemplate, uploadToCloudinary } from "@/lib/utils";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -53,7 +54,6 @@ export default function Home() {
     const template = localStorage.getItem("selectedTemplate");
     if (template) {
       setSelectedTemplate(JSON.parse(template));
-      localStorage.removeItem("selectedTemplate");
     }
   }, []);
 
@@ -111,10 +111,19 @@ export default function Home() {
       const data = {
         userId: user.id,
         htmlContent: fullHtml,
-        name: draftName,
+        name: isDefaultTemplate(selectedTemplate.id)
+          ? draftName
+          : selectedTemplate.name || "",
       };
 
-      const response = await dispatch(generatePortfolio(data));
+      let response;
+
+      if (isDefaultTemplate(selectedTemplate.id))
+        response = await dispatch(generatePortfolio(data));
+      else
+        response = await dispatch(
+          updateExistingPortfolio({ id: selectedTemplate.id, data })
+        );
       if (response.payload) {
         setPortfolioId(response.payload.id);
       }
@@ -125,6 +134,8 @@ export default function Home() {
     } catch (err) {
       console.error("Error saving portfolio:", err);
       setIsSaving(false);
+    } finally {
+      localStorage.removeItem("selectedTemplate");
     }
   };
 
@@ -338,6 +349,11 @@ export default function Home() {
         cancelText="Cancel"
         onConfirm={handleSaveConfirm}
         severity="info"
+        draftId={
+          localStorage.getItem("selectedTemplate")
+            ? JSON.parse(localStorage.getItem("selectedTemplate")).id
+            : ""
+        }
       />
 
       <SuccessModal

@@ -10,20 +10,28 @@ import {
   CardContent,
   Grid,
   Typography,
+  Tooltip,
+  IconButton,
+  Chip,
 } from "@mui/material";
-
-import { Eye, Edit2 } from "lucide-react";
+import { Eye, Edit2, Trash2 } from "lucide-react";
 
 import MotionBox from "@/app/components/animations/MotionBox";
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
+import ConfirmationModal from "../modals/ConfirmationModal";
 
-import { getAllPortfolios } from "@/lib/redux/slices/portfolioSlice";
+import {
+  deleteDraft,
+  getAllPortfolios,
+} from "@/lib/redux/slices/portfolioSlice";
 import { useAppDispatch } from "@/lib/redux/hooks";
 
 export default function Drafts() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [templates, setTemplates] = useState([]);
+  const [saveConfirmationOpen, setSaveConfirmationOpen] = useState(false);
+  const [draftId, setDraftId] = useState("");
 
   useEffect(() => {
     const fetchDrafts = async () => {
@@ -44,8 +52,38 @@ export default function Drafts() {
   };
 
   const handleEdit = (template) => {
-    localStorage.setItem("selectedTemplate", JSON.stringify(template));
+    const formatedTemplate = {
+      id: template.id,
+      name: template.name,
+      data: {
+        pages: [{ component: template.htmlContent }],
+      },
+    };
+    localStorage.setItem("selectedTemplate", JSON.stringify(formatedTemplate));
     router.push("/AIWebsiteBuilders/template-selector");
+  };
+
+  const handleDelete = (templateId) => {
+    setDraftId(templateId);
+    setSaveConfirmationOpen(true);
+  };
+
+  const handleSaveConfirm = async (draftId: string) => {
+    setSaveConfirmationOpen(false);
+
+    try {
+      const response = await dispatch(deleteDraft(draftId));
+
+      if (response.type !== "portfolio/delete/fulfilled") {
+        throw new Error("Failed to delete draft");
+      }
+
+      setTemplates((prevTemplates) =>
+        prevTemplates.filter((t) => t.id !== draftId)
+      );
+    } catch (err) {
+      console.error("Error saving portfolio:", err);
+    }
   };
 
   return (
@@ -98,6 +136,41 @@ export default function Drafts() {
                     borderRadius: "12px 12px 0 0",
                   }}
                 >
+                  {template.published ? (
+                    <Chip
+                      label="Published"
+                      color="success"
+                      size="small"
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        zIndex: 1,
+                        fontWeight: 600,
+                      }}
+                    />
+                  ) : (
+                    <Tooltip title="Delete draft">
+                      <IconButton
+                        onClick={() => handleDelete(template.id)}
+                        sx={{
+                          position: "absolute",
+                          right: 8,
+                          zIndex: 1,
+                          color: "#ef4444",
+                          backdropFilter: "blur(6px)",
+                          backgroundColor: "rgba(255, 255, 255, 0.3)",
+                          borderRadius: "50%",
+                          padding: "6px",
+                          "&:hover": {
+                            backgroundColor: "rgba(255, 255, 255, 0.5)",
+                          },
+                        }}
+                      >
+                        <Trash2 size={18} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                   <iframe
                     srcDoc={template.htmlContent}
                     style={{
@@ -122,12 +195,20 @@ export default function Drafts() {
                     pb: 1,
                   }}
                 >
-                  <Typography
-                    variant="h6"
-                    sx={{ color: "white", mb: 1, fontWeight: 600 }}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
                   >
-                    {template.name}
-                  </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{ color: "white", mb: 1, fontWeight: 600 }}
+                    >
+                      {template.name}
+                    </Typography>
+                  </Box>
                 </CardContent>
 
                 <CardActions sx={{ px: 0, pt: 2, gap: 1 }}>
@@ -161,7 +242,7 @@ export default function Drafts() {
                       },
                     }}
                   >
-                    Customize
+                    {template.published ? "Update" : "Customize"}
                   </Button>
                 </CardActions>
               </GlassMorphism>
@@ -169,6 +250,17 @@ export default function Drafts() {
           </Grid>
         ))}
       </Grid>
+      <ConfirmationModal
+        open={saveConfirmationOpen}
+        onClose={() => setSaveConfirmationOpen(false)}
+        title="Save Portfolio"
+        message="Are you sure you want to delete this draft?"
+        draftId={draftId}
+        confirmText="Delete Draft"
+        cancelText="Cancel"
+        onConfirm={handleSaveConfirm}
+        severity="warning"
+      />
     </Box>
   );
 }

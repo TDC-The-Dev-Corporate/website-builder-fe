@@ -233,3 +233,16 @@ export const uploadToCloudinary = async (files) => {
 
   return uploadedAssets;
 };
+
+export const isDefaultTemplate = (templateId: string): boolean => {
+  const defaultIds = [
+    "carpenter-template",
+    "electrician-template",
+    "hvac-template",
+    "landscaper-template",
+    "painter-template",
+    "plumber-template",
+  ];
+
+  return defaultIds.includes(templateId);
+};
