@@ -46,7 +46,111 @@ export default function Drafts() {
   const handleView = (template) => {
     const newWindow = window.open("", "_blank");
     if (newWindow) {
-      newWindow.document.write(template.htmlContent);
+      const sessionId = `template-${Date.now()}`;
+      const formatedTemplate = {
+        id: template.id,
+        name: template.name,
+        data: {
+          pages: [{ component: template.htmlContent }],
+        },
+      };
+      localStorage.setItem(sessionId, JSON.stringify(formatedTemplate));
+
+      newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Preview: ${template.name}</title>
+            <style>
+              @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+              }
+              .floating-edit-btn {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                cursor: pointer;
+                z-index: 1000;
+                animation: pulse 2s infinite;
+                transition: all 0.3s ease;
+                border: none;
+              }
+              .floating-edit-btn:hover {
+                animation: none;
+                transform: scale(1.1);
+                box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+              }
+              .edit-icon {
+                width: 24px;
+                height: 24px;
+              }
+              .tooltip {
+                position: absolute;
+                right: 70px;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-size: 14px;
+                white-space: nowrap;
+                opacity: 0;
+                transition: opacity 0.3s;
+                pointer-events: none;
+              }
+              .floating-edit-btn:hover .tooltip {
+                opacity: 1;
+              }
+            </style>
+          </head>
+          <body>
+            ${template.htmlContent}
+            <button class="floating-edit-btn" title="Edit Template">
+              <svg class="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span class="tooltip">Customize this template</span>
+            </button>
+            <script>
+              document.querySelector('.floating-edit-btn').addEventListener('click', () => {
+                let messageSent = false;
+                
+                // Try postMessage first
+                if (window.opener && !window.opener.closed) {
+                  try {
+                    window.opener.postMessage({
+                      type: 'EDIT_TEMPLATE',
+                      sessionId: '${sessionId}'
+                    }, '*');
+                    messageSent = true;
+                    
+                    // Close the preview after a short delay
+                    setTimeout(() => window.close(), 300);
+                  } catch (e) {
+                    console.log('postMessage failed');
+                  }
+                }
+                
+                // Only use fallback if postMessage didn't work
+                if (!messageSent) {
+                  window.location.href = \`${window.location.origin}/AIWebsiteBuilders/template-selector?sessionId=${sessionId}\`;
+                }
+              });
+            </script>
+          </body>
+        </html>
+      `);
       newWindow.document.close();
     }
   };
