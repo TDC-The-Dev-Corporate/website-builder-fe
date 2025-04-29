@@ -48,6 +48,44 @@ export default function Dashboard() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data?.type === "EDIT_TEMPLATE") {
+        const templateData = localStorage.getItem(event.data.sessionId);
+        if (templateData) {
+          localStorage.setItem("selectedTemplate", templateData);
+          localStorage.removeItem(event.data.sessionId);
+          router.push("/AIWebsiteBuilders/template-selector");
+        }
+      }
+    };
+
+    // Check for URL parameters
+    const checkForSessionId = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get("sessionId");
+
+      if (sessionId) {
+        const templateData = localStorage.getItem(sessionId);
+        if (templateData) {
+          localStorage.setItem("selectedTemplate", templateData);
+          localStorage.removeItem(sessionId);
+
+          // Clean the URL without reloading
+          window.history.replaceState(null, "", window.location.pathname);
+
+          router.push("/AIWebsiteBuilders/template-selector");
+        }
+      }
+    };
+
+    // Run once on mount
+    checkForSessionId();
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [router]);
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {

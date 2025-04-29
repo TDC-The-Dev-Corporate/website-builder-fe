@@ -2,12 +2,8 @@
 
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 
-import { Save } from "lucide-react";
-
-import { Box, Button, Avatar, Chip } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box } from "@mui/material";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
@@ -36,35 +32,8 @@ import {
 
 import { isDefaultTemplate, uploadToCloudinary } from "@/lib/utils";
 import LoadingSpinner from "@/app/components/animations/LoadingSpinner";
-
-const AppHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  padding: theme.spacing(1, 2),
-  background: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-  zIndex: 1000,
-  position: "relative",
-  color: "white",
-}));
-
-const ActionButton = styled(Button)(({ theme }) => ({
-  marginLeft: theme.spacing(1),
-  textTransform: "none",
-  fontWeight: 500,
-  borderRadius: "8px",
-  padding: theme.spacing(1, 2),
-}));
-
-const LoadingScreen = styled(Box)(({ theme }) => ({
-  height: "100vh",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  background: theme.palette.background.default,
-}));
+import { grapesJsStyles, LoadingScreen } from "./helpingComponents";
+import { EditorHeader } from "./EditorHeader";
 
 export default function PortfolioBuilder() {
   const [isLoading, setIsLoading] = useState(true);
@@ -207,45 +176,11 @@ export default function PortfolioBuilder() {
         <div
           style={{ display: "flex", flexDirection: "column", height: "100vh" }}
         >
-          <AppHeader>
-            <Box display="flex" alignItems="center">
-              <Avatar
-                src="/images/TradesBuilderLogo.png"
-                alt="logo"
-                sx={{ width: 150, height: 80 }}
-              />
-              {selectedTemplate && (
-                <Chip
-                  label={selectedTemplate.name || "New Portfolio"}
-                  color="primary"
-                  size="small"
-                  sx={{ color: "white" }}
-                />
-              )}
-            </Box>
-
-            <Box display="flex" alignItems="center">
-              <ActionButton
-                variant="contained"
-                startIcon={<Save size={18} />}
-                onClick={() => setSaveConfirmationOpen(true)}
-                disabled={isSaving}
-                sx={{
-                  background: isSaving
-                    ? "rgba(52, 199, 89, 0.7)"
-                    : "linear-gradient(135deg, #34C759 0%, #30B350 100%)",
-                  "&:hover": {
-                    background:
-                      "linear-gradient(135deg, #30B350 0%, #2CA548 100%)",
-                  },
-                  minWidth: 180,
-                  color: "white",
-                }}
-              >
-                {isSaving ? "Saving..." : "Save Changes"}
-              </ActionButton>
-            </Box>
-          </AppHeader>
+          <EditorHeader
+            selectedTemplate={selectedTemplate}
+            setSaveConfirmationOpen={setSaveConfirmationOpen}
+            isSaving={isSaving}
+          />
 
           <Box sx={{ flex: 1, position: "relative", overflow: "hidden" }}>
             <StudioEditor
@@ -253,28 +188,15 @@ export default function PortfolioBuilder() {
                 editorRef.current = editor;
                 loadSelectedTemplate(editor);
 
-                // Customize the UI further
                 editor.on("load", () => {
-                  // Customize panels
                   const panelManager = editor.Panels;
 
-                  // Simplify the top panel for trademen
                   const devicesElement = document.createElement("div");
                   devicesElement.className = "panel__devices";
 
                   panelManager
                     .getPanel("views-container")
                     ?.set("appendContent", devicesElement);
-
-                  // Add custom blocks category for trademen
-                  editor.BlockManager.add("trade-section", {
-                    label: "Trade Section",
-                    content: `<div class="trade-section" style="padding: 20px; background: #f8f9fa; border-radius: 8px;">
-                      <h3>Our Services</h3>
-                      <p>Professional trade services you can trust</p>
-                    </div>`,
-                    category: "Sections",
-                  });
                 });
               }}
               options={{
@@ -408,7 +330,6 @@ export default function PortfolioBuilder() {
                           });
                         }
 
-                        // Add custom blocks for trademen
                         editor.BlockManager.add("service-card", {
                           label: "Service Card",
                           content: `<div class="service-card" style="padding: 20px; border-radius: 8px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -545,98 +466,9 @@ export default function PortfolioBuilder() {
         deployUrl={deployUrl}
       />
 
-      <style jsx global>{`
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-
-        /* Customize GrapesJS UI */
-        .gjs-one-bg {
-          background-color: #f8fafc !important;
-        }
-
-        .gjs-two-color {
-          color: #1e293b !important;
-        }
-
-        .gjs-pn-panel {
-          background-color: white !important;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-        }
-
-        .gjs-block {
-          border-radius: 8px !important;
-          margin-bottom: 12px !important;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-          transition: all 0.2s ease;
-        }
-
-        .gjs-block:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .gjs-block-category {
-          font-weight: 500 !important;
-          color: #334155 !important;
-          padding: 12px 15px !important;
-          background: #f1f5f9 !important;
-          border-radius: 0 !important;
-        }
-
-        .gjs-cv-canvas {
-          background: white !important;
-        }
-
-        /* Custom scrollbars */
-        ::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-          background: #f1f5f9;
-        }
-
-        ::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
-
-        /* Custom tabs */
-        .custom-tabs {
-          display: flex;
-          border-bottom: 1px solid #e2e8f0;
-          padding: 0 20px;
-        }
-
-        .custom-tab {
-          padding: 12px 16px;
-          cursor: pointer;
-          border-bottom: 2px solid transparent;
-          color: #64748b;
-          font-weight: 500;
-          transition: all 0.2s ease;
-        }
-
-        .custom-tab:hover {
-          color: #334155;
-        }
-
-        .custom-tab.active {
-          color: #3b82f6;
-          border-bottom-color: #3b82f6;
-        }
-      `}</style>
+      <style jsx global>
+        {grapesJsStyles}
+      </style>
     </>
   );
 }
