@@ -31,7 +31,7 @@ import MotionBox from "@/app/components/animations/MotionBox";
 import Drafts from "@/app/components/Drafts/Drafts";
 
 import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
-import { logoutUser } from "@/lib/utils";
+import { cleanLocalStorage, logoutUser } from "@/lib/utils";
 
 const DRAWER_WIDTH = 280;
 
@@ -70,7 +70,6 @@ export default function Dashboard() {
           localStorage.setItem("selectedTemplate", templateData);
           localStorage.removeItem(sessionId);
 
-          // Clean the URL without reloading
           window.history.replaceState(null, "", window.location.pathname);
 
           router.push("/AIWebsiteBuilders/template-selector");
@@ -78,7 +77,6 @@ export default function Dashboard() {
       }
     };
 
-    // Run once on mount
     checkForSessionId();
 
     window.addEventListener("message", handleMessage);
@@ -87,6 +85,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      cleanLocalStorage();
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);

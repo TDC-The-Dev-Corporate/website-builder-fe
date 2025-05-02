@@ -205,6 +205,9 @@ export default function PortfolioBuilder() {
 
                   assets: {
                     storageType: "self",
+                    upload: false,
+                    dropzone: false,
+                    autoAdd: false,
                     onUpload: async ({ files }) => {
                       try {
                         const results = await uploadToCloudinary(files);
@@ -214,58 +217,81 @@ export default function PortfolioBuilder() {
                         return [];
                       }
                     },
-                  },
-                  styleManager: {
-                    sectors: [
-                      {
-                        name: "General",
-                        properties: [
-                          "display",
-                          "flex-direction",
-                          "flex-wrap",
-                          "justify-content",
-                          "align-items",
-                          "align-content",
-                        ],
-                      },
-                      {
-                        name: "Dimension",
-                        properties: [
-                          "width",
-                          "height",
-                          "max-width",
-                          "min-height",
-                          "margin",
-                          "padding",
-                        ],
-                      },
-                      {
-                        name: "Typography",
-                        properties: [
-                          "font-family",
-                          "font-size",
-                          "font-weight",
-                          "letter-spacing",
-                          "color",
-                          "line-height",
-                          "text-align",
-                          "text-decoration",
-                        ],
-                      },
-                      {
-                        name: "Decorations",
-                        properties: [
-                          "background-color",
-                          "background",
-                          "box-shadow",
-                          "border-radius",
-                          "border",
-                        ],
-                      },
-                    ],
-                  },
-
+                  } as any,
                   plugins: [
+                    (editor) => {
+                      editor.DomComponents.addType("video", {
+                        isComponent: (el) => el.tagName === "VIDEO",
+                        model: {
+                          defaults: {
+                            tagName: "video",
+                            attributes: {
+                              controls: true,
+                              style: "max-width: 100%;",
+                              preload: "auto",
+                            },
+                            traits: [
+                              {
+                                type: "text",
+                                name: "src",
+                                label: "Video URL",
+                                placeholder:
+                                  "https://example.com/video.mp4 or YouTube/Vimeo URL",
+                                changeProp: true,
+                              },
+                              {
+                                type: "select",
+                                name: "provider",
+                                label: "Video Provider",
+                                options: [
+                                  {
+                                    id: "html5",
+                                    value: "html5",
+                                    name: "HTML5 Video",
+                                  },
+                                  {
+                                    id: "youtube",
+                                    value: "youtube",
+                                    name: "YouTube",
+                                  },
+                                  {
+                                    id: "vimeo",
+                                    value: "vimeo",
+                                    name: "Vimeo",
+                                  },
+                                ],
+                                changeProp: true,
+                              },
+                              {
+                                type: "text",
+                                name: "videoId",
+                                label: "Video ID",
+                                placeholder: "Only for YouTube/Vimeo",
+                              },
+                            ],
+                          },
+                        },
+
+                        view: {
+                          events: {
+                            dblclick: "onActive",
+                          } as any,
+
+                          onRender({ el }) {
+                            const video = el as HTMLVideoElement;
+                            if (!video.poster) {
+                              video.poster =
+                                'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23ddd"/><polygon points="40,30 70,50 40,70" fill="%23fff"/></svg>';
+                            }
+                          },
+
+                          onTraitsChange() {
+                            (this.model as any).updateVideo();
+                          },
+                        },
+                      });
+                    },
+
                     rteTinyMce.init({
                       enableOnClick: true,
                       loadConfig: ({ component, config }) => {
@@ -423,7 +449,6 @@ export default function PortfolioBuilder() {
                       carpenterTemplate,
                       hvacTemplate,
                       plumberTemplate,
-                      electricianTemplate,
                       electricianTemplate,
                       landscaperTemplate,
                       painterTemplate,
