@@ -16,6 +16,15 @@ export function logoutUser() {
   window.location.href = "/AIWebsiteBuilders/auth/login";
 }
 
+export const cleanLocalStorage = () => {
+  const preservedKeys = ["published", "token", "user"];
+  Object.keys(localStorage).forEach((key) => {
+    if (!preservedKeys.includes(key)) {
+      localStorage.removeItem(key);
+    }
+  });
+};
+
 export function getUserId(token: string): number | null {
   try {
     const decoded: any = jwtDecode(token);
@@ -154,7 +163,6 @@ export const scale = {
   },
 };
 
-// Custom easing functions
 export const springs = {
   gentle: [0.34, 1.56, 0.64, 1],
   bounce: [0.22, 1.2, 0.36, 1],
@@ -162,7 +170,6 @@ export const springs = {
   smooth: [0.4, 0, 0.2, 1],
 };
 
-// Helper for constructing linear gradients
 export const linearGradient = (
   direction: string,
   color1: string,
@@ -172,7 +179,6 @@ export const linearGradient = (
 ) =>
   `linear-gradient(${direction}, ${color1} ${position1}%, ${color2} ${position2}%)`;
 
-// Format trade type from slug
 export const formatTradeType = (tradeType: string): string => {
   return tradeType
     .split("-")
@@ -180,7 +186,6 @@ export const formatTradeType = (tradeType: string): string => {
     .join(" ");
 };
 
-// Generate motivational quotes for tradesmen
 export const tradesmanQuotes = [
   "Build your online presence as solidly as you build your projects",
   "Your craftsmanship deserves to be showcased professionally",
@@ -193,7 +198,6 @@ export const tradesmanQuotes = [
   "Your experience matters. Let's help the world see it",
 ];
 
-// Get random quote
 export const getRandomQuote = (): string => {
   return tradesmanQuotes[Math.floor(Math.random() * tradesmanQuotes.length)];
 };
