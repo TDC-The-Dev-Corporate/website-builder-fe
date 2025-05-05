@@ -50,3 +50,12 @@ interface ForgotPassword {
   newPassword: string;
   confirmNewPassword: string;
 }
+
+interface UploadedAsset {
+  id: string;
+  src: string;
+  name: string;
+  mimeType: string;
+  size: number;
+  isImage: boolean;
+}

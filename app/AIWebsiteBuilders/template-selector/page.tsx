@@ -211,6 +211,27 @@ export default function PortfolioBuilder() {
                     onUpload: async ({ files }) => {
                       try {
                         const results = await uploadToCloudinary(files);
+
+                        results.forEach((asset) => {
+                          if (asset.isImage) {
+                            editorRef.current?.addComponents(
+                              `<img src="${asset.src}" alt="${asset.name}" />`
+                            );
+                          } else {
+                            editorRef.current?.addComponents(`
+                              <a 
+                                href="${asset.src}" 
+                                download="${asset.name}" 
+                                style="display: inline-block; color: #3b82f6; text-decoration: underline; margin: 5px 0;" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                              >
+                                ${asset.name}
+                              </a>
+                            `);
+                          }
+                        });
+
                         return results;
                       } catch (error) {
                         console.error("Cloudinary Upload Error:", error);

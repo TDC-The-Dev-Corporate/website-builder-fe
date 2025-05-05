@@ -202,20 +202,23 @@ export const getRandomQuote = (): string => {
   return tradesmanQuotes[Math.floor(Math.random() * tradesmanQuotes.length)];
 };
 
-export const uploadToCloudinary = async (files) => {
+export const uploadToCloudinary = async (files: File[]) => {
   const CLOUDINARY_UPLOAD_PRESET =
     process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
   const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const licenseKey = process.env.NEXT_PUBLIC_GRAPESJS_LICENSE_KEY;
-  const uploadedAssets = [];
+
+  const uploadedAssets: UploadedAsset[] = [];
 
   for (const file of files) {
+    const isImage = file.type.startsWith("image/");
+    const resourceType = isImage ? "image" : "raw";
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
     const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
       {
         method: "POST",
         body: formData,
@@ -232,6 +235,7 @@ export const uploadToCloudinary = async (files) => {
       name: file.name,
       mimeType: file.type,
       size: file.size,
+      isImage,
     });
   }
 
