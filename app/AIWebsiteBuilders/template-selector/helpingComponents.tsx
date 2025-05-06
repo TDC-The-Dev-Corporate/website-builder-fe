@@ -30,6 +30,33 @@ export const LoadingScreen = styled(Box)(({ theme }) => ({
 }));
 
 export const grapesJsStyles = `
+        .gjs-dragging {
+          outline: 2px dashed #3b82f6 !important;
+          background-color: rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .gjs-dragging * {
+          pointer-events: none;
+        }
+        .gjs-dashed *[data-gjs-highlightable] {
+          outline: 2px dashed #3b82f6 !important;
+        }
+
+        /* Dropzone styling */
+        .gjs-assets-dropzone {
+          border: 2px dashed #3b82f6;
+          border-radius: 5px;
+          padding: 20px;
+          text-align: center;
+          margin: 10px;
+          background: rgba(59, 130, 246, 0.05);
+          color: #3b82f6;
+        }
+
+        .gjs-assets-dropzone.active {
+          background: rgba(59, 130, 246, 0.1);
+          border-color: #2563eb;
+        }
         @keyframes spin {
           0% {
             transform: rotate(0deg);
