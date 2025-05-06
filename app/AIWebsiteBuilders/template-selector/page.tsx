@@ -2,7 +2,6 @@
 
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
-
 import { Box } from "@mui/material";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
@@ -22,6 +21,9 @@ import { painterTemplate } from "@/lib/templates/painter";
 import DeploySuccessModal from "@/app/components/modals/DeploySuccessModal";
 import ConfirmationModal from "@/app/components/modals/ConfirmationModal";
 import SuccessModal from "@/app/components/modals/SuccessModal";
+import { EditorHeader } from "./EditorHeader";
+import FileUploadManager from "@/app/components/FileUploadManager";
+import LoadingSpinner from "@/app/components/animations/LoadingSpinner";
 
 import { useAppDispatch } from "@/lib/redux/hooks";
 import {
@@ -31,9 +33,7 @@ import {
 } from "@/lib/redux/slices/portfolioSlice";
 
 import { isDefaultTemplate, uploadToCloudinary } from "@/lib/utils";
-import LoadingSpinner from "@/app/components/animations/LoadingSpinner";
 import { grapesJsStyles, LoadingScreen } from "./helpingComponents";
-import { EditorHeader } from "./EditorHeader";
 
 export default function PortfolioBuilder() {
   const [isLoading, setIsLoading] = useState(true);
@@ -161,6 +161,35 @@ export default function PortfolioBuilder() {
     }
   };
 
+  const editorHelpers = {
+    clearSelection: (editor) => {
+      const selected = editor.getSelected();
+      if (selected) {
+        selected.remove();
+      }
+    },
+
+    addImageComponent: (editor, asset) => {
+      editor.addComponents(
+        `<img src="${asset.src}" alt="${asset.name}" style="max-width:100%;height:auto;"/>`
+      );
+    },
+
+    addFileLinkComponent: (editor, asset) => {
+      editor.addComponents(`
+      <a href="${asset.src}" 
+         download="${asset.name}" 
+         data-file-link="true"
+         style="display: block; padding: 12px 16px; margin: 10px 0; 
+                background-color: #f8f9fa; border-radius: 6px; 
+                color: #3b82f6; text-decoration: none; 
+                border-left: 4px solid #3b82f6;">
+        ${asset.name}
+      </a>
+    `);
+    },
+  };
+
   return (
     <>
       <Head>
@@ -211,35 +240,87 @@ export default function PortfolioBuilder() {
                     onUpload: async ({ files }) => {
                       try {
                         const results = await uploadToCloudinary(files);
+                        const editor = editorRef.current;
+
+                        if (!editor) return results;
+
+                        editorHelpers.clearSelection(editor);
 
                         results.forEach((asset) => {
                           if (asset.isImage) {
-                            editorRef.current?.addComponents(
-                              `<img src="${asset.src}" alt="${asset.name}" />`
-                            );
+                            editorHelpers.addImageComponent(editor, asset);
                           } else {
-                            editorRef.current?.addComponents(`
-                              <a 
-                                href="${asset.src}" 
-                                download="${asset.name}" 
-                                style="display: inline-block; color: #3b82f6; text-decoration: underline; margin: 5px 0;" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                              >
-                                ${asset.name}
-                              </a>
-                            `);
+                            editorHelpers.addFileLinkComponent(editor, asset);
                           }
                         });
 
                         return results;
                       } catch (error) {
-                        console.error("Cloudinary Upload Error:", error);
+                        console.error("Upload error:", error);
+                        editorRef.current?.showNotification(
+                          "Upload failed",
+                          "error"
+                        );
                         return [];
                       }
                     },
+                    onSelect: (asset) => {
+                      const editor = editorRef.current;
+                      if (!editor) return true;
+
+                      if (!asset.isImage) {
+                        editorHelpers.addFileLinkComponent(editor, asset);
+                        return false;
+                      }
+                      return true;
+                    },
                   } as any,
                   plugins: [
+                    (editor) => {
+                      editor.DomComponents.addType("file-link", {
+                        isComponent: (el) =>
+                          el.tagName === "A" &&
+                          el.getAttribute("data-file-link") === "true",
+                        model: {
+                          defaults: {
+                            tagName: "a",
+                            attributes: {
+                              "data-file-link": "true",
+                              target: "_blank",
+                              rel: "noopener noreferrer",
+                              download: "",
+                              style:
+                                "display: block; padding: 12px 16px; margin: 10px 0; background-color: #f8f9fa; border-radius: 6px; color: #3b82f6; text-decoration: none; border-left: 4px solid #3b82f6;",
+                            },
+                            traits: [
+                              {
+                                type: "text",
+                                name: "href",
+                                label: "File URL",
+                                changeProp: true,
+                              },
+                              {
+                                type: "text",
+                                name: "download",
+                                label: "File name",
+                                changeProp: true,
+                              },
+                              {
+                                type: "text",
+                                name: "style",
+                                label: "Style",
+                                changeProp: true,
+                              },
+                            ],
+                          },
+                        },
+                        view: {
+                          events: {
+                            dblclick: "onActive",
+                          } as any,
+                        },
+                      });
+                    },
                     (editor) => {
                       editor.DomComponents.addType("video", {
                         isComponent: (el) => el.tagName === "VIDEO",
@@ -478,6 +559,7 @@ export default function PortfolioBuilder() {
                 },
               }}
             />
+            <FileUploadManager editor={editorRef.current} />
           </Box>
         </div>
       )}

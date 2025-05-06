@@ -108,7 +108,7 @@ import {
 } from "@mui/material";
 import { Mail, Clock as LockClock } from "lucide-react";
 import { AppDispatch, RootState } from "@/lib/redux/store";
-import { verifyUser } from "@/lib/redux/slices/authSlice";
+import { sendOTP, verifyUser } from "@/lib/redux/slices/authSlice";
 import MotionBox from "@/app/components/animations/MotionBox";
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 
@@ -117,6 +117,7 @@ export default function VerifyOTP() {
   const router = useRouter();
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const [isVerified, setIsVerified] = useState(false);
+  const [email, setEmail] = useState("");
 
   const {
     register,
@@ -135,6 +136,15 @@ export default function VerifyOTP() {
       }
     } catch (error) {
       console.error("Verification error:", error);
+    }
+  };
+
+  const resendOTP = async () => {
+    if (!email) throw new Error("Please enter email id");
+    const result = await dispatch(sendOTP({ email }));
+    if (result.type === "auth/sendOTP/fulfilled") {
+      console.log("Email resend ");
+      // router.push("/AIWebsiteBuilders/auth/verify-otp");
     }
   };
 
@@ -241,6 +251,7 @@ export default function VerifyOTP() {
                         {...register("email", { required: true })}
                         error={!!errors.email}
                         helperText={errors.email ? "Email is required" : ""}
+                        onChange={(e) => setEmail(e.target.value)}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -287,7 +298,6 @@ export default function VerifyOTP() {
                         disabled={loading}
                         sx={{
                           mt: 2,
-                          mb: 2,
                           p: 1.5,
                           borderRadius: "8px",
                           background:
@@ -306,6 +316,31 @@ export default function VerifyOTP() {
                         ) : (
                           "Verify Account"
                         )}
+                      </Button>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        disabled={loading}
+                        onClick={resendOTP}
+                        sx={{
+                          mb: 2,
+                          p: 1.5,
+                          borderRadius: "8px",
+                          background:
+                            "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
+                          textTransform: "none",
+                          fontSize: "1rem",
+                          fontWeight: 600,
+                          "&:hover": {
+                            background:
+                              "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
+                          },
+                        }}
+                      >
+                        Resend OTP
                       </Button>
                     </Grid>
                   </Grid>
