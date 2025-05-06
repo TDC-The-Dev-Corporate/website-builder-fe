@@ -179,13 +179,14 @@ export default function PortfolioBuilder() {
     },
 
     addVideoComponent: (editor: any, asset: UploadedAsset) => {
-      const videoElement = {
+      editor.addComponents({
         type: "video",
-        url: asset.src,
-        children: [{ text: "" }],
-      };
-
-      Transforms.insertNodes(editor, videoElement);
+        src: asset.src,
+        style: "max-width: 100%; height: auto;",
+        attributes: {
+          controls: true,
+        },
+      });
     },
 
     addFileLinkComponent: (editor, asset) => {
@@ -249,13 +250,13 @@ export default function PortfolioBuilder() {
                     const files = Array.from(event.dataTransfer?.files || []);
                     if (files.length === 0) return;
 
-                    const results = await uploadToCloudinary(files); // or however your upload works
+                    const results = await uploadToCloudinary(files);
 
                     results.forEach((asset) => {
                       if (asset.isImage) {
                         editorHelpers.addImageComponent(editor, asset);
                       } else if (asset.type?.startsWith("video")) {
-                        editorHelpers.addVideoComponent?.(editor, asset); // implement this helper if needed
+                        editorHelpers.addVideoComponent?.(editor, asset);
                       } else {
                         editorHelpers.addFileLinkComponent(editor, asset);
                       }
@@ -284,6 +285,8 @@ export default function PortfolioBuilder() {
                         results.forEach((asset) => {
                           if (asset.isImage) {
                             editorHelpers.addImageComponent(editor, asset);
+                          } else if (asset.type?.startsWith("video")) {
+                            editorHelpers.addVideoComponent?.(editor, asset);
                           } else {
                             editorHelpers.addFileLinkComponent(editor, asset);
                           }
