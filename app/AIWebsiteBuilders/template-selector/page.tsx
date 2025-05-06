@@ -5,8 +5,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { Box } from "@mui/material";
 
-import { Transforms } from "slate";
-
 import StudioEditor from "@grapesjs/studio-sdk/react";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
 import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
@@ -301,16 +299,6 @@ export default function PortfolioBuilder() {
                         );
                         return [];
                       }
-                    },
-                    onSelect: (asset) => {
-                      const editor = editorRef.current;
-                      if (!editor) return true;
-
-                      if (!asset.isImage) {
-                        editorHelpers.addFileLinkComponent(editor, asset);
-                        return false;
-                      }
-                      return true;
                     },
                   } as any,
                   plugins: [
