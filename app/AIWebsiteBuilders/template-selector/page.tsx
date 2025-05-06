@@ -2,7 +2,10 @@
 
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
+
 import { Box } from "@mui/material";
+
+import { Transforms } from "slate";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
@@ -175,15 +178,22 @@ export default function PortfolioBuilder() {
       );
     },
 
+    addVideoComponent: (editor: any, asset: UploadedAsset) => {
+      const videoElement = {
+        type: "video",
+        url: asset.src,
+        children: [{ text: "" }],
+      };
+
+      Transforms.insertNodes(editor, videoElement);
+    },
+
     addFileLinkComponent: (editor, asset) => {
       editor.addComponents(`
       <a href="${asset.src}" 
          download="${asset.name}" 
          data-file-link="true"
-         style="display: block; padding: 12px 16px; margin: 10px 0; 
-                background-color: #f8f9fa; border-radius: 6px; 
-                color: #3b82f6; text-decoration: none; 
-                border-left: 4px solid #3b82f6;">
+         style="display: block; padding: 12px 16px; margin: 10px 0; ">
         ${asset.name}
       </a>
     `);
@@ -226,6 +236,31 @@ export default function PortfolioBuilder() {
                   panelManager
                     .getPanel("views-container")
                     ?.set("appendContent", devicesElement);
+
+                  const canvasBody = editor.Canvas.getBody();
+
+                  canvasBody.addEventListener("dragover", (event) => {
+                    event.preventDefault();
+                  });
+
+                  canvasBody.addEventListener("drop", async (event) => {
+                    event.preventDefault();
+
+                    const files = Array.from(event.dataTransfer?.files || []);
+                    if (files.length === 0) return;
+
+                    const results = await uploadToCloudinary(files); // or however your upload works
+
+                    results.forEach((asset) => {
+                      if (asset.isImage) {
+                        editorHelpers.addImageComponent(editor, asset);
+                      } else if (asset.type?.startsWith("video")) {
+                        editorHelpers.addVideoComponent?.(editor, asset); // implement this helper if needed
+                      } else {
+                        editorHelpers.addFileLinkComponent(editor, asset);
+                      }
+                    });
+                  });
                 });
               }}
               options={{
@@ -234,9 +269,9 @@ export default function PortfolioBuilder() {
 
                   assets: {
                     storageType: "self",
-                    upload: false,
-                    dropzone: false,
-                    autoAdd: false,
+                    upload: true,
+                    dropzone: true,
+                    autoAdd: true,
                     onUpload: async ({ files }) => {
                       try {
                         const results = await uploadToCloudinary(files);

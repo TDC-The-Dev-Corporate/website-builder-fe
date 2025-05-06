@@ -236,6 +236,7 @@ export const uploadToCloudinary = async (files: File[]) => {
       mimeType: file.type,
       size: file.size,
       isImage,
+      type: file.type,
     });
   }
 

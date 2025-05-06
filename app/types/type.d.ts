@@ -58,4 +58,5 @@ interface UploadedAsset {
   mimeType: string;
   size: number;
   isImage: boolean;
+  type: string;
 }
