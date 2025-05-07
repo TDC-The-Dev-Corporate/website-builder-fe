@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { jwtDecode } from "jwt-decode";
+import imageCompression from "browser-image-compression";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -210,34 +211,66 @@ export const uploadToCloudinary = async (files: File[]) => {
   const uploadedAssets: UploadedAsset[] = [];
 
   for (const file of files) {
-    const isImage = file.type.startsWith("image/");
-    const resourceType = isImage ? "image" : "raw";
+    try {
+      const isImage = file.type.startsWith("image/");
+      const resourceType = isImage ? "image" : "raw";
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+      let fileToUpload = file;
 
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
-      {
-        method: "POST",
-        body: formData,
+      if (isImage) {
+        const options = {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1280,
+          useWebWorker: true,
+          fileType: "image/jpeg",
+          initialQuality: 0.6,
+        };
+
+        try {
+          fileToUpload = await imageCompression(file, options);
+        } catch (compressionError) {
+          console.warn(
+            "Image compression failed, uploading original",
+            compressionError
+          );
+          fileToUpload = file;
+        }
       }
-    );
 
-    if (!res.ok) throw new Error("Failed to upload to Cloudinary");
+      const formData = new FormData();
+      formData.append("file", fileToUpload);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
-    const data = await res.json();
+      if (isImage) {
+        formData.append("quality", "auto:good");
+        formData.append("fetch_format", "auto");
+      }
 
-    uploadedAssets.push({
-      id: data.public_id,
-      src: data.secure_url,
-      name: file.name,
-      mimeType: file.type,
-      size: file.size,
-      isImage,
-      type: file.type,
-    });
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to upload to Cloudinary");
+
+      const data = await res.json();
+
+      uploadedAssets.push({
+        id: data.public_id,
+        src: data.secure_url,
+        name: file.name,
+        mimeType: file.type,
+        size: fileToUpload.size,
+        isImage,
+        type: file.type,
+      });
+    } catch (error) {
+      console.error(`Error uploading file ${file.name}:`, error);
+      continue;
+    }
   }
 
   return uploadedAssets;
