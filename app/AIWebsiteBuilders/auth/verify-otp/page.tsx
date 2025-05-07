@@ -1,94 +1,3 @@
-// "use client";
-
-// import { useForm } from "react-hook-form";
-// import { useDispatch, useSelector } from "react-redux";
-// import { useRouter } from "next/navigation";
-
-// import {
-//   Box,
-//   Button,
-//   Container,
-//   TextField,
-//   Typography,
-//   CircularProgress,
-//   Alert,
-// } from "@mui/material";
-
-// import { AppDispatch, RootState } from "@/lib/redux/store";
-// import { verifyUser } from "@/lib/redux/slices/authSlice";
-
-// export default function VerifyOTP() {
-//   const dispatch = useDispatch<AppDispatch>();
-//   const router = useRouter();
-//   const { loading, error } = useSelector((state: RootState) => state.auth);
-//   const {
-//     register,
-//     handleSubmit,
-//     formState: { errors },
-//   } = useForm();
-
-//   const onSubmit = async (data: any) => {
-//     const result = await dispatch(verifyUser(data));
-//     const isVerified = localStorage.getItem("verified") === "true";
-//     if (result.payload.success) {
-//       if (!isVerified) {
-//         router.push("/AIWebsiteBuilders/auth/login");
-//       } else {
-//         router.push("/AIWebsiteBuilders/auth/forgot-password/reset-password");
-//       }
-//     }
-//   };
-
-//   return (
-//     <Container component="main" maxWidth="xs">
-//       <Box
-//         sx={{
-//           marginTop: 8,
-//           display: "flex",
-//           flexDirection: "column",
-//           alignItems: "center",
-//         }}
-//       >
-//         <Typography component="h1" variant="h5">
-//           Verify OTP
-//         </Typography>
-//         {error && <Alert severity="error">{error}</Alert>}
-//         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
-//           <TextField
-//             margin="normal"
-//             required
-//             fullWidth
-//             label="Email"
-//             {...register("email", { required: true })}
-//             error={!!errors.email}
-//             helperText={errors.email ? "Email is required" : ""}
-//           />
-//           <TextField
-//             margin="normal"
-//             required
-//             fullWidth
-//             label="Verification Code"
-//             {...register("verificationCode", { required: true })}
-//             error={!!errors.verificationCode}
-//             helperText={
-//               errors.verificationCode ? "Verification code is required" : ""
-//             }
-//           />
-//           <Button
-//             type="submit"
-//             fullWidth
-//             variant="contained"
-//             sx={{ mt: 3, mb: 2 }}
-//             disabled={loading}
-//           >
-//             {loading ? <CircularProgress size={24} /> : "Verify"}
-//           </Button>
-//         </Box>
-//       </Box>
-//     </Container>
-//   );
-// }
-
 "use client";
 
 import { useState } from "react";
@@ -105,6 +14,7 @@ import {
   Alert,
   InputAdornment,
   Grid,
+  Snackbar,
 } from "@mui/material";
 import { Mail, Clock as LockClock } from "lucide-react";
 import { AppDispatch, RootState } from "@/lib/redux/store";
@@ -118,6 +28,7 @@ export default function VerifyOTP() {
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const [isVerified, setIsVerified] = useState(false);
   const [email, setEmail] = useState("");
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   const {
     register,
@@ -140,11 +51,17 @@ export default function VerifyOTP() {
   };
 
   const resendOTP = async () => {
-    if (!email) throw new Error("Please enter email id");
-    const result = await dispatch(sendOTP({ email }));
-    if (result.type === "auth/sendOTP/fulfilled") {
-      console.log("Email resend ");
-      // router.push("/AIWebsiteBuilders/auth/verify-otp");
+    try {
+      if (!email) {
+        return;
+      }
+      const result = await dispatch(sendOTP({ email }));
+      if (result.type === "auth/sendOTP/fulfilled") {
+        setResendSuccess(true);
+        setTimeout(() => setResendSuccess(false), 3000);
+      }
+    } catch (error) {
+      console.error("Error resending OTP:", error);
     }
   };
 
@@ -350,6 +267,27 @@ export default function VerifyOTP() {
           </GlassMorphism>
         </MotionBox>
       </Container>
+
+      <Snackbar
+        open={resendSuccess}
+        autoHideDuration={3000}
+        onClose={() => setResendSuccess(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="success"
+          sx={{
+            backgroundColor: "rgba(52, 199, 89, 0.2)",
+            color: "#34C759",
+            border: "1px solid rgba(52, 199, 89, 0.3)",
+            "& .MuiAlert-icon": {
+              color: "#34C759",
+            },
+          }}
+        >
+          New verification code has been sent to your email!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
