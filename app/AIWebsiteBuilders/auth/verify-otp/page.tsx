@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
+
+import { Mail, Clock as LockClock } from "lucide-react";
+
 import {
   Box,
   Button,
@@ -16,11 +19,12 @@ import {
   Grid,
   Snackbar,
 } from "@mui/material";
-import { Mail, Clock as LockClock } from "lucide-react";
-import { AppDispatch, RootState } from "@/lib/redux/store";
-import { sendOTP, verifyUser } from "@/lib/redux/slices/authSlice";
+
 import MotionBox from "@/app/components/animations/MotionBox";
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
+
+import { AppDispatch, RootState } from "@/lib/redux/store";
+import { sendOTP, verifyUser } from "@/lib/redux/slices/authSlice";
 
 export default function VerifyOTP() {
   const dispatch = useDispatch<AppDispatch>();
