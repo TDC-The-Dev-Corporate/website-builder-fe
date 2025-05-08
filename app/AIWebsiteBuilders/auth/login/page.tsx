@@ -34,7 +34,9 @@ export default function Login() {
   const onSubmit = async (data: any) => {
     const result = await dispatch(login(data));
     if (result.payload.success) {
-      router.push("/AIWebsiteBuilders/home");
+      if (!result.payload.data.is_emailVerified)
+        router.push("/AIWebsiteBuilders/auth/verify-otp");
+      else router.push("/AIWebsiteBuilders/home");
     }
   };
 

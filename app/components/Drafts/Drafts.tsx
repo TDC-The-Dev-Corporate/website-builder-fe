@@ -214,145 +214,150 @@ export default function Drafts() {
       </Box>
 
       <Grid container spacing={4}>
-        {templates.map((template, index) => (
-          <Grid item xs={12} sm={6} lg={4} key={template.id}>
-            <MotionBox
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              sx={{ height: "100%", display: "flex", flexDirection: "column" }}
-            >
-              <GlassMorphism
-                blur={10}
-                opacity={0.1}
+        {templates.length > 0 &&
+          templates.map((template, index) => (
+            <Grid item xs={12} sm={6} lg={4} key={template.id}>
+              <MotionBox
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
                 sx={{
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "space-between",
                 }}
               >
-                <Box
+                <GlassMorphism
+                  blur={10}
+                  opacity={0.1}
                   sx={{
-                    position: "relative",
-                    height: 240,
-                    overflow: "hidden",
-                    borderRadius: "12px 12px 0 0",
-                  }}
-                >
-                  {template.published ? (
-                    <Chip
-                      label="Published"
-                      color="success"
-                      size="small"
-                      sx={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        zIndex: 1,
-                        fontWeight: 600,
-                      }}
-                    />
-                  ) : (
-                    <Tooltip title="Delete draft">
-                      <IconButton
-                        onClick={() => handleDelete(template.id)}
-                        sx={{
-                          position: "absolute",
-                          right: 8,
-                          zIndex: 1,
-                          color: "#ef4444",
-                          backdropFilter: "blur(6px)",
-                          backgroundColor: "rgba(255, 255, 255, 0.3)",
-                          borderRadius: "50%",
-                          padding: "6px",
-                          "&:hover": {
-                            backgroundColor: "rgba(255, 255, 255, 0.5)",
-                          },
-                        }}
-                      >
-                        <Trash2 size={18} />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  <iframe
-                    srcDoc={template.htmlContent}
-                    style={{
-                      width: "200%",
-                      height: "480px",
-                      border: "none",
-                      transform: "scale(0.5)",
-                      transformOrigin: "top left",
-                      pointerEvents: "none",
-                    }}
-                    title={template.name}
-                  />
-                </Box>
-
-                <CardContent
-                  sx={{
-                    flexGrow: 1,
+                    height: "100%",
                     display: "flex",
                     flexDirection: "column",
-                    px: 0,
-                    pt: 2,
-                    pb: 1,
+                    justifyContent: "space-between",
                   }}
                 >
                   <Box
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
+                      position: "relative",
+                      height: 240,
+                      overflow: "hidden",
+                      borderRadius: "12px 12px 0 0",
                     }}
                   >
-                    <Typography
-                      variant="h6"
-                      sx={{ color: "white", mb: 1, fontWeight: 600 }}
-                    >
-                      {template.name}
-                    </Typography>
+                    {template.published ? (
+                      <Chip
+                        label="Published"
+                        color="success"
+                        size="small"
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          zIndex: 1,
+                          fontWeight: 600,
+                        }}
+                      />
+                    ) : (
+                      <Tooltip title="Delete draft">
+                        <IconButton
+                          onClick={() => handleDelete(template.id)}
+                          sx={{
+                            position: "absolute",
+                            right: 8,
+                            zIndex: 1,
+                            color: "#ef4444",
+                            backdropFilter: "blur(6px)",
+                            backgroundColor: "rgba(255, 255, 255, 0.3)",
+                            borderRadius: "50%",
+                            padding: "6px",
+                            "&:hover": {
+                              backgroundColor: "rgba(255, 255, 255, 0.5)",
+                            },
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    <iframe
+                      srcDoc={template.htmlContent}
+                      style={{
+                        width: "200%",
+                        height: "480px",
+                        border: "none",
+                        transform: "scale(0.5)",
+                        transformOrigin: "top left",
+                        pointerEvents: "none",
+                      }}
+                      title={template.name}
+                    />
                   </Box>
-                </CardContent>
 
-                <CardActions sx={{ px: 0, pt: 2, gap: 1 }}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleView(template)}
-                    startIcon={<Eye size={18} />}
+                  <CardContent
                     sx={{
-                      flex: 1,
-                      color: "white",
-                      borderColor: "rgba(255, 255, 255, 0.2)",
-                      "&:hover": {
-                        borderColor: "white",
-                        backgroundColor: "rgba(255, 255, 255, 0.1)",
-                      },
+                      flexGrow: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      px: 0,
+                      pt: 2,
+                      pb: 1,
                     }}
                   >
-                    Preview
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => handleEdit(template)}
-                    startIcon={<Edit2 size={18} />}
-                    sx={{
-                      flex: 1,
-                      background:
-                        "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
-                      "&:hover": {
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{ color: "white", mb: 1, fontWeight: 600 }}
+                      >
+                        {template.name}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+
+                  <CardActions sx={{ px: 0, pt: 2, gap: 1 }}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => handleView(template)}
+                      startIcon={<Eye size={18} />}
+                      sx={{
+                        flex: 1,
+                        color: "white",
+                        borderColor: "rgba(255, 255, 255, 0.2)",
+                        "&:hover": {
+                          borderColor: "white",
+                          backgroundColor: "rgba(255, 255, 255, 0.1)",
+                        },
+                      }}
+                    >
+                      Preview
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={() => handleEdit(template)}
+                      startIcon={<Edit2 size={18} />}
+                      sx={{
+                        flex: 1,
                         background:
-                          "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
-                      },
-                    }}
-                  >
-                    {template.published ? "Update" : "Customize"}
-                  </Button>
-                </CardActions>
-              </GlassMorphism>
-            </MotionBox>
-          </Grid>
-        ))}
+                          "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
+                        "&:hover": {
+                          background:
+                            "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
+                        },
+                      }}
+                    >
+                      {template.published ? "Update" : "Customize"}
+                    </Button>
+                  </CardActions>
+                </GlassMorphism>
+              </MotionBox>
+            </Grid>
+          ))}
       </Grid>
       <ConfirmationModal
         open={saveConfirmationOpen}

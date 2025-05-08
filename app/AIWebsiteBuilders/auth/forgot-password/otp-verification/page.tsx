@@ -42,11 +42,13 @@ export default function VerifyOTP() {
 
   const onSubmit = async (data: any) => {
     try {
+      const email = localStorage.getItem("email");
+      data = { ...data, email };
       const result = await dispatch(verifyUser(data));
       if (result.payload.success) {
         setIsVerified(true);
         setTimeout(() => {
-          router.push("/AIWebsiteBuilders/auth/onboarding");
+          router.push("/AIWebsiteBuilders/auth/forgot-password/reset-password");
         }, 1500);
       }
     } catch (error) {
@@ -56,6 +58,7 @@ export default function VerifyOTP() {
 
   const resendOTP = async () => {
     try {
+      const email = localStorage.getItem("email");
       const result = await dispatch(sendOTP({ email }));
       if (result.type === "auth/sendOTP/fulfilled") {
         setResendSuccess(true);
@@ -161,28 +164,6 @@ export default function VerifyOTP() {
                   sx={{ mt: 1 }}
                 >
                   <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <TextField
-                        required
-                        fullWidth
-                        label="Email"
-                        {...register("email", { required: true })}
-                        error={!!errors.email}
-                        helperText={errors.email ? "Email is required" : ""}
-                        onChange={(e) => setEmail(e.target.value)}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Mail
-                                size={20}
-                                color="rgba(255, 255, 255, 0.7)"
-                              />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={textFieldStyles}
-                      />
-                    </Grid>
                     <Grid item xs={12}>
                       <TextField
                         required
@@ -340,7 +321,7 @@ const VerificationSuccess = () => (
         mb: 3,
       }}
     >
-      Your account has been verified. Redirecting to onboarding...
+      Your account has been verified. Redirecting to reset password...
     </Typography>
     <CircularProgress size={30} sx={{ color: "#34C759" }} />
   </MotionBox>
