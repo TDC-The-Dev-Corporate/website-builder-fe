@@ -25,6 +25,6 @@ export const sendOtpEmail = async (data: any) => {
 };
 
 export const resetForgottenPassword = async (data: ForgotPassword) => {
-  const response = await api.put("auth/reset-forget-password", data);
+  const response = await api.patch("auth/resetPassword", data);
   return response.data;
 };

@@ -46,9 +46,9 @@ interface NavItem {
 }
 
 interface ForgotPassword {
-  email: string;
-  newPassword: string;
-  confirmNewPassword: string;
+  EMAIL: string;
+  pasword: string;
+  confirmPassword: string;
 }
 
 interface UploadedAsset {

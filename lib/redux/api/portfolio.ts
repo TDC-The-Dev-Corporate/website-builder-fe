@@ -16,7 +16,7 @@ export const getPortfolioByUserName = async (name: string) => {
 };
 
 export const getPortfolios = async () => {
-  const response = await api.get(`portfolios`, {});
+  const response = await api.get(`portfolios/userDrafts`, {});
   return response.data;
 };
 

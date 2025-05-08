@@ -130,7 +130,7 @@ export const sendOTP = createAsyncThunk(
   }
 );
 
-export const forgetPassword = createAsyncThunk(
+export const resetPassword = createAsyncThunk(
   "auth/resetForgetPassword",
   async (data: ForgotPassword, { rejectWithValue }) => {
     try {
@@ -249,14 +249,14 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = (action.payload as { message: string }).message;
       })
-      .addCase(forgetPassword.pending, (state) => {
+      .addCase(resetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(forgetPassword.fulfilled, (state, action) => {
+      .addCase(resetPassword.fulfilled, (state, action) => {
         state.loading = false;
       })
-      .addCase(forgetPassword.rejected, (state, action) => {
+      .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as { message: string }).message;
       })
