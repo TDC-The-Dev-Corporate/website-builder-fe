@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
+
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
 import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
 import { accordionComponent } from "@grapesjs/studio-sdk-plugins";
@@ -225,6 +226,72 @@ export default function PortfolioBuilder() {
               onEditor={(editor) => {
                 editorRef.current = editor;
                 loadSelectedTemplate(editor);
+
+                editor.DomComponents.addType("modal", {
+                  isComponent: (el) => el.classList?.contains("modal"),
+                  model: {
+                    defaults: {
+                      name: "Modal",
+                      traits: [
+                        "id",
+                        {
+                          type: "checkbox",
+                          label: "Visible in editor",
+                          name: "visibleInEditor",
+                          changeProp: true,
+                        },
+                      ],
+                      visibleInEditor: false,
+                      script: function () {
+                        const modal = this;
+                        const closeBtns = modal.querySelectorAll(
+                          '[data-bs-dismiss="modal"], .btn-close'
+                        );
+
+                        closeBtns.forEach((btn) => {
+                          btn.addEventListener("click", () => {
+                            modal.classList.remove("show");
+                            modal.style.display = "none";
+                          });
+                        });
+
+                        document
+                          .querySelectorAll('[data-bs-toggle="modal"]')
+                          .forEach((trigger) => {
+                            const target =
+                              trigger.getAttribute("data-bs-target");
+                            if (target === `#${modal.id}`) {
+                              trigger.addEventListener("click", () => {
+                                modal.classList.add("show");
+                                modal.style.display = "block";
+                              });
+                            }
+                          });
+                      },
+                    },
+
+                    init() {
+                      this.on("change:visibleInEditor", () => {
+                        const el = this.view?.el;
+                        if (el) {
+                          const val = this.get("visibleInEditor");
+                          el.classList.toggle("show", val);
+                          el.style.display = val ? "block" : "none";
+
+                          // Add these for editor visibility
+                          if (val) {
+                            el.style.display = "block";
+                            el.style.opacity = "1";
+                            el.style.visibility = "visible";
+                            el.style.position = "relative";
+                            el.style.minHeight = "300px";
+                            el.style.border = "2px dashed blue";
+                          }
+                        }
+                      });
+                    },
+                  },
+                });
 
                 editor.on("load", () => {
                   const panelManager = editor.Panels;
