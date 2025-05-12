@@ -30,17 +30,6 @@ export const LoadingScreen = styled(Box)(({ theme }) => ({
 }));
 
 export const grapesJsStyles = `
-      .modal {
-          display: block;
-          position: relative;
-          background: #fff;
-          border: 1px solid #ccc;
-          padding: 20px;
-          background-color: rgba(59, 130, 246, 0.1);
-        }
-        .modal-content {
-          display: block;
-        }
         .gjs-dragging {
           outline: 2px dashed #3b82f6 !important;
           background-color: rgba(59, 130, 246, 0.1) !important;

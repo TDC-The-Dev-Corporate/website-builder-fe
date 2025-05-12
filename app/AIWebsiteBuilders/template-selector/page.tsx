@@ -278,14 +278,10 @@ export default function PortfolioBuilder() {
                           el.classList.toggle("show", val);
                           el.style.display = val ? "block" : "none";
 
-                          // Add these for editor visibility
                           if (val) {
                             el.style.display = "block";
                             el.style.opacity = "1";
                             el.style.visibility = "visible";
-                            el.style.position = "relative";
-                            el.style.minHeight = "300px";
-                            el.style.border = "2px dashed blue";
                           }
                         }
                       });
