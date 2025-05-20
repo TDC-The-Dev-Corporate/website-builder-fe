@@ -16,7 +16,16 @@ export const getPortfolioByUserName = async (name: string) => {
 };
 
 export const getPortfolios = async () => {
-  const response = await api.get(`portfolios/userDrafts`, {});
+  const response = await api.get(`portfolios/userDrafts`, {
+    headers: {
+      "Cache-Control": "max-age=3600", // 1 hour
+    },
+  });
+  return response.data;
+};
+
+export const clearCache = async () => {
+  const response = await api.get(`portfolios/clearCache`, {});
   return response.data;
 };
 

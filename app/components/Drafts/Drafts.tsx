@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -33,15 +33,20 @@ export default function Drafts() {
   const [saveConfirmationOpen, setSaveConfirmationOpen] = useState(false);
   const [draftId, setDraftId] = useState("");
 
+  const executedRef = useRef(false);
   useEffect(() => {
     const fetchDrafts = async () => {
+      if (executedRef.current) return;
+      executedRef.current = true;
+
       const drafts = await dispatch(getAllPortfolios());
       if (drafts.payload) {
         setTemplates(drafts.payload);
       }
     };
+
     fetchDrafts();
-  }, []);
+  }, [dispatch]);
 
   const handleView = (template) => {
     const newWindow = window.open("", "_blank");
@@ -123,6 +128,34 @@ export default function Drafts() {
               <span class="tooltip">Customize this template</span>
             </button>
             <script>
+            document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            
+            const action = btn.dataset.action;
+            const modalId = btn.dataset.modalId;
+            
+            if (action === 'open-drawer') {
+              document.getElementById('drawer').classList.add('active');
+              document.getElementById('overlay').classList.add('active');
+            }
+            
+            if (action === 'close-drawer') {
+              document.getElementById('drawer').classList.remove('active');
+              document.getElementById('overlay').classList.remove('active');
+            }
+            
+            if (action === 'open-modal' && modalId) {
+              document.getElementById(modalId).classList.add('active');
+              document.getElementById('overlay').classList.add('active');
+            }
+            
+            if (action === 'close-modal' && modalId) {
+              document.getElementById(modalId).classList.remove('active');
+              document.getElementById('overlay').classList.remove('active');
+            }
+          });
+
               document.querySelector('.floating-edit-btn').addEventListener('click', () => {
                 let messageSent = false;
                 
