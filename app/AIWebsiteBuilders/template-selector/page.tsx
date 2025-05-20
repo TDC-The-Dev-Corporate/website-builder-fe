@@ -30,6 +30,7 @@ import { useAppDispatch } from "@/lib/redux/hooks";
 import {
   generatePortfolio,
   publishPortfolio,
+  resetCache,
   updateExistingPortfolio,
 } from "@/lib/redux/slices/portfolioSlice";
 
@@ -75,26 +76,48 @@ export default function PortfolioBuilder() {
 
   const getFullHtml = () => {
     if (!editorRef.current) return "";
-
     const editor = editorRef.current;
-    const html = editor.getHtml();
-    const css = editor.getCss();
-
     return `
       <!DOCTYPE html>
-      <html lang="en">
+      <html>
       <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>My Portfolio</title>
-        <style>
-          ${css}
-        </style>
+        <style>${editor.getCss()}</style>
+        <script>
+          // Event Delegation System
+          document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            
+            const action = btn.dataset.action;
+            const modalId = btn.dataset.modalId;
+            
+            if (action === 'open-drawer') {
+              document.getElementById('drawer').classList.add('active');
+              document.getElementById('overlay').classList.add('active');
+            }
+            
+            if (action === 'close-drawer') {
+              document.getElementById('drawer').classList.remove('active');
+              document.getElementById('overlay').classList.remove('active');
+            }
+            
+            if (action === 'open-modal' && modalId) {
+              document.getElementById(modalId).classList.add('active');
+              document.getElementById('overlay').classList.add('active');
+            }
+            
+            if (action === 'close-modal' && modalId) {
+              document.getElementById(modalId).classList.remove('active');
+              document.getElementById('overlay').classList.remove('active');
+            }
+          });
+        </script>
       </head>
       <body>
-        ${html}
+        ${editor.getHtml()}
       </body>
-      </html>`;
+      </html>
+    `;
   };
 
   const handleSaveConfirm = async (draftName: string) => {
@@ -108,6 +131,7 @@ export default function PortfolioBuilder() {
     }
 
     try {
+      await dispatch(resetCache());
       const user = JSON.parse(localStorage.getItem("user"));
       const data = {
         userId: user.id,

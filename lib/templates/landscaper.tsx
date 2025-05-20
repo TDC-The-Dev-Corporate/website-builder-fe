@@ -11,32 +11,34 @@ export const landscaperTemplate = {
               <div class="drawer-header">
                 <span class="logo-icon">🌿</span>
                 <h1>GreenScape</h1>
-                <button class="close-drawer" onclick="document.getElementById('drawer').classList.remove('active'); document.getElementById('overlay').classList.remove('active')">×</button>
+                <button class="close-drawer" data-action="close-drawer">×</button>
               </div>
               <div class="nav-links">
-                <a href="#home" class="nav-link active" onclick="closeDrawer()">
+                <a href="#home" class="nav-link active" data-action="close-drawer">
                   <span class="link-icon">🏠</span>
                   Home
                 </a>
-                <a href="#services" class="nav-link" onclick="closeDrawer()">
+                <a href="#services" class="nav-link" data-action="close-drawer">
                   <span class="link-icon">🌳</span>
                   Services
                 </a>
-                <a href="#gallery" class="nav-link" onclick="closeDrawer()">
+                <a href="#gallery" class="nav-link" data-action="close-drawer">
                   <span class="link-icon">🖼️</span>
                   Gallery
                 </a>
-                <a href="#process" class="nav-link" onclick="closeDrawer()">
+                <a href="#process" class="nav-link" data-action="close-drawer">
                   <span class="link-icon">📋</span>
                   Process
                 </a>
-                <a href="#contact" class="nav-link" onclick="closeDrawer()">
+                <a href="#contact" class="nav-link" data-action="close-drawer">
                   <span class="link-icon">📞</span>
                   Contact
                 </a>
               </div>
               <div class="drawer-footer">
-                <button class="quote-btn" onclick="openModal('quoteModal')">Get Free Quote</button>
+                <button class="quote-btn" data-action="open-modal" data-modal="quoteModal" data-modal-id="quoteModal">
+                  Get Free Quote
+                </button>
               </div>
             </nav>
 
@@ -46,7 +48,7 @@ export const landscaperTemplate = {
             <!-- Quote Modal -->
             <div class="modal" id="quoteModal">
               <div class="modal-content">
-                <button class="modal-close" onclick="closeModal('quoteModal')">×</button>
+                <button class="modal-close" data-action="close-modal" data-modal="quoteModal" data-modal-id="quoteModal">×</button>
                 <h2>Get a Free Quote</h2>
                 <form class="quote-form">
                   <div class="form-group">
@@ -106,7 +108,7 @@ export const landscaperTemplate = {
             <main class="main-content">
               <!-- Mobile Header -->
               <header class="mobile-header">
-                <button class="menu-toggle" onclick="openDrawer()">☰</button>
+                <button class="menu-toggle" data-action="open-drawer">☰</button>
                 <span class="mobile-logo">GreenScape</span>
                 <button class="mobile-quote" onclick="openModal('quoteModal')">💬</button>
               </header>

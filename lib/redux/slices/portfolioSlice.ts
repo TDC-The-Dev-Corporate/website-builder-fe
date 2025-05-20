@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
+  clearCache,
   createPortfolio,
   getPortfolios,
   publish,
@@ -58,6 +59,19 @@ export const getAllPortfolios = createAsyncThunk<
     return rejectWithValue(errorMessage);
   }
 });
+
+export const resetCache = createAsyncThunk<any, void, { rejectValue: string }>(
+  "portfolios/get",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await clearCache();
+      return response;
+    } catch (error: any) {
+      const errorMessage = error.message || "Failed to clear cache";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
 
 export const publishPortfolio = createAsyncThunk(
   "portfolio/publish",
