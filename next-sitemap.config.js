@@ -1,6 +1,14 @@
+async function fetchUsernames() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}user`);
+  if (!res.ok) throw new Error("Failed to fetch usernames");
+
+  const users = await res.json();
+  return users;
+}
+
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: "http://localhost:3000", // Change to production URL when live
+  siteUrl: "http://localhost:3000",
   generateRobotsTxt: true,
   generateIndexSitemap: true,
   changefreq: "weekly",
@@ -16,7 +24,7 @@ module.exports = {
     ],
   },
   additionalPaths: async (config) => {
-    const usernames = ["mahrooshhashmi"];
+    const usernames = await fetchUsernames();
     return usernames.map((username) => ({
       loc: `/AIWebsiteBuilders/portfolio/${username}`,
       lastmod: new Date().toISOString(),

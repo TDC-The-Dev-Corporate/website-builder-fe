@@ -7,7 +7,7 @@ import {
   verify,
 } from "../api/auth";
 import { getUserId } from "@/lib/utils";
-import { removeUser, updateUser } from "../api/profile";
+import { getAllUsers, removeUser, updateUser } from "../api/profile";
 
 interface AuthState {
   user: any;
@@ -52,6 +52,18 @@ export const deleteAccount = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await removeUser();
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const getAllPublishedSitesUsers = createAsyncThunk(
+  "user/delete",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getAllUsers();
       return response;
     } catch (error: any) {
       return rejectWithValue(error);
