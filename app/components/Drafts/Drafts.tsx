@@ -23,6 +23,7 @@ import ConfirmationModal from "../modals/ConfirmationModal";
 import {
   deleteDraft,
   getAllPortfolios,
+  resetCache,
 } from "@/lib/redux/slices/portfolioSlice";
 import { useAppDispatch } from "@/lib/redux/hooks";
 
@@ -206,6 +207,7 @@ export default function Drafts() {
   };
 
   const handleSaveConfirm = async (draftId: string) => {
+    await dispatch(resetCache());
     setSaveConfirmationOpen(false);
 
     try {

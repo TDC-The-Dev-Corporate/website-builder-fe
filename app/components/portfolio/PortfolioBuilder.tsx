@@ -115,6 +115,37 @@ export default function PortfolioBuilder() {
                 document.getElementById('overlay').classList.remove('active');
               }
             });
+            
+            // Close modals and drawers when clicking on overlay
+            document.getElementById('overlay')?.addEventListener('click', function() {
+              document.getElementById('drawer')?.classList.remove('active');
+              
+              // Close all modals
+              const modals = document.querySelectorAll('.modal');
+              modals.forEach(modal => {
+                modal.classList.remove('active');
+              });
+              
+              this.classList.remove('active');
+            });
+            
+            // Prevent clicks inside modals from closing them
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+              modal.addEventListener('click', function(e) {
+                e.stopPropagation();
+              });
+            });
+            
+            // Handle form submissions
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+              form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Form submission is simulated in this template. In a real website, this would submit data to a server.');
+                this.reset();
+              });
+            });
           </script>
         </head>
         <body>
@@ -124,7 +155,7 @@ export default function PortfolioBuilder() {
       `;
   };
 
-  const handleSaveConfirm = async (draftName: string) => {
+  const handleSaveConfirm = async (draftName) => {
     setSaveConfirmationOpen(false);
     setIsSaving(true);
 
@@ -204,7 +235,7 @@ export default function PortfolioBuilder() {
       );
     },
 
-    addVideoComponent: (editor: any, asset: UploadedAsset) => {
+    addVideoComponent: (editor, asset) => {
       editor.addComponents({
         type: "video",
         src: asset.src,
@@ -275,6 +306,72 @@ export default function PortfolioBuilder() {
               onEditor={(editor) => {
                 editorRef.current = editor;
                 loadSelectedTemplate(editor);
+
+                editor.DomComponents.addType("modal", {
+                  isComponent: (el) => el.classList?.contains("modal"),
+                  model: {
+                    defaults: {
+                      name: "Modal",
+                      traits: [
+                        "id",
+                        {
+                          type: "checkbox",
+                          label: "Visible in editor",
+                          name: "visibleInEditor",
+                          changeProp: true,
+                        },
+                      ],
+                      visibleInEditor: false,
+                      script: function () {
+                        const modal = this;
+                        const closeBtns = modal.querySelectorAll(
+                          '[data-bs-dismiss="modal"], .btn-close'
+                        );
+
+                        closeBtns.forEach((btn) => {
+                          btn.addEventListener("click", () => {
+                            modal.classList.remove("show");
+                            modal.style.display = "none";
+                          });
+                        });
+
+                        document
+                          .querySelectorAll('[data-bs-toggle="modal"]')
+                          .forEach((trigger) => {
+                            const target =
+                              trigger.getAttribute("data-bs-target");
+                            if (target === `#${modal.id}`) {
+                              trigger.addEventListener("click", () => {
+                                modal.classList.add("show");
+                                modal.style.display = "block";
+                              });
+                            }
+                          });
+                      },
+                    },
+
+                    init() {
+                      this.on("change:visibleInEditor", () => {
+                        const el = this.view?.el;
+                        if (el) {
+                          const val = this.get("visibleInEditor");
+                          el.classList.toggle("show", val);
+                          el.style.display = val ? "block" : "none";
+
+                          // Add these for editor visibility
+                          if (val) {
+                            el.style.display = "block";
+                            el.style.opacity = "1";
+                            el.style.visibility = "visible";
+                            el.style.position = "relative";
+                            el.style.minHeight = "300px";
+                            el.style.border = "2px dashed blue";
+                          }
+                        }
+                      });
+                    },
+                  },
+                });
 
                 editor.on("load", () => {
                   const panelManager = editor.Panels;
@@ -464,7 +561,7 @@ export default function PortfolioBuilder() {
                           },
 
                           onTraitsChange() {
-                            (this.model as any).updateVideo();
+                            this.model.updateVideo();
                           },
                         },
                       });
