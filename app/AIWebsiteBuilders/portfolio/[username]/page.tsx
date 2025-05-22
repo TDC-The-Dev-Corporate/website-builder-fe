@@ -1,65 +1,93 @@
-"use client";
+import { Metadata } from "next";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-
-import { Box, Typography } from "@mui/material";
-
-import AppLoader from "@/app/components/loader/AppLoader";
+import {
+  baseMetadata,
+  generateLocalBusinessSchema,
+  generateOrganizationSchema,
+  getPortfolioMetadata,
+} from "@/lib/metadata";
+import JsonLd from "@/app/components/JsonLd";
+import PortfolioPage from "@/app/components/portfolio/PortfolioPage";
 
 import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
 
-export default function PortfolioPage() {
-  const params = useParams();
-  const username = params.username as string;
-  const [portfolio, setPortfolio] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+export async function generateMetadata({
+  params,
+}: {
+  params: { username: string };
+}): Promise<Metadata> {
+  try {
+    const portfolioData = await getPortfolioByUserName(params.username);
 
-  useEffect(() => {
-    async function fetchPortfolio() {
-      if (!username) return;
-
-      try {
-        const response = getPortfolioByUserName(username);
-        if (!response) {
-          throw new Error("Failed to fetch portfolio");
-        }
-
-        const data = await response;
-        setPortfolio(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching portfolio:", error);
-      }
+    if (portfolioData) {
+      return getPortfolioMetadata(portfolioData);
     }
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+  }
 
-    fetchPortfolio();
-  }, [username]);
+  return {
+    ...baseMetadata,
+    title: "Trade Professional Portfolio | TradesBuilder",
+    description:
+      "View this tradesperson's professional portfolio and services.",
+  };
+}
+
+export default async function PortfolioUserPage({
+  params,
+}: {
+  params: { username: string };
+}) {
+  let portfolioData = null;
+  let structuredData = null;
+
+  try {
+    portfolioData = await getPortfolioByUserName(params.username);
+
+    if (portfolioData) {
+      structuredData = [
+        generateOrganizationSchema(portfolioData),
+        generateLocalBusinessSchema(portfolioData),
+        {
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          name: `${portfolioData.name}'s Trade Portfolio`,
+          description: `Professional ${portfolioData.tradeSpecialization} services portfolio`,
+          breadcrumb: {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                item: {
+                  "@id": "/",
+                  name: "Home",
+                },
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                item: {
+                  "@id": `/portfolio/${portfolioData.username}`,
+                  name: "Portfolio",
+                },
+              },
+            ],
+          },
+        },
+      ].filter(Boolean);
+    }
+  } catch (error) {
+    console.error("Error fetching portfolio data:", error);
+  }
 
   return (
-    <AppLoader loading={loading}>
-      {loading ? null : portfolio ? (
-        <Box
-          sx={{
-            minHeight: "100vh",
-            padding: 4,
-          }}
-          dangerouslySetInnerHTML={{ __html: portfolio.htmlContent }}
-        />
-      ) : (
-        <Box
-          sx={{
-            minHeight: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography variant="h6" color="text.secondary">
-            Portfolio not found
-          </Typography>
-        </Box>
+    <>
+      {structuredData && structuredData.length > 0 && (
+        <JsonLd data={structuredData} />
       )}
-    </AppLoader>
+      <PortfolioPage />
+    </>
   );
 }

@@ -25,7 +25,7 @@ export const getPortfolios = async () => {
 };
 
 export const clearCache = async () => {
-  const response = await api.get(`portfolios/clearCache`, {});
+  const response = await api.get(`portfolios/clearCacheById`, {});
   return response.data;
 };
 
