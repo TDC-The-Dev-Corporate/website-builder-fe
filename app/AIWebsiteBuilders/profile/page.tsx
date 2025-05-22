@@ -5,14 +5,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import {
-  Box,
-  Typography,
-  Grid,
-  IconButton,
-  Tooltip,
-  Divider,
-} from "@mui/material";
-import {
   User,
   Mail,
   Phone,
@@ -23,13 +15,24 @@ import {
   Globe,
 } from "lucide-react";
 
+import {
+  Box,
+  Typography,
+  Grid,
+  IconButton,
+  Tooltip,
+  Divider,
+} from "@mui/material";
+
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
+import { generateOrganizationSchema } from "@/lib/metadata";
+import JsonLd from "@/app/components/JsonLd";
 
 export default function ViewProfile() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
+  const [portfolio, setPortfolio] = useState<any>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -72,6 +75,7 @@ export default function ViewProfile() {
 
   return (
     <Box sx={{ p: 3, width: "100%", position: "relative" }}>
+      {user && <JsonLd data={generateOrganizationSchema(user)} />}
       <GlassMorphism blur={10} opacity={0.1}>
         <Tooltip title="Edit Profile" arrow>
           <IconButton
@@ -121,7 +125,7 @@ export default function ViewProfile() {
                 {user.profileImage ? (
                   <Image
                     src={user.profileImage}
-                    alt="Profile"
+                    alt={`${user.name} - Professional ${user.tradeSpecialization}`}
                     width={200}
                     height={200}
                     style={{ objectFit: "cover" }}
@@ -274,7 +278,10 @@ export default function ViewProfile() {
                           Website URL
                         </Typography>
                         <Typography variant="body1" sx={{ color: "white" }}>
-                          {`http://localhost:3000/AIWebsiteBuilders/portfolio/${user.username}`}
+                          {`${
+                            process.env.NEXT_PUBLIC_APP_URL ||
+                            "http://localhost:3000"
+                          }/AIWebsiteBuilders/portfolio/${user.username}`}
                         </Typography>
                       </Box>
                     </Box>
