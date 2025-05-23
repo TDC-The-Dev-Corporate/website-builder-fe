@@ -16,6 +16,94 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    function handleClick(e) {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+
+      const action = btn.dataset.action;
+      const modalId = btn.dataset.modalId;
+
+      if (action === "open-drawer") {
+        document.getElementById("drawer")?.classList.add("active");
+        document.getElementById("overlay")?.classList.add("active");
+      }
+
+      if (action === "close-drawer") {
+        document.getElementById("drawer")?.classList.remove("active");
+        document.getElementById("overlay")?.classList.remove("active");
+      }
+
+      if (action === "open-modal" && modalId) {
+        document.getElementById(modalId)?.classList.add("active");
+        document.getElementById("overlay")?.classList.add("active");
+      }
+
+      if (action === "close-modal" && modalId) {
+        document.getElementById(modalId)?.classList.remove("active");
+        document.getElementById("overlay")?.classList.remove("active");
+      }
+    }
+
+    function handleOverlayClick() {
+      document.getElementById("drawer")?.classList.remove("active");
+
+      const modals = document.querySelectorAll(".modal");
+      modals.forEach((modal) => {
+        modal.classList.remove("active");
+      });
+
+      document.getElementById("overlay")?.classList.remove("active");
+    }
+
+    function handleModalClick(e) {
+      e.stopPropagation();
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      alert("Thank you for your submission! We will contact you shortly.");
+      e.target.reset();
+
+      const modal = e.target.closest(".modal");
+      if (modal) {
+        modal.classList.remove("active");
+        document.getElementById("overlay")?.classList.remove("active");
+      }
+    }
+
+    document.addEventListener("click", handleClick);
+    document
+      .getElementById("overlay")
+      ?.addEventListener("click", handleOverlayClick);
+
+    const modals = document.querySelectorAll(".modal");
+    modals.forEach((modal) => {
+      modal.addEventListener("click", handleModalClick);
+    });
+
+    const forms = document.querySelectorAll("form");
+    forms.forEach((form) => {
+      form.addEventListener("submit", handleFormSubmit);
+    });
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("click", handleClick);
+      document
+        .getElementById("overlay")
+        ?.removeEventListener("click", handleOverlayClick);
+
+      modals.forEach((modal) => {
+        modal.removeEventListener("click", handleModalClick);
+      });
+
+      forms.forEach((form) => {
+        form.removeEventListener("submit", handleFormSubmit);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
     async function fetchPortfolio() {
       if (!username) return;
 
@@ -43,7 +131,6 @@ export default function PortfolioPage() {
         <Box
           sx={{
             minHeight: "100vh",
-            padding: 4,
           }}
           dangerouslySetInnerHTML={{ __html: portfolio.htmlContent }}
         />
