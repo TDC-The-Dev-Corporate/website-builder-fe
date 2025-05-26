@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 
 import { ArrowBigLeft, Save } from "lucide-react";
 
-import { Avatar, Box, Chip } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 import { ActionButton, AppHeader } from "./helpingComponents";
 
@@ -15,20 +15,35 @@ export const EditorHeader: FC<{
   const router = useRouter();
   return (
     <AppHeader>
-      <Box display="flex" alignItems="center">
-        <Avatar
-          src="/images/TradesBuilderLogo.png"
-          alt="logo"
-          sx={{ width: 150, height: 50 }}
-        />
-        {selectedTemplate && (
-          <Chip
-            label={selectedTemplate.name || "New Portfolio"}
-            color="primary"
-            size="small"
-            sx={{ color: "white" }}
+      <Box sx={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <Box
+          sx={{
+            width: "38px",
+            height: "38px",
+            backgroundColor: "white",
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            style={{ width: "24px", height: "17px", objectFit: "cover" }}
+            alt="Logo"
+            src="/images/Logo.png"
           />
-        )}
+        </Box>
+        <Typography
+          variant="h4"
+          sx={{
+            fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
+            fontWeight: 800,
+            color: "white",
+            fontSize: "64px",
+          }}
+        >
+          TRADES BUILDER PRO
+        </Typography>
       </Box>
 
       <Box display="flex" alignItems="center">

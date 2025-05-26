@@ -1,173 +1,317 @@
-"use client";
-
+import React from "react";
 import {
   Box,
   Container,
   Grid,
   Typography,
   Link,
-  IconButton,
+  TextField,
+  Button,
   Divider,
+  IconButton,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
-import { Instagram, Twitter, Facebook, Linkedin, Youtube } from "lucide-react";
-import { styled } from "@mui/material/styles";
+import { Facebook, Instagram, Twitter, Send } from "@mui/icons-material";
 
-const FooterLink = styled(Link)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  textDecoration: "none",
-  display: "block",
-  marginBottom: theme.spacing(1),
-  transition: "color 0.2s ease",
-  "&:hover": {
-    color: theme.palette.primary.main,
-  },
-}));
+export const Footer = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-const SocialButton = styled(IconButton)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  transition: "all 0.2s ease",
-  "&:hover": {
-    color: theme.palette.primary.main,
-    backgroundColor: `${theme.palette.primary.main}15`,
-    transform: "translateY(-3px)",
-  },
-}));
+  const productLinks = [
+    { name: "Templates", href: "#" },
+    { name: "Features", href: "#" },
+    { name: "Pricing", href: "#" },
+    { name: "Examples", href: "#" },
+  ];
 
-const Footer = () => {
+  const resourceLinks = [
+    { name: "Blog", href: "#" },
+    { name: "Guides", href: "#" },
+    { name: "Tutorials", href: "#" },
+    { name: "Help Center", href: "#" },
+    { name: "Contact Us", href: "#" },
+  ];
+
+  const companyLinks = [
+    { name: "About Us", href: "#" },
+    { name: "Press", href: "#" },
+    { name: "Careers", href: "#" },
+    { name: "Partners", href: "#" },
+    { name: "Legal", href: "#" },
+  ];
+
+  const socialLinks = [
+    { icon: <Facebook fontSize="small" />, href: "#" },
+    { icon: <Twitter fontSize="small" />, href: "#" },
+    { icon: <Instagram fontSize="small" />, href: "#" },
+  ];
+
   return (
-    <Box sx={{ bgcolor: "background.paper", pt: 8, pb: 4 }}>
-      <Container maxWidth="lg">
+    <Box
+      component="footer"
+      sx={{
+        width: "100%",
+        bgcolor: "#1e1e1e",
+        py: 10,
+        px: isMobile ? 2 : 4, // Reduced side padding
+        color: "white",
+      }}
+    >
+      <Container
+        maxWidth="lg"
+        sx={{
+          px: isMobile ? 2 : 4, // Reduced container padding
+          maxWidth: "1280px !important", // Force max-width
+        }}
+      >
         <Grid container spacing={4}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography
-              variant="h6"
-              component="div"
-              gutterBottom
-              sx={{ fontWeight: 600 }}
-            >
-              TradeBuilder
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              The ultimate website builder for tradesmen. Showcase your
-              craftsmanship online with professional websites.
-            </Typography>
-            <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-              <SocialButton aria-label="Instagram">
-                <Instagram size={20} />
-              </SocialButton>
-              <SocialButton aria-label="Twitter">
-                <Twitter size={20} />
-              </SocialButton>
-              <SocialButton aria-label="Facebook">
-                <Facebook size={20} />
-              </SocialButton>
-              <SocialButton aria-label="LinkedIn">
-                <Linkedin size={20} />
-              </SocialButton>
-              <SocialButton aria-label="YouTube">
-                <Youtube size={20} />
-              </SocialButton>
+          {/* Company Info */}
+          <Grid item xs={12} md={6} lg={3}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontFamily: "'Montserrat', Helvetica, Arial, sans-serif",
+                  fontWeight: 700,
+                  color: "white",
+                }}
+              >
+                TRADES BUILDER
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontFamily: "'Montserrat', Helvetica, Arial, sans-serif",
+                  color: "#949494",
+                  maxWidth: 307,
+                }}
+              >
+                The Ultimate Website Builder For Tradesmen. Showcase Your
+                Craftsmanship Online With Professional Websites.
+              </Typography>
             </Box>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography
-              variant="subtitle1"
-              gutterBottom
-              sx={{ fontWeight: 600 }}
-            >
-              Products
-            </Typography>
-            <FooterLink>Templates</FooterLink>
-            <FooterLink>Features</FooterLink>
-            <FooterLink>Pricing</FooterLink>
-            <FooterLink>Examples</FooterLink>
-            <FooterLink>Testimonials</FooterLink>
+          {/* Products Column */}
+          <Grid item xs={6} md={3} lg={2}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                  fontWeight: 500,
+                  letterSpacing: "1px",
+                }}
+              >
+                Products
+              </Typography>
+              <Box component="ul" sx={{ listStyle: "none", pl: 0, m: 0 }}>
+                {productLinks.map((link, index) => (
+                  <li key={index}>
+                    <Link
+                      href={link.href}
+                      sx={{
+                        fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                        color: "white",
+                        textDecoration: "none",
+                        "&:hover": { textDecoration: "underline" },
+                        display: "block",
+                        py: 0.5,
+                      }}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </Box>
+            </Box>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography
-              variant="subtitle1"
-              gutterBottom
-              sx={{ fontWeight: 600 }}
-            >
-              Resources
-            </Typography>
-            <FooterLink>Blog</FooterLink>
-            <FooterLink>Guides</FooterLink>
-            <FooterLink>Tutorials</FooterLink>
-            <FooterLink>Help Center</FooterLink>
-            <FooterLink>Contact Us</FooterLink>
+          {/* Resources Column */}
+          <Grid item xs={6} md={3} lg={2}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                  fontWeight: 500,
+                  letterSpacing: "1px",
+                }}
+              >
+                Resources
+              </Typography>
+              <Box component="ul" sx={{ listStyle: "none", pl: 0, m: 0 }}>
+                {resourceLinks.map((link, index) => (
+                  <li key={index}>
+                    <Link
+                      href={link.href}
+                      sx={{
+                        fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                        color: "white",
+                        textDecoration: "none",
+                        "&:hover": { textDecoration: "underline" },
+                        display: "block",
+                        py: 0.5,
+                      }}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </Box>
+            </Box>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography
-              variant="subtitle1"
-              gutterBottom
-              sx={{ fontWeight: 600 }}
-            >
-              Company
-            </Typography>
-            <FooterLink>About Us</FooterLink>
-            <FooterLink>Careers</FooterLink>
-            <FooterLink>Press</FooterLink>
-            <FooterLink>Partners</FooterLink>
-            <FooterLink>Legal</FooterLink>
+          {/* Company Column */}
+          <Grid item xs={6} md={3} lg={2}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                  fontWeight: 500,
+                  letterSpacing: "1px",
+                }}
+              >
+                Company
+              </Typography>
+              <Box component="ul" sx={{ listStyle: "none", pl: 0, m: 0 }}>
+                {companyLinks.map((link, index) => (
+                  <li key={index}>
+                    <Link
+                      href={link.href}
+                      sx={{
+                        fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                        color: "white",
+                        textDecoration: "none",
+                        "&:hover": { textDecoration: "underline" },
+                        display: "block",
+                        py: 0.5,
+                      }}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* Newsletter and Social */}
+          <Grid item xs={12} md={6} lg={3}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                  fontWeight: 500,
+                }}
+              >
+                Join the newsletter
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  bgcolor: "white",
+                  borderRadius: "12px",
+                  overflow: "hidden",
+                  maxWidth: 298,
+                }}
+              >
+                <TextField
+                  type="email"
+                  placeholder="email@website.com"
+                  variant="standard"
+                  InputProps={{
+                    disableUnderline: true,
+                    sx: {
+                      px: 2,
+                      py: 1,
+                      flex: 1,
+                    },
+                  }}
+                  sx={{ flex: 1 }}
+                />
+                <IconButton
+                  sx={{
+                    mr: 1,
+                    color: "black",
+                  }}
+                >
+                  <Send fontSize="small" />
+                </IconButton>
+              </Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                  fontWeight: 500,
+                  mt: 2,
+                }}
+              >
+                Follow us
+              </Typography>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                {socialLinks.map((social, index) => (
+                  <IconButton
+                    key={index}
+                    href={social.href}
+                    sx={{
+                      bgcolor: "white",
+                      color: "black",
+                      "&:hover": { bgcolor: "grey.200" },
+                      width: 36,
+                      height: 36,
+                    }}
+                  >
+                    {social.icon}
+                  </IconButton>
+                ))}
+              </Box>
+            </Box>
           </Grid>
         </Grid>
 
-        <Divider sx={{ my: 4 }} />
-
+        {/* Footer Bottom */}
+        <Divider
+          sx={{
+            mt: 8,
+            borderColor: "rgba(255, 255, 255, 0.3)",
+          }}
+        />
         <Box
           sx={{
+            pt: 4,
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between",
-            alignItems: { xs: "center", sm: "flex-start" },
+            alignItems: "center",
+            gap: 1,
           }}
         >
-          <Typography variant="body2" color="text.secondary">
-            © {new Date().getFullYear()} TradeBuilder. All rights reserved.
+          <Typography
+            variant="body2"
+            sx={{
+              fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+            }}
+          >
+            © TradesBuilder 2025
           </Typography>
-          <Box sx={{ display: "flex", gap: 3, mt: { xs: 2, sm: 0 } }}>
-            <Link
-              // href="/privacy"
-              color="text.secondary"
-              sx={{
-                textDecoration: "none",
-                fontSize: "0.875rem",
-                "&:hover": { color: "primary.main" },
-              }}
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              // href="/terms"
-              color="text.secondary"
-              sx={{
-                textDecoration: "none",
-                fontSize: "0.875rem",
-                "&:hover": { color: "primary.main" },
-              }}
-            >
-              Terms of Service
-            </Link>
-            <Link
-              // href="/cookies"
-              color="text.secondary"
-              sx={{
-                textDecoration: "none",
-                fontSize: "0.875rem",
-                "&:hover": { color: "primary.main" },
-              }}
-            >
-              Cookies
-            </Link>
-          </Box>
+          <Link
+            href="#"
+            sx={{
+              fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+              color: "white",
+              textDecoration: "none",
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            Privacy Policy
+          </Link>
         </Box>
       </Container>
     </Box>
   );
 };
-
-export default Footer;
