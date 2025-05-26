@@ -4,14 +4,15 @@ import { useRef } from "react";
 
 import { Box } from "@mui/material";
 
-import Navbar from "@/app/components/landing/Navbar";
 import Hero from "@/app/components/landing/Hero";
-import Features from "@/app/components/landing/Features";
-import Showcase from "@/app/components/landing/Showcase";
-import CallToAction from "@/app/components/landing/CallToAction";
+
 import ScrollToTop from "@/app/components/landing/ScrollToTop";
-import Footer from "@/app/components/landing/Footer";
 import JsonLd from "./JsonLd";
+import { Navbar } from "./landing/Navbar";
+import { Features } from "./landing/Features";
+import { Showcase } from "./landing/Showcase";
+import { CallToAction } from "./landing/CallToAction";
+import { Footer } from "./landing/Footer";
 
 export default function HomePage() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ export default function HomePage() {
   };
 
   return (
-    <Box sx={{ overflow: "hidden" }}>
+    <Box sx={{ overflow: "hidden", bgcolor: "black", minHeight: "100vh" }}>
       <JsonLd data={websiteSchema} />
       <Navbar sections={sections} />
       <Box ref={heroRef} id="hero">

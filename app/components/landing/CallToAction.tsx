@@ -1,140 +1,136 @@
-"use client";
-
-import { Box, Container, Typography, Button, useTheme } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { getRandomQuote } from "@/lib/utils";
-import MotionBox from "../animations/MotionBox";
+import React from "react";
+import {
+  Card,
+  CardContent,
+  Button,
+  Typography,
+  useTheme,
+  useMediaQuery,
+  Box,
+} from "@mui/material";
+import NorthEastIcon from "@mui/icons-material/NorthEast";
 import { useRouter } from "next/navigation";
-import { ShinyText } from "../animations/ShinyText";
 
-const CTAWrapper = styled(Box)(({ theme }) => ({
-  position: "relative",
-  padding: theme.spacing(10, 0),
-  background: `linear-gradient(135deg, ${theme.palette.appleBlue.dark} 0%, ${theme.palette.primary.main} 100%)`,
-  overflow: "hidden",
-  textAlign: "center",
-  borderRadius: theme.shape.borderRadius * 3,
-  margin: theme.spacing(0, 2),
-  [theme.breakpoints.up("sm")]: {
-    margin: theme.spacing(0, 4),
-  },
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background:
-      "url(https://images.pexels.com/photos/1249611/pexels-photo-1249611.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    opacity: 0.1,
-    zIndex: 0,
-  },
-}));
-
-const buttonVariants = {
-  initial: { scale: 1 },
-  hover: {
-    scale: 1.05,
-    transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 10,
-    },
-  },
-  tap: { scale: 0.98 },
-};
-
-const CallToAction = () => {
+export const CallToAction = () => {
   const theme = useTheme();
-  const quote = getRandomQuote();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const router = useRouter();
 
-  const handleStartBuilding = () => {
-    const token = localStorage.getItem("token");
-    if (token) router.push("/AIWebsiteBuilders/home");
-    else router.push("/AIWebsiteBuilders/auth/login");
-  };
-
   return (
-    <Container maxWidth="lg" sx={{ my: 10 }}>
-      <CTAWrapper>
-        <Container maxWidth="md" sx={{ position: "relative", zIndex: 1 }}>
-          <MotionBox
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            sx={{ mb: 4 }}
-          >
-            <Typography
-              variant="h3"
-              component="h2"
-              sx={{
-                color: "common.white",
-                fontWeight: 700,
-                fontSize: { xs: "2rem", md: "2.75rem" },
-                mb: 2,
-              }}
-            >
-              Ready to <ShinyText color="white">Elevate</ShinyText> Your Trade
-              Business?
-            </Typography>
+    <Card
+      sx={{
+        width: "100%",
+        maxWidth: 1280,
+        height: "513px",
+        mx: "auto",
+        // my: 4,
+        mb: 4,
+        borderRadius: "20px",
+        overflow: "hidden",
+        position: "relative",
+        backgroundColor: "black",
+        color: "white",
+      }}
+    >
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "url(/images/CallToActionFrame.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.4,
+          zIndex: 0,
+        }}
+      />
 
-            <Typography
-              variant="h6"
-              sx={{
-                color: "rgba(255, 255, 255, 0.9)",
-                maxWidth: 600,
-                mx: "auto",
-                fontWeight: 400,
-              }}
-            >
-              {quote}
-            </Typography>
-          </MotionBox>
+      <CardContent
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          p: isMobile ? 4 : 10,
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
+        <Typography
+          variant={isMobile ? "h4" : "h2"}
+          sx={{
+            fontFamily: "['Montserrat',Helvetica]",
+            fontWeight: 700,
+            fontSize: "64px !important",
+            width: 800,
+            lineHeight: "100&",
+            letterSpacing: "2%",
+          }}
+        >
+          TAKE YOUR TRADE BUSINESS TO THE NEXT LEVEL
+        </Typography>
 
-          <MotionBox
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+        <Typography
+          variant="body1"
+          sx={{
+            fontFamily: "['Montserrat',Helvetica]",
+            fontWeight: 500,
+            color: "#f0f0f0",
+            fontSize: "20px",
+            lineHeight: 1.6,
+          }}
+        >
+          Your Trade Skills Deserve Professional Digital Representation.
+        </Typography>
+
+        <Button
+          variant="outlined"
+          onClick={() => {
+            if (!localStorage.getItem("token"))
+              router.push("/AIWebsiteBuilders/auth/login");
+            else router.push("/AIWebsiteBuilders/home");
+          }}
+          sx={{
+            width: "200px",
+            height: "40px",
+            padding: "8px 24px",
+
+            borderRadius: "8px",
+            backgroundColor: "white",
+            color: "black",
+            borderColor: "white",
+            display: "flex",
+            alignItems: "center",
+            "&:hover": {
+              backgroundColor: "white",
+              color: "black",
+              borderColor: "white",
+              "& .rotate-icon": {
+                transform: "rotate(45deg)", // horizontal
+              },
+            },
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: '"Inter", Helvetica, Arial, sans-serif',
+              fontWeight: 400,
+              fontSize: "14px",
+              textTransform: "none",
+            }}
           >
-            <Button
-              component={motion.button}
-              variants={buttonVariants}
-              initial="initial"
-              whileHover="hover"
-              whileTap="tap"
-              size="large"
-              variant="contained"
-              color="primary"
-              endIcon={<ArrowRight />}
-              sx={{
-                py: 1.75,
-                px: 4,
-                boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)",
-                backgroundColor: theme.palette.common.white,
-                fontSize: "1.1rem",
-                fontWeight: 600,
-                borderRadius: "12px",
-                "&:hover": {
-                  backgroundColor: theme.palette.common.white,
-                },
-              }}
-              onClick={handleStartBuilding}
-            >
-              Start Building Now
-            </Button>
-          </MotionBox>
-        </Container>
-      </CTAWrapper>
-    </Container>
+            Start Now
+          </Typography>
+          <NorthEastIcon
+            className="rotate-icon"
+            sx={{
+              width: "15px",
+              height: "15px",
+              marginLeft: "7px",
+              transform: "rotate(0deg)",
+              transition: "transform 0.3s ease-in-out",
+            }}
+          />
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
-
-export default CallToAction;
