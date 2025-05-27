@@ -1,4 +1,5 @@
 import React, { JSX } from "react";
+
 import {
   Box,
   Typography,
@@ -6,15 +7,9 @@ import {
   Card,
   CardMedia,
   CardContent,
-  useTheme,
-  useMediaQuery,
 } from "@mui/material";
 
 export const Features = (): JSX.Element => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  // Feature card data for mapping
   const featureCards = [
     {
       id: 1,
@@ -78,7 +73,8 @@ export const Features = (): JSX.Element => {
       sx={{
         width: "100%",
         backgroundColor: "black",
-        py: { xs: "5rem", md: "8rem" }, // 80px on desktop, 40px on mobile
+        pb: { xs: "40px", md: "70px" }, // 80px on desktop, 40px on mobile
+        pt: { xs: "40px", md: "100px" },
         px: { xs: "1.25rem", md: "5rem" }, // 20px on mobile, 80px on desktop
       }}
     >
@@ -92,12 +88,13 @@ export const Features = (): JSX.Element => {
           variant="h2"
           sx={{
             maxWidth: "923px",
-            fontFamily: "['Montserrat',Helvetica]",
+            fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 700,
             color: "white",
             fontSize: { xs: "2.25rem", md: "3.75rem", lg: "4rem" }, // 36px, 60px, 64px
             letterSpacing: "1.28px",
-            mb: "2.5rem", // 40px
+            mb: "30px",
+            lineHeight: "1.1",
           }}
         >
           DIGITAL SOLUTIONS FOR TRADESMEN
@@ -105,12 +102,12 @@ export const Features = (): JSX.Element => {
 
         <Typography
           sx={{
-            fontFamily: "['Montserrat',Helvetica]",
+            fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 500,
+            fontSize: "16px !important",
             color: "#808080",
-            fontSize: "1rem", // 16px
             letterSpacing: "0.32px",
-            mb: "4rem", // 64px
+            mb: "50px",
           }}
         >
           Professional Tools That Help You Showcase Your Work And Win More
@@ -118,10 +115,17 @@ export const Features = (): JSX.Element => {
         </Typography>
 
         <Grid container spacing={{ xs: 1.25, md: 2.5 }}>
-          {" "}
-          {/* 5px on mobile, 10px on desktop */}
-          {featureCards.map((card) => (
-            <Grid item xs={12} sm={6} lg={4} key={card.id}>
+          {featureCards.map((card, index) => (
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              lg={4}
+              key={card.id}
+              data-aos="fade-up"
+              data-aos-delay={`${index * 100}`}
+              data-aos-duration="800"
+            >
               <Card
                 sx={{
                   maxWidth: "413px",
@@ -141,26 +145,26 @@ export const Features = (): JSX.Element => {
                     width: "100%",
                     objectFit: "cover",
                   }}
-                  alt="Screenshot"
-                  src={card.image} // Add your image source here
+                  alt={card.title}
+                  src={card.image}
                 />
                 <CardContent
                   sx={{
-                    pt: "1.25rem", // 20px
-                    pb: "1.5rem", // 24px
-                    px: "1.5rem", // 24px
+                    pt: "1.25rem",
+                    pb: "1.5rem",
+                    px: "1.5rem",
                     flexGrow: 1,
                   }}
                 >
                   <Typography
                     variant="h3"
                     sx={{
-                      fontFamily: "['Montserrat',Helvetica]",
+                      fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
                       fontWeight: 500,
                       color: "white",
-                      fontSize: "20px !important", // 20px
+                      fontSize: "20px !important",
                       letterSpacing: "0.4px",
-                      mb: "0.75rem", // 12px
+                      mb: "0.75rem",
                     }}
                   >
                     {card.title}
@@ -170,7 +174,7 @@ export const Features = (): JSX.Element => {
                       fontFamily: '"Inter", Helvetica, Arial, sans-serif',
                       fontWeight: 400,
                       color: "#808080",
-                      fontSize: "16px !important", // 16px
+                      fontSize: "16px !important",
                       lineHeight: "17.5px",
                     }}
                   >

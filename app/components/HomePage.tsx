@@ -1,11 +1,13 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 import { Box } from "@mui/material";
 
-import Hero from "@/app/components/landing/Hero";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
+import Hero from "@/app/components/landing/Hero";
 import ScrollToTop from "@/app/components/landing/ScrollToTop";
 import JsonLd from "./JsonLd";
 import { Navbar } from "./landing/Navbar";
@@ -19,6 +21,14 @@ export default function HomePage() {
   const featuresRef = useRef<HTMLDivElement>(null);
   const showcaseRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+      easing: "ease-in-out",
+    });
+  }, []);
 
   const sections = [
     { id: "hero", label: "Home", ref: heroRef },
@@ -50,16 +60,16 @@ export default function HomePage() {
     <Box sx={{ overflow: "hidden", bgcolor: "black", minHeight: "100vh" }}>
       <JsonLd data={websiteSchema} />
       <Navbar sections={sections} />
-      <Box ref={heroRef} id="hero">
+      <Box ref={heroRef} id="hero" data-aos="fade-up">
         <Hero />
       </Box>
-      <Box ref={featuresRef} id="features">
+      <Box ref={featuresRef} id="features" data-aos="fade-up">
         <Features />
       </Box>
-      <Box ref={showcaseRef} id="showcase">
+      <Box ref={showcaseRef} id="showcase" data-aos="fade-up">
         <Showcase />
       </Box>
-      <Box ref={ctaRef} id="cta">
+      <Box ref={ctaRef} id="cta" data-aos="fade-up">
         <CallToAction />
       </Box>
       <Footer />

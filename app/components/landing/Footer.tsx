@@ -1,4 +1,5 @@
 import React from "react";
+
 import {
   Box,
   Container,
@@ -6,7 +7,6 @@ import {
   Typography,
   Link,
   TextField,
-  Button,
   Divider,
   IconButton,
   useTheme,
@@ -53,27 +53,36 @@ export const Footer = () => {
       sx={{
         width: "100%",
         bgcolor: "#1e1e1e",
-        py: 10,
-        px: isMobile ? 2 : 4, // Reduced side padding
+        mt: "140px",
+        pt: "50px",
+        pb: "30px",
+        px: isMobile ? 2 : 4,
         color: "white",
       }}
     >
       <Container
         maxWidth="lg"
         sx={{
-          px: isMobile ? 2 : 4, // Reduced container padding
-          maxWidth: "1280px !important", // Force max-width
+          px: isMobile ? 2 : 4,
+          maxWidth: "1280px !important",
         }}
       >
         <Grid container spacing={4}>
-          {/* Company Info */}
-          <Grid item xs={12} md={6} lg={3}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            lg={3}
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Typography
                 variant="h4"
                 sx={{
                   fontFamily: "'Montserrat', Helvetica, Arial, sans-serif",
                   fontWeight: 700,
+                  fontSize: "33.42px",
                   color: "white",
                 }}
               >
@@ -83,6 +92,8 @@ export const Footer = () => {
                 variant="body2"
                 sx={{
                   fontFamily: "'Montserrat', Helvetica, Arial, sans-serif",
+                  fontWeight: 400,
+                  fontSize: "14px",
                   color: "#949494",
                   maxWidth: 307,
                 }}
@@ -93,14 +104,21 @@ export const Footer = () => {
             </Box>
           </Grid>
 
-          {/* Products Column */}
-          <Grid item xs={6} md={3} lg={2}>
+          <Grid
+            item
+            xs={6}
+            md={3}
+            lg={2}
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               <Typography
                 variant="subtitle1"
                 sx={{
                   fontFamily: "'Inter', Helvetica, Arial, sans-serif",
                   fontWeight: 500,
+                  fontSize: "16px",
                   letterSpacing: "1px",
                 }}
               >
@@ -113,6 +131,8 @@ export const Footer = () => {
                       href={link.href}
                       sx={{
                         fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                        fontwe: 400,
+                        fontSize: "14px",
                         color: "white",
                         textDecoration: "none",
                         "&:hover": { textDecoration: "underline" },
@@ -128,14 +148,21 @@ export const Footer = () => {
             </Box>
           </Grid>
 
-          {/* Resources Column */}
-          <Grid item xs={6} md={3} lg={2}>
+          <Grid
+            item
+            xs={6}
+            md={3}
+            lg={2}
+            data-aos="fade-up"
+            data-aos-delay="300"
+          >
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               <Typography
                 variant="subtitle1"
                 sx={{
                   fontFamily: "'Inter', Helvetica, Arial, sans-serif",
                   fontWeight: 500,
+                  fontSize: "16px",
                   letterSpacing: "1px",
                 }}
               >
@@ -148,6 +175,8 @@ export const Footer = () => {
                       href={link.href}
                       sx={{
                         fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                        fontWeight: 400,
+                        fontSize: "14px",
                         color: "white",
                         textDecoration: "none",
                         "&:hover": { textDecoration: "underline" },
@@ -163,14 +192,21 @@ export const Footer = () => {
             </Box>
           </Grid>
 
-          {/* Company Column */}
-          <Grid item xs={6} md={3} lg={2}>
+          <Grid
+            item
+            xs={6}
+            md={3}
+            lg={2}
+            data-aos="fade-up"
+            data-aos-delay="400"
+          >
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               <Typography
                 variant="subtitle1"
                 sx={{
                   fontFamily: "'Inter', Helvetica, Arial, sans-serif",
                   fontWeight: 500,
+                  fontSize: "16px",
                   letterSpacing: "1px",
                 }}
               >
@@ -183,6 +219,8 @@ export const Footer = () => {
                       href={link.href}
                       sx={{
                         fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                        fontWeight: 400,
+                        fontSize: "14px",
                         color: "white",
                         textDecoration: "none",
                         "&:hover": { textDecoration: "underline" },
@@ -198,14 +236,21 @@ export const Footer = () => {
             </Box>
           </Grid>
 
-          {/* Newsletter and Social */}
-          <Grid item xs={12} md={6} lg={3}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            lg={3}
+            data-aos="fade-up"
+            data-aos-delay="500"
+          >
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Typography
                 variant="h6"
                 sx={{
                   fontFamily: "'Inter', Helvetica, Arial, sans-serif",
                   fontWeight: 500,
+                  fontSize: "20px",
                 }}
               >
                 Join the newsletter
@@ -230,6 +275,9 @@ export const Footer = () => {
                       px: 2,
                       py: 1,
                       flex: 1,
+                      fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+                      fontWeight: 400,
+                      fontSize: "14px",
                     },
                   }}
                   sx={{ flex: 1 }}
@@ -248,6 +296,7 @@ export const Footer = () => {
                 sx={{
                   fontFamily: "'Inter', Helvetica, Arial, sans-serif",
                   fontWeight: 500,
+                  fontSize: "20px",
                   mt: 2,
                 }}
               >
@@ -274,14 +323,17 @@ export const Footer = () => {
           </Grid>
         </Grid>
 
-        {/* Footer Bottom */}
         <Divider
+          data-aos="fade-in"
+          data-aos-delay="600"
           sx={{
             mt: 8,
             borderColor: "rgba(255, 255, 255, 0.3)",
           }}
         />
         <Box
+          data-aos="fade-up"
+          data-aos-delay="700"
           sx={{
             pt: 4,
             display: "flex",
@@ -295,6 +347,8 @@ export const Footer = () => {
             variant="body2"
             sx={{
               fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+              fontWeight: 400,
+              fontSize: "16px",
             }}
           >
             © TradesBuilder 2025
@@ -303,6 +357,8 @@ export const Footer = () => {
             href="#"
             sx={{
               fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+              fontWeight: 400,
+              fontSize: "16px",
               color: "white",
               textDecoration: "none",
               "&:hover": { textDecoration: "underline" },

@@ -1,12 +1,14 @@
 "use client";
 
-import { Box, Container, Typography, Button } from "@mui/material";
-import NorthEastIcon from "@mui/icons-material/NorthEast";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import { Box, Container, Typography, Button } from "@mui/material";
+import NorthEastIcon from "@mui/icons-material/NorthEast";
+
 const Hero = () => {
   const router = useRouter();
+
   return (
     <Container
       maxWidth="lg"
@@ -14,55 +16,52 @@ const Hero = () => {
         textAlign: "center",
         position: "relative",
         overflow: "hidden",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        backgroundImage: "url('/images/Texture.png')",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
-      <Box
-        sx={{
-          width: 677,
-          height: 677,
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          borderRadius: "50%",
-          backgroundImage: "url('/images/Textures.png')",
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-          opacity: "30%",
-          zIndex: 0,
-          color: "white",
-        }}
-      />
-
-      {/* Content Layer */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
         <Typography
+          data-aos="fade-down"
+          data-aos-delay="100"
           sx={{
-            fontFamily: "['Montserrat',Helvetica]",
+            fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 500,
-            fontSize: "16px",
+            fontSize: "16px !important",
             color: "#f0f0f0",
-            mb: 3,
-            mt: 5,
+            mb: 4,
+            mt: 12,
           }}
         >
           Skip The Hassle. Build & Launch Your Trade Site In 10 Minutes.
         </Typography>
 
         <Typography
+          data-aos="zoom-in"
+          data-aos-delay="200"
           sx={{
-            fontFamily: "['Montserrat',Helvetica]",
+            fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 700,
             fontSize: "64px",
             color: "white",
             mb: 4,
+            lineHeight: "1.1",
           }}
         >
           FOCUS ON YOUR CRAFT — WE'LL BUILD THE WEBSITE
         </Typography>
 
-        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 8 }}>
+        <Box
+          data-aos="fade-up"
+          data-aos-delay="300"
+          sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 8 }}
+        >
           <Button
             variant="outlined"
             onClick={() => {
@@ -84,16 +83,16 @@ const Hero = () => {
                 color: "black",
                 borderColor: "white",
                 "& .rotate-icon": {
-                  transform: "rotate(45deg)", // horizontal
+                  transform: "rotate(45deg)",
                 },
               },
             }}
           >
             <Typography
               sx={{
-                fontFamily: '"Poppins", Helvetica, Arial, sans-serif',
+                fontFamily: "'Inter', Helvetica, Arial, sans-serif",
                 fontWeight: 400,
-                fontSize: "16px",
+                fontSize: "14px",
                 textTransform: "none",
               }}
             >
@@ -118,16 +117,18 @@ const Hero = () => {
               height: "40px",
               padding: "8px 24px",
               borderRadius: "8px",
-              borderColor: "white",
+              border: "none",
               color: "white",
-              backgroundColor: "#FFFFFF33",
+              backgroundColor: "rgba(255, 255, 255, 0.3)",
+              backdropFilter: "blur(4px)",
+              WebkitBackdropFilter: "blur(4px)",
             }}
           >
             <Typography
               sx={{
-                fontFamily: '"Poppins", Helvetica, Arial, sans-serif',
+                fontFamily: "'Inter', Helvetica, Arial, sans-serif",
                 fontWeight: 400,
-                fontSize: "16px",
+                fontSize: "14px",
                 textTransform: "none",
               }}
             >
@@ -140,10 +141,12 @@ const Hero = () => {
         </Box>
 
         <Typography
+          data-aos="fade-up"
+          data-aos-delay="400"
           sx={{
-            fontFamily: "['Montserrat',Helvetica]",
+            fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 500,
-            fontSize: "16px",
+            fontSize: "16px !important",
             color: "#f0f0f0",
             mb: 3,
             mt: 5,
@@ -152,7 +155,11 @@ const Hero = () => {
           Trusted by more than 100 companies
         </Typography>
 
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box
+          data-aos="zoom-in-up"
+          data-aos-delay="500"
+          sx={{ display: "flex", justifyContent: "center" }}
+        >
           <Image src="/images/Hero.png" alt="Logos" width={1089} height={474} />
         </Box>
       </Box>
