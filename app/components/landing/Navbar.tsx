@@ -1,4 +1,6 @@
 import React, { JSX, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import {
   AppBar,
   Toolbar,
@@ -13,8 +15,6 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 type NavbarProps = {
   sections: { id: string; label: string; ref: React.RefObject<HTMLElement> }[];
@@ -42,22 +42,25 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
 
   return (
     <AppBar
-      position="static"
+      position="sticky"
       sx={{
-        height: "80px",
+        height: "70px",
         backgroundColor: "black",
         boxShadow: "none",
-        padding: { xs: "1rem", md: "1rem 5rem" }, // 36px 80px when converted from py-9 px-20
+        padding: { xs: "0 1rem", md: "0 5rem" },
+        display: "flex",
+        justifyContent: "center",
       }}
     >
       <Toolbar
         sx={{
           display: "flex",
           justifyContent: "space-between",
+          alignItems: "center",
+          height: "100%",
           padding: "0 !important",
         }}
       >
-        {/* Logo Section */}
         <Box sx={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <Box
             sx={{
@@ -76,20 +79,21 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
               src="/images/Logo.png"
             />
           </Box>
-          <Typography
-            variant="h4"
-            sx={{
-              fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
-              fontWeight: 800,
-              color: "white",
-              fontSize: "64px",
-            }}
-          >
-            TRADES BUILDER PRO
-          </Typography>
+          {!isMobile && (
+            <Typography
+              variant="h4"
+              sx={{
+                fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
+                fontWeight: 800,
+                color: "white",
+                fontSize: "64px",
+              }}
+            >
+              TRADES BUILDER PRO
+            </Typography>
+          )}
         </Box>
 
-        {/* Desktop Navigation */}
         {!isMobile ? (
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Box sx={{ display: "flex" }}>
@@ -102,8 +106,8 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
                     fontWeight: 400,
                     color: "#808080",
                     fontSize: "14px !important",
-                    letterSpacing: "0.28px",
-                    textTransform: "none",
+                    // letterSpacing: "0.28px",
+                    textTransform: "uppercase",
                     "&:hover": {
                       color: "white",
                       backgroundColor: "transparent",
@@ -128,13 +132,14 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
                 padding: "8px 24px",
                 borderRadius: "8px",
                 borderColor: "white",
+                marginLeft: "16px",
                 color: "white",
                 "&:hover": {
                   backgroundColor: "white",
                   color: "black",
                   borderColor: "white",
                   "& .rotate-icon": {
-                    transform: "rotate(45deg)", // horizontal
+                    transform: "rotate(45deg)",
                   },
                 },
               }}

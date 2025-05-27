@@ -1,13 +1,13 @@
 import React, { useState, useEffect, JSX } from "react";
+import { useRouter } from "next/navigation";
+
 import { Box, Typography, Card, CardContent, Button } from "@mui/material";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
-import { useRouter } from "next/navigation";
 
 export const Showcase = (): JSX.Element => {
   const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
 
-  // Data for trade cards to enable mapping
   const tradeCards = [
     {
       id: 1,
@@ -27,18 +27,16 @@ export const Showcase = (): JSX.Element => {
     },
   ];
 
-  // Carousel images
   const carouselImages = [
     "/images/carousel1.png",
     "/images/carousel2.png",
     "/images/carousel3.png",
   ];
 
-  // Auto-advance carousel with continuous loop
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
-    }, 3000); // Change image every 3 seconds
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [carouselImages.length]);
@@ -49,8 +47,8 @@ export const Showcase = (): JSX.Element => {
       sx={{
         position: "relative",
         width: "100%",
-        py: { xs: "4rem", md: "6rem" },
         px: { xs: "1rem", md: "5rem" },
+        mb: "100px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -58,17 +56,17 @@ export const Showcase = (): JSX.Element => {
         color: "white",
       }}
     >
-      {/* Main Heading */}
       <Typography
         variant="h2"
+        data-aos="fade-up"
         sx={{
-          fontFamily: "['Montserrat',Helvetica]",
+          fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
           fontWeight: 700,
           color: "white",
           fontSize: { xs: "2.25rem", md: "64px !important" },
           textAlign: "center",
           letterSpacing: "1.28px",
-          lineHeight: "normal",
+          lineHeight: "1.1",
           maxWidth: "923px",
           mb: "2rem",
         }}
@@ -76,10 +74,10 @@ export const Showcase = (): JSX.Element => {
         WEBSITES TAILORED FOR YOUR TRADE
       </Typography>
 
-      {/* Description Paragraph */}
       <Typography
+        data-aos="fade-up"
         sx={{
-          fontFamily: "['Montserrat',Helvetica]",
+          fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
           fontWeight: 500,
           color: "#808080",
           fontSize: "16px !important",
@@ -87,7 +85,7 @@ export const Showcase = (): JSX.Element => {
           letterSpacing: "0",
           lineHeight: "20.5px",
           maxWidth: "1028px",
-          mt: "2rem",
+          mb: 2,
         }}
       >
         Create A Website That's Perfectly Suited To Your Specific Trade. Whether
@@ -95,7 +93,6 @@ export const Showcase = (): JSX.Element => {
         Templates Are Designed To Highlight Your Unique Skills And Services.
       </Typography>
 
-      {/* Content Container */}
       <Box
         sx={{
           width: "100%",
@@ -106,7 +103,6 @@ export const Showcase = (): JSX.Element => {
           justifyContent: "space-between",
         }}
       >
-        {/* Left Column - Cards */}
         <Box
           sx={{
             display: "flex",
@@ -115,9 +111,11 @@ export const Showcase = (): JSX.Element => {
             width: { xs: "100%", lg: "600px" },
           }}
         >
-          {tradeCards.map((card) => (
+          {tradeCards.map((card, idx) => (
             <Card
               key={card.id}
+              data-aos="fade-up"
+              data-aos-delay={`${idx * 100}`}
               sx={{
                 backgroundColor: "black",
                 borderRadius: "20px",
@@ -133,7 +131,7 @@ export const Showcase = (): JSX.Element => {
                   right: 0,
                   bottom: 0,
                   borderRadius: "20px",
-                  padding: "1px", // Border thickness
+                  padding: "1px",
                   background: "linear-gradient(to bottom, #454545, #000000)",
                   WebkitMask:
                     "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
@@ -148,7 +146,7 @@ export const Showcase = (): JSX.Element => {
                   right: 0,
                   bottom: 0,
                   height: "1px",
-                  background: "black", // Mask bottom border
+                  background: "black",
                 },
               }}
             >
@@ -156,7 +154,7 @@ export const Showcase = (): JSX.Element => {
                 <Typography
                   variant="h3"
                   sx={{
-                    fontFamily: "['Montserrat',Helvetica]",
+                    fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
                     fontWeight: 500,
                     color: "white",
                     fontSize: "20px !important",
@@ -186,6 +184,8 @@ export const Showcase = (): JSX.Element => {
 
           <Button
             variant="outlined"
+            data-aos="zoom-in"
+            data-aos-delay="400"
             onClick={() => {
               if (!localStorage.getItem("token"))
                 router.push("/AIWebsiteBuilders/auth/login");
@@ -195,7 +195,7 @@ export const Showcase = (): JSX.Element => {
               width: "200px",
               height: "40px",
               padding: "8px 24px",
-              margin: "5%",
+              margin: "3% 0% 0% 5%",
               borderRadius: "8px",
               backgroundColor: "white",
               color: "black",
@@ -207,7 +207,7 @@ export const Showcase = (): JSX.Element => {
                 color: "black",
                 borderColor: "white",
                 "& .rotate-icon": {
-                  transform: "rotate(45deg)", // horizontal
+                  transform: "rotate(45deg)",
                 },
               },
             }}
@@ -235,8 +235,8 @@ export const Showcase = (): JSX.Element => {
           </Button>
         </Box>
 
-        {/* Right Column - Carousel */}
         <Box
+          data-aos="fade-left"
           sx={{
             width: { xs: "100%", lg: "630px" },
             height: { xs: "300px", lg: "415px" },

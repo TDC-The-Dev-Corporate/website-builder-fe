@@ -1,4 +1,6 @@
 import React from "react";
+import { useRouter } from "next/navigation";
+
 import {
   Card,
   CardContent,
@@ -9,7 +11,6 @@ import {
   Box,
 } from "@mui/material";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
-import { useRouter } from "next/navigation";
 
 export const CallToAction = () => {
   const theme = useTheme();
@@ -23,7 +24,6 @@ export const CallToAction = () => {
         maxWidth: 1280,
         height: "513px",
         mx: "auto",
-        // my: 4,
         mb: 4,
         borderRadius: "20px",
         overflow: "hidden",
@@ -31,6 +31,7 @@ export const CallToAction = () => {
         backgroundColor: "black",
         color: "white",
       }}
+      data-aos="zoom-in"
     >
       <Box
         sx={{
@@ -57,13 +58,15 @@ export const CallToAction = () => {
         <Typography
           variant={isMobile ? "h4" : "h2"}
           sx={{
-            fontFamily: "['Montserrat',Helvetica]",
+            fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 700,
             fontSize: "64px !important",
             width: 800,
             lineHeight: "100&",
             letterSpacing: "2%",
           }}
+          data-aos="fade-up"
+          data-aos-delay="100"
         >
           TAKE YOUR TRADE BUSINESS TO THE NEXT LEVEL
         </Typography>
@@ -71,12 +74,14 @@ export const CallToAction = () => {
         <Typography
           variant="body1"
           sx={{
-            fontFamily: "['Montserrat',Helvetica]",
+            fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 500,
             color: "#f0f0f0",
             fontSize: "20px",
             lineHeight: 1.6,
           }}
+          data-aos="fade-up"
+          data-aos-delay="200"
         >
           Your Trade Skills Deserve Professional Digital Representation.
         </Typography>
@@ -92,7 +97,6 @@ export const CallToAction = () => {
             width: "200px",
             height: "40px",
             padding: "8px 24px",
-
             borderRadius: "8px",
             backgroundColor: "white",
             color: "black",
@@ -104,10 +108,12 @@ export const CallToAction = () => {
               color: "black",
               borderColor: "white",
               "& .rotate-icon": {
-                transform: "rotate(45deg)", // horizontal
+                transform: "rotate(45deg)",
               },
             },
           }}
+          data-aos="fade-up"
+          data-aos-delay="300"
         >
           <Typography
             sx={{

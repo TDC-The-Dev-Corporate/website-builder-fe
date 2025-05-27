@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
-import { baseMetadata } from "@/lib/metadata";
 import ThemeRegistry from "./components/ThemeRegistry";
+
+import { baseMetadata } from "@/lib/metadata";
 
 import "./globals.css";
 
@@ -17,6 +18,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className={inter.className}>
         <ThemeRegistry>{children}</ThemeRegistry>
       </body>
