@@ -387,6 +387,36 @@ export default function PortfolioBuilder() {
                   canvasBody.addEventListener("dragover", (event) => {
                     event.preventDefault();
                   });
+
+                  canvasBody.addEventListener("drop", (event) => {
+                    event.preventDefault();
+                  });
+                });
+
+                editor.on("canvas:dragdata", async (dataTransfer, result) => {
+                  if (
+                    dataTransfer &&
+                    dataTransfer.files &&
+                    dataTransfer.files.length
+                  ) {
+                    result.content = null;
+
+                    const files = Array.from(dataTransfer.files) as File[];
+
+                    const uploadedAssets = await uploadToCloudinary(files);
+
+                    editorHelpers.clearSelection(editor);
+
+                    uploadedAssets.forEach((asset) => {
+                      if (asset.isImage) {
+                        editorHelpers.addImageComponent(editor, asset);
+                      } else if (asset.type?.startsWith("video")) {
+                        editorHelpers.addVideoComponent?.(editor, asset);
+                      } else {
+                        editorHelpers.addFileLinkComponent(editor, asset);
+                      }
+                    });
+                  }
                 });
               }}
               options={{
@@ -396,7 +426,8 @@ export default function PortfolioBuilder() {
                   assets: {
                     storageType: "self",
                     upload: true,
-                    dropzone: true,
+                    dropzone: false,
+                    openAssetsOnDrop: false,
                     autoAdd: false,
                     onUpload: async ({ files }) => {
                       try {
