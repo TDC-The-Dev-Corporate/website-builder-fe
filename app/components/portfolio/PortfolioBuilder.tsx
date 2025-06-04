@@ -358,7 +358,6 @@ export default function PortfolioBuilder() {
                           el.classList.toggle("show", val);
                           el.style.display = val ? "block" : "none";
 
-                          // Add these for editor visibility
                           if (val) {
                             el.style.display = "block";
                             el.style.opacity = "1";
@@ -388,25 +387,6 @@ export default function PortfolioBuilder() {
                   canvasBody.addEventListener("dragover", (event) => {
                     event.preventDefault();
                   });
-
-                  canvasBody.addEventListener("drop", async (event) => {
-                    event.preventDefault();
-
-                    const files = Array.from(event.dataTransfer?.files || []);
-                    if (files.length === 0) return;
-
-                    const results = await uploadToCloudinary(files);
-
-                    results.forEach((asset) => {
-                      if (asset.isImage) {
-                        editorHelpers.addImageComponent(editor, asset);
-                      } else if (asset.type?.startsWith("video")) {
-                        editorHelpers.addVideoComponent?.(editor, asset);
-                      } else {
-                        editorHelpers.addFileLinkComponent(editor, asset);
-                      }
-                    });
-                  });
                 });
               }}
               options={{
@@ -417,7 +397,7 @@ export default function PortfolioBuilder() {
                     storageType: "self",
                     upload: true,
                     dropzone: true,
-                    autoAdd: true,
+                    autoAdd: false,
                     onUpload: async ({ files }) => {
                       try {
                         const results = await uploadToCloudinary(files);
