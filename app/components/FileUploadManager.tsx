@@ -18,7 +18,9 @@ export default function FileUploadManager({
     const originalSelect = assetManager.select;
 
     assetManager.select = function (asset) {
-      if (!asset.isImage) {
+      const isImage = asset.get("type")?.startsWith("image") || asset.isImage;
+
+      if (!isImage) {
         editor.runCommand("insert-document-after", {
           src: asset.getSrc(),
           name: asset.get("name"),
