@@ -20,7 +20,14 @@ import {
   Avatar,
 } from "@mui/material";
 
-import { Menu, User, Layout, LogOut, DraftingCompass } from "lucide-react";
+import {
+  Menu,
+  User,
+  Layout,
+  LogOut,
+  DraftingCompass,
+  Globe,
+} from "lucide-react";
 
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 import TemplateViewer from "@/app/components/TemplatesViewer/templateViewer";
@@ -33,6 +40,7 @@ import ViewProfile from "@/app/AIWebsiteBuilders/profile/page";
 import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
 
 import { cleanLocalStorage, logoutUser } from "@/lib/utils";
+import DomainManagement from "../domain/DomainManagement";
 
 interface Portfolio {
   id: string;
@@ -133,6 +141,7 @@ export default function Dashboard() {
   const menuItems = [
     { text: "Templates", icon: <Layout size={20} />, id: "templates" },
     { text: "Drafts", icon: <DraftingCompass size={20} />, id: "drafts" },
+    { text: "Domain", icon: <Globe size={20} />, id: "domain" },
     { text: "Profile", icon: <User size={20} />, id: "profile" },
   ];
 
@@ -159,6 +168,8 @@ export default function Dashboard() {
         return <TemplateViewer />;
       case "drafts":
         return <Drafts />;
+      case "domain":
+        return <DomainManagement />;
       default:
         return <TemplateViewer />;
     }
