@@ -3,7 +3,9 @@
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 
-import { Box } from "@mui/material";
+import { Wand2, Image as ImageIcon } from "lucide-react";
+
+import { Box, Dialog, DialogContent, Fab, Tooltip } from "@mui/material";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
@@ -24,6 +26,7 @@ import ConfirmationModal from "@/app/components/modals/ConfirmationModal";
 import SuccessModal from "@/app/components/modals/SuccessModal";
 import FileUploadManager from "@/app/components/FileUploadManager";
 import LoadingSpinner from "@/app/components/animations/LoadingSpinner";
+import ContentGenerator from "@/app/components/AI/ContentGenerator";
 import JsonLd from "../JsonLd";
 import {
   grapesJsStyles,
@@ -52,6 +55,11 @@ export default function PortfolioBuilder() {
   const [deployUrl, setDeployUrl] = useState("");
   const [portfolioId, setPortfolioId] = useState("");
 
+  const [showContentGenerator, setShowContentGenerator] = useState(false);
+
+  const [userTrade, setUserTrade] = useState("");
+  const [businessName, setBusinessName] = useState("");
+
   const dispatch = useAppDispatch();
 
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -60,6 +68,15 @@ export default function PortfolioBuilder() {
     const template = localStorage.getItem("selectedTemplate");
     if (template) {
       setSelectedTemplate(JSON.parse(template));
+    }
+
+    const user = localStorage.getItem("user");
+    if (user) {
+      const userData = JSON.parse(user);
+      setUserTrade(userData.tradeSpecialization || "tradesman");
+      setBusinessName(
+        userData.businessName || userData.name || "your business"
+      );
     }
   }, []);
 
@@ -221,6 +238,28 @@ export default function PortfolioBuilder() {
     }
   };
 
+  const handleInsertContent = (content: string, type: string) => {
+    if (!editorRef.current) return;
+
+    const editor = editorRef.current;
+    const selected = editor.getSelected();
+
+    if (selected) {
+      if (type === "heading") {
+        selected.components(`<h2>${content}</h2>`);
+      } else if (type === "list") {
+        selected.components(content);
+      } else {
+        selected.components(`<div>${content}</div>`);
+      }
+    } else {
+      // Add to canvas if nothing is selected
+      editor.addComponents(`<div>${content}</div>`);
+    }
+
+    editor.trigger("change:canvasOffset");
+  };
+
   const editorHelpers = {
     clearSelection: (editor) => {
       const selected = editor.getSelected();
@@ -276,6 +315,8 @@ export default function PortfolioBuilder() {
       "Custom styling",
       "Image and video upload",
       "Real-time preview",
+      "AI content generation",
+      "AI image generation",
     ],
   };
 
@@ -660,6 +701,26 @@ export default function PortfolioBuilder() {
                         </div>`,
                           category: "Trade Components",
                         });
+
+                        // Add AI Content Generation button to toolbar
+                        editor.Panels.addButton("options", {
+                          id: "generate-content",
+                          className: "fa fa-magic",
+                          command: "show-content-generator",
+                          attributes: { title: "Generate Content with AI" },
+                        });
+
+                        editor.Commands.add("show-content-generator", {
+                          run: () => setShowContentGenerator(true),
+                        });
+
+                        // Add AI Image Generation button to toolbar
+                        editor.Panels.addButton("options", {
+                          id: "generate-image",
+                          className: "fa fa-image",
+                          command: "show-image-generator",
+                          attributes: { title: "Generate Images with AI" },
+                        });
                       });
                     },
                   ],
@@ -744,9 +805,63 @@ export default function PortfolioBuilder() {
               }}
             />
             <FileUploadManager editor={editorRef.current} />
+
+            {/* AI Floating Action Buttons */}
+            <Box
+              sx={{
+                position: "fixed",
+                bottom: 24,
+                right: 24,
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                zIndex: 1000,
+              }}
+            >
+              <Tooltip title="Generate Content with AI" placement="left">
+                <Fab
+                  color="primary"
+                  onClick={() => setShowContentGenerator(true)}
+                  sx={{
+                    background:
+                      "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+                    "&:hover": {
+                      background:
+                        "linear-gradient(135deg, #2563eb 0%, #1e40af 100%)",
+                    },
+                  }}
+                >
+                  <Wand2 size={24} />
+                </Fab>
+              </Tooltip>
+            </Box>
           </Box>
         </div>
       )}
+
+      <Dialog
+        open={showContentGenerator}
+        onClose={() => setShowContentGenerator(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: "transparent",
+            boxShadow: "none",
+          },
+        }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <ContentGenerator
+            onInsertContent={handleInsertContent}
+            onClose={() => setShowContentGenerator(false)}
+            userTrade={userTrade}
+            businessName={businessName}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Image Generator Dialog */}
 
       <ConfirmationModal
         open={saveConfirmationOpen}
