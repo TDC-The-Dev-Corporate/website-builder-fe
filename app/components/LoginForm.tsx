@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
+import { ThreeDots } from "react-loader-spinner";
 import {
   Box,
   Button,
@@ -182,7 +182,18 @@ export default function LoginForm() {
                   },
                 }}
               >
-                {loading ? <CircularProgress size={24} /> : "Sign In"}
+                {loading ? (
+                  <ThreeDots
+                    height="28"
+                    width="40"
+                    radius="9"
+                    color="#FFFFFF"
+                    ariaLabel="three-dots-loading"
+                    visible
+                  />
+                ) : (
+                  "Sign In"
+                )}
               </Button>
 
               <Divider sx={{ my: 3, color: "rgba(255, 255, 255, 0.5)" }}>
