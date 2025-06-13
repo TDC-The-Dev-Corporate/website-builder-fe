@@ -28,6 +28,7 @@ import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 
 import { AppDispatch, RootState } from "@/lib/redux/store";
 import { register as registerUser } from "@/lib/redux/slices/authSlice";
+import { ThreeDots } from "react-loader-spinner";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -435,7 +436,18 @@ export default function Register() {
                       },
                     }}
                   >
-                    {loading ? <CircularProgress size={24} /> : "Register"}
+                    {loading ? (
+                      <ThreeDots
+                        height="28"
+                        width="40"
+                        radius="9"
+                        color="#FFFFFF"
+                        ariaLabel="three-dots-loading"
+                        visible
+                      />
+                    ) : (
+                      "Register"
+                    )}
                   </Button>
                 </Grid>
 
