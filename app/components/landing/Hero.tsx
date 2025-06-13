@@ -112,8 +112,10 @@ const Hero = () => {
 
           <Button
             variant="outlined"
+            onClick={() => {
+              router.push("/AIWebsiteBuilders/pricing");
+            }}
             sx={{
-              cursor: "not-allowed",
               height: "40px",
               padding: "8px 24px",
               borderRadius: "8px",
@@ -122,6 +124,11 @@ const Hero = () => {
               backgroundColor: "rgba(255, 255, 255, 0.3)",
               backdropFilter: "blur(4px)",
               WebkitBackdropFilter: "blur(4px)",
+              "&:hover": {
+                "& .rotate-icon": {
+                  transform: "rotate(45deg)",
+                },
+              },
             }}
           >
             <Typography
@@ -132,10 +139,17 @@ const Hero = () => {
                 textTransform: "none",
               }}
             >
-              Explore Features
+              Pricing Plans
             </Typography>
             <NorthEastIcon
-              sx={{ width: "15px", height: "15px", marginLeft: "7px" }}
+              className="rotate-icon"
+              sx={{
+                width: "15px",
+                height: "15px",
+                marginLeft: "7px",
+                transform: "rotate(0deg)",
+                transition: "transform 0.3s ease-in-out",
+              }}
             />
           </Button>
         </Box>
