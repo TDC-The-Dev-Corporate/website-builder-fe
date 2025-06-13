@@ -91,9 +91,7 @@ export default function PricingPage() {
   const router = useRouter();
 
   const handlePlanSelect = (planId: string) => {
-    // Handle plan selection logic here
     console.log(`Selected plan: ${planId}`);
-    router.push(`/AIWebsiteBuilders/pricing/${planId}`);
   };
 
   return (
