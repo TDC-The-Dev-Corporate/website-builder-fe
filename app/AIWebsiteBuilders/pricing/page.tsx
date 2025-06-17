@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { Check, Star, Zap, Shield } from "lucide-react";
+
 import {
   Box,
   Typography,
@@ -18,10 +22,12 @@ import {
   Grid,
   Paper,
 } from "@mui/material";
-import { Check, Star, Zap, Shield } from "lucide-react";
+
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+
 import PaymentForm from "@/app/components/payment/PaymentForm";
+import { useAppDispatch } from "@/lib/redux/hooks";
+import { doPayment } from "@/lib/redux/api/payment";
 
 const MotionCard = motion(Card);
 const MotionBox = motion(Box);
@@ -90,11 +96,22 @@ const pricingPlans = [
 export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(false);
   const [activePlan, setActivePlan] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
-  const handlePlanSelect = (planId: string) => {
+  const handlePlanSelect = async (planId: string) => {
+    setLoading(true);
     setActivePlan(true);
-    console.log(`Selected plan: ${planId}`);
+    const selectedPlan = pricingPlans.find((p) => p.id === planId);
+    const amount = isYearly
+      ? selectedPlan.yearlyPrice * 100
+      : selectedPlan.monthlyPrice * 100;
+    const data = { amount, currency: "usd" };
+    const { clientSecret } = await doPayment(data);
+    setClientSecret(clientSecret);
+    setLoading(false);
   };
 
   return (
@@ -411,7 +428,7 @@ export default function PricingPage() {
         </Container>
       )}
 
-      {activePlan && <PaymentForm />}
+      {activePlan && <PaymentForm clientSecret={clientSecret} />}
     </Box>
   );
 }
