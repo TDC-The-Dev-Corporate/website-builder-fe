@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  CardNumberElement,
-  CardExpiryElement,
-  CardCvcElement,
-  useElements,
-  useStripe,
-} from "@stripe/react-stripe-js";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 import {
   Box,
   Button,
@@ -16,7 +12,14 @@ import {
   CircularProgress,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+
+import {
+  CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js";
 
 const ELEMENT_OPTIONS = {
   style: {
@@ -33,52 +36,35 @@ const ELEMENT_OPTIONS = {
   },
 };
 
-export default function PaymentForm() {
+export default function PaymentForm({ clientSecret }) {
   const stripe = useStripe();
   const elements = useElements();
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
-    if (!stripe || !elements) {
-      setLoading(false);
-      return;
-    }
-
-    const card = elements.getElement(CardNumberElement);
-    if (!card) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { paymentMethod, error } = await stripe.createPaymentMethod({
-        type: "card",
-        card,
-      });
-
-      if (error) {
-        setError(error.message || "Payment failed");
-        setLoading(false);
-        return;
+    const cardElement = elements.getElement(CardNumberElement);
+    const { error, paymentIntent } = await stripe!.confirmCardPayment(
+      clientSecret,
+      {
+        payment_method: { card: cardElement! },
       }
+    );
 
-      console.log("Payment method created:", paymentMethod);
-      setSuccess(true);
-
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 3000);
-    } catch (err: any) {
-      setError("An unexpected error occurred.");
-    } finally {
+    if (error) {
+      setError(error.message);
       setLoading(false);
+      return;
     }
+    setSuccess(true);
+    setTimeout(() => router.push("/"), 3000);
+    setLoading(false);
   };
 
   return (
