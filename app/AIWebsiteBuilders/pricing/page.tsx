@@ -27,7 +27,7 @@ import { motion } from "framer-motion";
 
 import PaymentForm from "@/app/components/payment/PaymentForm";
 import { useAppDispatch } from "@/lib/redux/hooks";
-import { doPayment } from "@/lib/redux/api/payment";
+import { createSubsscription } from "@/lib/redux/api/payment";
 
 const MotionCard = motion(Card);
 const MotionBox = motion(Box);
@@ -40,6 +40,8 @@ const pricingPlans = [
     description: "For tradesmen who want a fast DIY setup",
     monthlyPrice: 49,
     yearlyPrice: 499,
+    monthlyPriceId: "price_1RaxVeLGv5Qfwi5L19H9fLaY",
+    yearlyPriceId: "price_1RaxWKLGv5Qfwi5Lzlvv6pYF",
     color: "primary",
     features: [
       "Drag-and-drop builder",
@@ -58,6 +60,8 @@ const pricingPlans = [
     description: "For growing businesses that want automation",
     monthlyPrice: 99,
     yearlyPrice: 999,
+    monthlyPriceId: "price_1RaxWtLGv5Qfwi5LcDQOmYNI",
+    yearlyPriceId: "price_1RaxZOLGv5Qfwi5LuBbcajvb",
     color: "secondary",
     features: [
       "Everything in Essential, plus:",
@@ -77,6 +81,8 @@ const pricingPlans = [
     description: "Done-for-you setup + dedicated support",
     monthlyPrice: 129,
     yearlyPrice: 1548, // 129 * 12
+    monthlyPriceId: "price_1RaxY5LGv5Qfwi5LrljKef03",
+    yearlyPriceId: "price_1RaxZoLGv5Qfwi5LEVCv4YQm",
     setupFee: 1499,
     color: "appleGreen",
     features: [
@@ -104,12 +110,13 @@ export default function PricingPage() {
   const handlePlanSelect = async (planId: string) => {
     setLoading(true);
     setActivePlan(true);
+
     const selectedPlan = pricingPlans.find((p) => p.id === planId);
-    const amount = isYearly
-      ? selectedPlan.yearlyPrice * 100
-      : selectedPlan.monthlyPrice * 100;
-    const data = { amount, currency: "usd" };
-    const { clientSecret } = await doPayment(data);
+    const priceId = isYearly
+      ? selectedPlan.yearlyPriceId
+      : selectedPlan.monthlyPriceId;
+
+    const { clientSecret } = await createSubsscription({ priceId });
     setClientSecret(clientSecret);
     setLoading(false);
   };
