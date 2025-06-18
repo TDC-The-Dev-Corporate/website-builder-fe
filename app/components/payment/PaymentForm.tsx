@@ -50,7 +50,7 @@ export default function PaymentForm({ clientSecret }) {
     setLoading(true);
 
     const cardElement = elements.getElement(CardNumberElement);
-    const { error, paymentIntent } = await stripe!.confirmCardPayment(
+    const { error, paymentIntent } = await stripe.confirmCardPayment(
       clientSecret,
       {
         payment_method: { card: cardElement! },
