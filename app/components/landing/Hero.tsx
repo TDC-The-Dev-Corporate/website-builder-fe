@@ -36,7 +36,7 @@ const Hero = () => {
             fontSize: "16px !important",
             color: "#f0f0f0",
             mb: 4,
-            mt: 12,
+            mt: { xs: 2, md: 12 },
           }}
         >
           Skip The Hassle. Build & Launch Your Trade Site In 10 Minutes.
@@ -48,13 +48,19 @@ const Hero = () => {
           sx={{
             fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 700,
-            fontSize: "64px",
+
+            fontSize: {
+              xs: "32px",
+              sm: "42px",
+              md: "52px",
+              lg: "64px",
+            },
             color: "white",
             mb: 4,
             lineHeight: "1.1",
           }}
         >
-          FOCUS ON YOUR CRAFT — WE'LL BUILD THE WEBSITE
+          FOCUS ON YOUR CRAFT — WE&apos;LL BUILD THE WEBSITE
         </Typography>
 
         <Box
