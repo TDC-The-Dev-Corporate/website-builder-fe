@@ -11,11 +11,12 @@ import {
   Container,
   TextField,
   Typography,
-  CircularProgress,
   Alert,
   Stack,
   Divider,
+  IconButton,
 } from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
 
 import MotionBox from "@/app/components/animations/MotionBox";
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
@@ -92,8 +93,26 @@ export default function LoginForm() {
               borderRadius: "16px",
               textAlign: "center",
               border: "1px solid rgba(255, 255, 255, 0.1)",
+              position: "relative",
             }}
           >
+            <IconButton
+              component={Link}
+              href="/"
+              sx={{
+                position: "absolute",
+                top: 16,
+                left: 16,
+                color: "rgba(255, 255, 255, 0.7)",
+                "&:hover": {
+                  color: "white",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              <HomeIcon />
+            </IconButton>
+
             <Typography
               component="h1"
               variant="h4"
