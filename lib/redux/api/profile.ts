@@ -9,3 +9,8 @@ export const removeUser = async () => {
   const response = await api.delete("user");
   return response.data;
 };
+
+export const getAllUsers = async () => {
+  const response = await api.get("user");
+  return response.data;
+};

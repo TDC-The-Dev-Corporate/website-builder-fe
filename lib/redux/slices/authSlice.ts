@@ -7,7 +7,7 @@ import {
   verify,
 } from "../api/auth";
 import { getUserId } from "@/lib/utils";
-import { removeUser, updateUser } from "../api/profile";
+import { getAllUsers, removeUser, updateUser } from "../api/profile";
 
 interface AuthState {
   user: any;
@@ -52,6 +52,18 @@ export const deleteAccount = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await removeUser();
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const getAllPublishedSitesUsers = createAsyncThunk(
+  "user/delete",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getAllUsers();
       return response;
     } catch (error: any) {
       return rejectWithValue(error);
@@ -130,7 +142,7 @@ export const sendOTP = createAsyncThunk(
   }
 );
 
-export const forgetPassword = createAsyncThunk(
+export const resetPassword = createAsyncThunk(
   "auth/resetForgetPassword",
   async (data: ForgotPassword, { rejectWithValue }) => {
     try {
@@ -249,14 +261,14 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = (action.payload as { message: string }).message;
       })
-      .addCase(forgetPassword.pending, (state) => {
+      .addCase(resetPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(forgetPassword.fulfilled, (state, action) => {
+      .addCase(resetPassword.fulfilled, (state, action) => {
         state.loading = false;
       })
-      .addCase(forgetPassword.rejected, (state, action) => {
+      .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as { message: string }).message;
       })
