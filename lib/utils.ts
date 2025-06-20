@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { jwtDecode } from "jwt-decode";
+import imageCompression from "browser-image-compression";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -15,6 +16,15 @@ export function logoutUser() {
   localStorage.removeItem("user");
   window.location.href = "/AIWebsiteBuilders/auth/login";
 }
+
+export const cleanLocalStorage = () => {
+  const preservedKeys = ["published", "token", "user"];
+  Object.keys(localStorage).forEach((key) => {
+    if (!preservedKeys.includes(key)) {
+      localStorage.removeItem(key);
+    }
+  });
+};
 
 export function getUserId(token: string): number | null {
   try {
@@ -113,4 +123,168 @@ export const getCroppedImg = async (
       0.95
     );
   });
+};
+
+export const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+export const slideUp = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+export const staggerChildren = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+export const scale = {
+  hidden: { scale: 0.95, opacity: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.34, 1.56, 0.64, 1],
+    },
+  },
+};
+
+export const springs = {
+  gentle: [0.34, 1.56, 0.64, 1],
+  bounce: [0.22, 1.2, 0.36, 1],
+  swift: [0.55, 0, 0.1, 1],
+  smooth: [0.4, 0, 0.2, 1],
+};
+
+export const linearGradient = (
+  direction: string,
+  color1: string,
+  position1: number,
+  color2: string,
+  position2: number
+) =>
+  `linear-gradient(${direction}, ${color1} ${position1}%, ${color2} ${position2}%)`;
+
+export const formatTradeType = (tradeType: string): string => {
+  return tradeType
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+export const tradesmanQuotes = [
+  "Build your online presence as solidly as you build your projects",
+  "Your craftsmanship deserves to be showcased professionally",
+  "Connect with clients who value quality as much as you do",
+  "Turn your skilled hands into a thriving digital business",
+  "Showcase your expertise to clients who need your skills",
+  "Building trust online as you do on every job site",
+  "Craft your online reputation with the same care as your trade",
+  "Your trade skills deserve professional digital representation",
+  "Your experience matters. Let's help the world see it",
+];
+
+export const getRandomQuote = (): string => {
+  return tradesmanQuotes[Math.floor(Math.random() * tradesmanQuotes.length)];
+};
+
+export const uploadToCloudinary = async (files: File[]) => {
+  const CLOUDINARY_UPLOAD_PRESET =
+    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+  const uploadedAssets: UploadedAsset[] = [];
+
+  for (const file of files) {
+    try {
+      const isImage = file.type.startsWith("image/");
+      const resourceType = isImage ? "image" : "raw";
+
+      let fileToUpload = file;
+
+      if (isImage) {
+        const options = {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1280,
+          useWebWorker: true,
+          fileType: "image/jpeg",
+          initialQuality: 0.6,
+        };
+
+        try {
+          fileToUpload = await imageCompression(file, options);
+        } catch (compressionError) {
+          console.warn(
+            "Image compression failed, uploading original",
+            compressionError
+          );
+          fileToUpload = file;
+        }
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileToUpload);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      if (isImage) {
+        formData.append("quality", "auto:good");
+        formData.append("fetch_format", "auto");
+      }
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to upload to Cloudinary");
+
+      const data = await res.json();
+
+      uploadedAssets.push({
+        id: data.public_id,
+        src: data.secure_url,
+        name: file.name,
+        mimeType: file.type,
+        size: fileToUpload.size,
+        isImage,
+        type: file.type,
+      });
+    } catch (error) {
+      console.error(`Error uploading file ${file.name}:`, error);
+      continue;
+    }
+  }
+
+  return uploadedAssets;
+};
+
+export const isDefaultTemplate = (templateId: string): boolean => {
+  const defaultIds = [
+    "carpenter-template",
+    "electrician-template",
+    "hvac-template",
+    "landscaper-template",
+    "painter-template",
+    "plumber-template",
+  ];
+
+  return defaultIds.includes(templateId);
 };

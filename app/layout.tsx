@@ -1,25 +1,15 @@
-"use client";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
-import { useEffect } from "react";
-import { Provider } from "react-redux";
-import { usePathname } from "next/navigation";
+import ThemeRegistry from "./components/ThemeRegistry";
 
-import { ProtectRoute } from "./protectRoute";
+import { baseMetadata } from "@/lib/metadata";
 
-import { useAppDispatch } from "@/lib/redux/hooks";
-import { clearError } from "@/lib/redux/slices/authSlice";
-import { store } from "@/lib/redux/store";
+import "./globals.css";
 
-function ErrorClearer() {
-  const dispatch = useAppDispatch();
-  const pathname = usePathname();
+const inter = Inter({ subsets: ["latin"] });
 
-  useEffect(() => {
-    dispatch(clearError());
-  }, [pathname, dispatch]);
-
-  return null;
-}
+export const metadata: Metadata = baseMetadata;
 
 export default function RootLayout({
   children,
@@ -27,15 +17,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      style={{ margin: 0, padding: 0, width: "100%", height: "100%" }}
-    >
-      <body style={{ margin: 0, padding: 0, width: "100%", height: "100%" }}>
-        <Provider store={store}>
-          <ErrorClearer />
-          <ProtectRoute>{children}</ProtectRoute>
-        </Provider>
+    <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className={inter.className}>
+        <ThemeRegistry>{children}</ThemeRegistry>
       </body>
     </html>
   );

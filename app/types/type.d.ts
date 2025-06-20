@@ -46,7 +46,17 @@ interface NavItem {
 }
 
 interface ForgotPassword {
-  email: string;
-  newPassword: string;
-  confirmNewPassword: string;
+  EMAIL: string;
+  pasword: string;
+  confirmPassword: string;
+}
+
+interface UploadedAsset {
+  id: string;
+  src: string;
+  name: string;
+  mimeType: string;
+  size: number;
+  isImage: boolean;
+  type: string;
 }

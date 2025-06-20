@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url><loc>http://localhost:3000/AIWebsiteBuilders/auth/forgot-password/reset-password</loc><lastmod>2025-05-26T15:02:05.869Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/oauth-redirect</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/auth/verify-otp</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/auth/login</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/profile/edit</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/profile</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/auth/register</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/home</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/auth/forgot-password</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/auth/forgot-password/otp-verification</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/auth/onboarding</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/template-selector</loc><lastmod>2025-05-26T15:02:05.870Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>http://localhost:3000/AIWebsiteBuilders/portfolio/[object Object]</loc><lastmod>2025-05-26T15:02:06.041Z</lastmod></url>
+</urlset>

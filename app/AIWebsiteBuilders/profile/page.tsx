@@ -5,18 +5,34 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import {
-  Container,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Dice1 as License,
+  Briefcase,
+  Edit,
+  Globe,
+} from "lucide-react";
+
+import {
   Box,
   Typography,
   Grid,
-  Button,
+  IconButton,
+  Tooltip,
   Divider,
 } from "@mui/material";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+
+import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
+import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
+import { generateOrganizationSchema } from "@/lib/metadata";
+import JsonLd from "@/app/components/JsonLd";
 
 export default function ViewProfile() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [portfolio, setPortfolio] = useState<any>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -27,112 +43,255 @@ export default function ViewProfile() {
     }
   }, []);
 
+  useEffect(() => {
+    async function fetchPortfolio() {
+      if (!user) return;
+      try {
+        const response = getPortfolioByUserName(user.username);
+        if (!response) {
+          localStorage.setItem("published", "false");
+          throw new Error("Failed to fetch portfolio");
+        }
+        const data = await response;
+        setPortfolio(data);
+        data
+          ? localStorage.setItem("published", "true")
+          : localStorage.setItem("published", "false");
+      } catch (error) {
+        localStorage.setItem("published", "false");
+        console.error("Error fetching portfolio:", error);
+      }
+    }
+    fetchPortfolio();
+  }, [user]);
+
   if (!user) {
     return (
-      <Container>
+      <Box sx={{ p: 4, textAlign: "center", color: "white" }}>
         <Typography>Please log in to view your profile.</Typography>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Grid container spacing={5} padding={3}>
-      {/* <Paper elevation={3} sx={{ p: 4 }}> */}
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
-          <Box
-            sx={{
-              width: 200,
-              height: 200,
-              borderRadius: "50%",
-              overflow: "hidden",
-              margin: "0 auto",
-              mb: 2,
-              backgroundColor: "#f0f0f0",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {user.profileImage ? (
-              <Image
-                src={user.profileImage}
-                alt="Profile"
-                width={200}
-                height={200}
-                style={{ objectFit: "cover" }}
-              />
-            ) : (
-              <AccountCircleIcon sx={{ fontSize: 100, color: "#9e9e9e" }} />
-            )}
-          </Box>
-          <Button
-            variant="contained"
+    <Box sx={{ p: 3, width: "100%", position: "relative" }}>
+      {user && <JsonLd data={generateOrganizationSchema(user)} />}
+      <GlassMorphism blur={10} opacity={0.1}>
+        <Tooltip title="Edit Profile" arrow>
+          <IconButton
             onClick={() => router.push("/AIWebsiteBuilders/profile/edit")}
             sx={{
-              mt: 2,
-              backgroundColor: "#0d47a1 !important",
+              position: "absolute",
+              top: 16,
+              right: 16,
+              background: "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
+              "&:hover": {
+                background: "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
+              },
+              zIndex: 1,
             }}
           >
-            Edit Profile
-          </Button>
-        </Grid>
+            <Edit size={20} color="white" />
+          </IconButton>
+        </Tooltip>
 
-        <Grid item xs={12} md={8}>
-          <Typography variant="h4" gutterBottom>
-            {user.name}
-          </Typography>
-          <Typography variant="h6" color="#0d47a1" gutterBottom>
-            {user.companyName}
-          </Typography>
+        <Grid container>
+          <Grid item xs={12} md={4}>
+            <Box
+              sx={{
+                p: 4,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+              }}
+            >
+              <Box
+                sx={{
+                  width: { xs: 150, md: 200 },
+                  height: { xs: 150, md: 200 },
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  mb: 3,
+                  background:
+                    "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "4px solid rgba(255, 255, 255, 0.1)",
+                }}
+              >
+                {user.profileImage ? (
+                  <Image
+                    src={user.profileImage}
+                    alt={`${user.name} - Professional ${user.tradeSpecialization}`}
+                    width={200}
+                    height={200}
+                    style={{ objectFit: "cover" }}
+                  />
+                ) : (
+                  <User size={80} color="white" />
+                )}
+              </Box>
+            </Box>
+          </Grid>
 
-          <Divider sx={{ my: 2 }} />
+          <Grid item xs={12} md={8}>
+            <Box sx={{ p: 4 }}>
+              <Typography
+                variant="h4"
+                sx={{ color: "white", mb: 1, fontWeight: 700 }}
+              >
+                {user.name}
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{ color: "#3b82f6", mb: 3, fontWeight: 600 }}
+              >
+                {user.companyName}
+              </Typography>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle2" color="textSecondary">
-                Email
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {user.email}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle2" color="textSecondary">
-                Phone
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {user.phoneNumber}
-              </Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" color="textSecondary">
-                Business Address
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {user.address}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle2" color="textSecondary">
-                License Number
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {user.licenseNumber}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle2" color="textSecondary">
-                Trade Specialization
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {user.tradeSpecialization}
-              </Typography>
-            </Grid>
+              <Divider
+                sx={{ borderColor: "rgba(255, 255, 255, 0.1)", my: 3 }}
+              />
+
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      mb: 3,
+                    }}
+                  >
+                    <Mail size={20} color="#3b82f6" />
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                      >
+                        Email
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: "white" }}>
+                        {user.email}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      mb: 3,
+                    }}
+                  >
+                    <Phone size={20} color="#3b82f6" />
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                      >
+                        Phone
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: "white" }}>
+                        {user.phoneNumber}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      mb: 3,
+                    }}
+                  >
+                    <License size={20} color="#3b82f6" />
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                      >
+                        License Number
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: "white" }}>
+                        {user.licenseNumber}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      mb: 3,
+                    }}
+                  >
+                    <Briefcase size={20} color="#3b82f6" />
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                      >
+                        Trade Specialization
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: "white" }}>
+                        {user.tradeSpecialization}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <MapPin size={20} color="#3b82f6" />
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                      >
+                        Business Address
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: "white" }}>
+                        {user.address}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+
+                {portfolio && (
+                  <Grid item xs={12}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Globe size={20} color="#3b82f6" />
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                        >
+                          Website URL
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: "white" }}>
+                          {`${
+                            process.env.NEXT_PUBLIC_APP_URL ||
+                            "http://localhost:3000"
+                          }/AIWebsiteBuilders/portfolio/${user.username}`}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
           </Grid>
         </Grid>
-      </Grid>
-      {/* </Paper> */}
-    </Grid>
+      </GlassMorphism>
+    </Box>
   );
 }
