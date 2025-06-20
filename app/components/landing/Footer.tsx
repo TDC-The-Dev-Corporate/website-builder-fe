@@ -324,16 +324,18 @@ export const Footer = () => {
         </Grid>
 
         <Divider
-          data-aos="fade-in"
-          data-aos-delay="600"
+          // data-aos="fade-in"
+          // data-aos-delay="600"
           sx={{
             mt: 8,
             borderColor: "rgba(255, 255, 255, 0.3)",
+            borderBottomWidth: "1px",
           }}
         />
+
         <Box
-          data-aos="fade-up"
-          data-aos-delay="700"
+          // data-aos="fade-up"
+          // data-aos-delay="700"
           sx={{
             pt: 4,
             display: "flex",
@@ -349,10 +351,22 @@ export const Footer = () => {
               fontFamily: "'Inter', Helvetica, Arial, sans-serif",
               fontWeight: 400,
               fontSize: "16px",
+              color: "white",
             }}
           >
             © TradesBuilder 2025
           </Typography>
+
+          {/* <Typography
+            variant="body2"
+            sx={{
+              fontFamily: "'Inter', Helvetica, Arial, sans-serif",
+              fontWeight: 400,
+              fontSize: "16px",
+            }}
+          >
+            © TradesBuilder 2025
+          </Typography> */}
           <Link
             href="#"
             sx={{

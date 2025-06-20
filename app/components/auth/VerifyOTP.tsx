@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Mail, Clock as LockClock } from "lucide-react";
 
@@ -29,6 +29,8 @@ import { sendOTP, verifyUser } from "@/lib/redux/slices/authSlice";
 export default function VerifyOTP() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const emailParam = searchParams.get("email");
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const [isVerified, setIsVerified] = useState(false);
   const [email, setEmail] = useState("");
@@ -37,9 +39,16 @@ export default function VerifyOTP() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm();
 
+  useEffect(() => {
+    if (emailParam) {
+      setEmail(emailParam);
+      setValue("email", emailParam);
+    }
+  }, [emailParam]);
   const onSubmit = async (data: any) => {
     try {
       const result = await dispatch(verifyUser(data));
@@ -134,8 +143,8 @@ export default function VerifyOTP() {
                     color: "rgba(255, 255, 255, 0.7)",
                   }}
                 >
-                  We've sent a verification code to your email. Please enter it
-                  below to continue.
+                  We&apos;ve sent a verification code to your email. Please
+                  enter it below to continue.
                 </Typography>
 
                 {error && (
