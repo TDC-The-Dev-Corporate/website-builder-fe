@@ -14,6 +14,7 @@ import { initHotjar } from "@/lib/hotjar";
 import theme from "@/lib/theme";
 
 import { store } from "@/lib/redux/store";
+import StripeProvider from "./payment/StripeProvider";
 
 declare global {
   interface Window {
@@ -56,24 +57,26 @@ export default function ThemeRegistry({
   return (
     <>
       <Provider store={store}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {loading ? (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: "100vh",
-                backgroundColor: "background.default",
-              }}
-            >
-              <LoadingSpinner message="Getting the hammer & nails ready..." />
-            </Box>
-          ) : (
-            <ProtectRoute>{children}</ProtectRoute>
-          )}
-        </ThemeProvider>
+        <StripeProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            {loading ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: "100vh",
+                  backgroundColor: "background.default",
+                }}
+              >
+                <LoadingSpinner message="Getting the hammer & nails ready..." />
+              </Box>
+            ) : (
+              <ProtectRoute>{children}</ProtectRoute>
+            )}
+          </ThemeProvider>
+        </StripeProvider>
       </Provider>
 
       {/* Google Analytics Scripts */}
