@@ -4,18 +4,19 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
+import { ThreeDots } from "react-loader-spinner";
 import {
   Box,
   Button,
   Container,
   TextField,
   Typography,
-  CircularProgress,
   Alert,
   Stack,
   Divider,
+  IconButton,
 } from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
 
 import MotionBox from "@/app/components/animations/MotionBox";
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
@@ -92,8 +93,26 @@ export default function LoginForm() {
               borderRadius: "16px",
               textAlign: "center",
               border: "1px solid rgba(255, 255, 255, 0.1)",
+              position: "relative",
             }}
           >
+            <IconButton
+              component={Link}
+              href="/"
+              sx={{
+                position: "absolute",
+                top: 16,
+                left: 16,
+                color: "rgba(255, 255, 255, 0.7)",
+                "&:hover": {
+                  color: "white",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              <HomeIcon />
+            </IconButton>
+
             <Typography
               component="h1"
               variant="h4"
@@ -182,7 +201,18 @@ export default function LoginForm() {
                   },
                 }}
               >
-                {loading ? <CircularProgress size={24} /> : "Sign In"}
+                {loading ? (
+                  <ThreeDots
+                    height="28"
+                    width="40"
+                    radius="9"
+                    color="#FFFFFF"
+                    ariaLabel="three-dots-loading"
+                    visible
+                  />
+                ) : (
+                  "Sign In"
+                )}
               </Button>
 
               <Divider sx={{ my: 3, color: "rgba(255, 255, 255, 0.5)" }}>

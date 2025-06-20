@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-
 import {
   Box,
   Button,
@@ -17,7 +16,10 @@ import {
   MenuItem,
   Divider,
   Stack,
+  IconButton,
 } from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
+import PhoneNumberInput from "@/app/components/ui/PhoneNumberInput";
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -28,6 +30,7 @@ import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 
 import { AppDispatch, RootState } from "@/lib/redux/store";
 import { register as registerUser } from "@/lib/redux/slices/authSlice";
+import { ThreeDots } from "react-loader-spinner";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -43,12 +46,9 @@ const validationSchema = Yup.object({
   companyName: Yup.string().required("Company name is required"),
   phoneNumber: Yup.string()
     .required("Phone number is required")
-    .matches(
-      /^\+?[0-9]{7,15}$/,
-      "Phone number must be valid and contain 7 to 15 digits"
-    ),
+    .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"),
   address: Yup.string().required("Business address is required"),
-  licenseNumber: Yup.string().required("License number is required"),
+  // licenseNumber: Yup.string().required("License number is required"),
   tradeSpecialization: Yup.string().required(
     "Trade specialization is required"
   ),
@@ -99,7 +99,12 @@ export default function Register() {
 
         const result = await dispatch(registerUser(values));
         if (result.payload.success) {
-          router.push("/AIWebsiteBuilders/auth/verify-otp");
+          // router.push("/AIWebsiteBuilders/auth/verify-otp");
+          router.push(
+            `/AIWebsiteBuilders/auth/verify-otp?email=${encodeURIComponent(
+              values.email
+            )}`
+          );
         }
       } catch (error) {
         console.error("Registration error:", error);
@@ -162,8 +167,26 @@ export default function Register() {
               borderRadius: "16px",
               textAlign: "center",
               border: "1px solid rgba(255, 255, 255, 0.1)",
+              position: "relative",
             }}
           >
+            <IconButton
+              component={Link}
+              href="/"
+              sx={{
+                position: "absolute",
+                top: 16,
+                left: 16,
+                color: "rgba(255, 255, 255, 0.7)",
+                "&:hover": {
+                  color: "white",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              <HomeIcon />
+            </IconButton>
+
             <Typography
               component="h1"
               variant="h4"
@@ -343,18 +366,13 @@ export default function Register() {
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Phone Number"
-                    {...formik.getFieldProps("phoneNumber")}
-                    error={
-                      formik.touched.phoneNumber &&
-                      Boolean(formik.errors.phoneNumber)
+                  <PhoneNumberInput
+                    value={formik.values.phoneNumber}
+                    onChange={(phone) =>
+                      formik.setFieldValue("phoneNumber", phone)
                     }
-                    helperText={
-                      formik.touched.phoneNumber && formik.errors.phoneNumber
-                    }
-                    sx={textFieldStyles}
+                    touched={formik.touched.phoneNumber}
+                    error={formik.errors.phoneNumber}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -435,7 +453,18 @@ export default function Register() {
                       },
                     }}
                   >
-                    {loading ? <CircularProgress size={24} /> : "Register"}
+                    {loading ? (
+                      <ThreeDots
+                        height="28"
+                        width="40"
+                        radius="9"
+                        color="#FFFFFF"
+                        ariaLabel="three-dots-loading"
+                        visible
+                      />
+                    ) : (
+                      "Register"
+                    )}
                   </Button>
                 </Grid>
 

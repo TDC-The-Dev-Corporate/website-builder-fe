@@ -21,6 +21,8 @@ type NavbarProps = {
 };
 export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
   const theme = useTheme();
+  const isBelow960 = useMediaQuery("(max-width:960px)");
+
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -86,7 +88,11 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
                 fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
                 fontWeight: 800,
                 color: "white",
-                fontSize: "64px",
+                fontSize: {
+                  md: isBelow960 ? "20px" : "24px",
+                  lg: "30px",
+                  xl: "35px",
+                },
               }}
             >
               TRADES BUILDER PRO

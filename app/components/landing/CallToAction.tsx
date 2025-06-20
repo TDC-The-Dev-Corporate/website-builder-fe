@@ -60,8 +60,17 @@ export const CallToAction = () => {
           sx={{
             fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 700,
-            fontSize: "64px !important",
-            width: 800,
+
+            fontSize: {
+              xs: "42px",
+              md: "52px",
+              lg: "64px",
+            },
+            width: {
+              xs: "100%",
+              sm: "90%",
+              lg: "800px",
+            },
             lineHeight: "100&",
             letterSpacing: "2%",
           }}
