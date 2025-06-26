@@ -18,6 +18,8 @@ import {
 
 import axios from "axios";
 
+import { InferenceClient } from "@huggingface/inference";
+
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 import MotionBox from "@/app/components/animations/MotionBox";
 
@@ -81,41 +83,33 @@ const ContentGenerator = ({
     setIsGenerating(true);
     try {
       const hfModel =
-        process.env.HUGGINGFACE_MODEL || "mistralai/Mixtral-8x7B-Instruct-v0.1";
-      const hfUrl = `https://api-inference.huggingface.co/models/${hfModel}`;
+        process.env.HUGGINGFACE_MODEL || "meta-llama/Llama-3.1-8B-Instruct";
       const hfApiKey = process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY || "";
 
-      const processedPrompt = preProcessPrompt(userPrompt);
+      const client = new InferenceClient(hfApiKey);
 
-      const response = await axios.post(
-        hfUrl,
-        {
-          inputs: processedPrompt,
-          parameters: {
-            max_new_tokens: 200,
-            temperature: 0.7,
-            top_p: 0.85,
-            do_sample: true,
-            return_full_text: false,
+      const response = await client.chatCompletion({
+        provider: "fireworks-ai",
+        model: hfModel,
+        messages: [
+          {
+            role: "user",
+            content:
+              "You are a website builder AI. Always respond with ONLY the final result: a short, clear, 1–2 sentence output. Do NOT explain anything or give variations. Just return the final version.",
           },
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${hfApiKey}`,
+          {
+            role: "user",
+            content: userPrompt,
           },
-        }
-      );
+        ],
+      });
 
-      const filteredResponse = filterResponse(
-        response.data[0].generated_text,
-        userPrompt
-      );
-      setGeneratedContent(filteredResponse);
+      const generatedText = response.choices[0].message.content || "";
+      setGeneratedContent(generatedText);
     } catch (error) {
       console.error("Content generation failed:", error);
       setGeneratedContent(
-        "Sorry, I couldn't generate that. Please try again with a different prompt."
+        "Sorry, I couldn't generate content. Please try again later."
       );
     } finally {
       setIsGenerating(false);
