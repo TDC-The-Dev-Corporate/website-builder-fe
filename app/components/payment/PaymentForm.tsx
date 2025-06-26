@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 import {
   Box,
@@ -39,33 +41,58 @@ const ELEMENT_OPTIONS = {
 export default function PaymentForm({ clientSecret }) {
   const stripe = useStripe();
   const elements = useElements();
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
 
-    const cardElement = elements.getElement(CardNumberElement);
-    const { error, paymentIntent } = await stripe.confirmCardPayment(
-      clientSecret,
-      {
-        payment_method: { card: cardElement! },
+  // Real-time completion states
+  const [cardNumberComplete, setCardNumberComplete] = useState(false);
+  const [cardExpiryComplete, setCardExpiryComplete] = useState(false);
+  const [cardCvcComplete, setCardCvcComplete] = useState(false);
+
+  const formik = useFormik({
+    initialValues: {
+      zip: "",
+    },
+    validationSchema: Yup.object({
+      zip: Yup.string().required("ZIP / Postal Code is required"),
+    }),
+    onSubmit: async (values) => {
+      setLoading(true);
+      setStripeError(null);
+
+      const cardNumber = elements?.getElement(CardNumberElement);
+
+      const { error, paymentIntent } = await stripe!.confirmCardPayment(
+        clientSecret,
+        {
+          payment_method: {
+            card: cardNumber!,
+            billing_details: {
+              address: {
+                postal_code: values.zip,
+              },
+            },
+          },
+        }
+      );
+
+      if (error) {
+        setStripeError(error.message || "Payment failed");
+        setLoading(false);
+        return;
       }
-    );
 
-    if (error) {
-      setError(error.message);
+      setSuccess(true);
+      setTimeout(() => router.push("/"), 3000);
       setLoading(false);
-      return;
-    }
-    setSuccess(true);
-    setTimeout(() => router.push("/"), 3000);
-    setLoading(false);
-  };
+    },
+  });
+
+  const allStripeFieldsComplete =
+    cardNumberComplete && cardExpiryComplete && cardCvcComplete;
 
   return (
     <Box display="flex" justifyContent="center" mt={6}>
@@ -86,14 +113,18 @@ export default function PaymentForm({ clientSecret }) {
           </Typography>
 
           {success ? (
-            <Typography color="#34C759" variant="body1">
+            <Typography color="#34C759" variant="body1" sx={{ mb: 5 }}>
               ✅ Payment successful! Thank you.
             </Typography>
           ) : (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={formik.handleSubmit}>
               <Box display="flex" flexDirection="column" gap={2} mb={2}>
                 <Box>
-                  <Typography variant="subtitle2" gutterBottom>
+                  <Typography
+                    variant="subtitle2"
+                    gutterBottom
+                    sx={{ textAlign: "left" }}
+                  >
                     Card Number
                   </Typography>
                   <Box
@@ -104,12 +135,19 @@ export default function PaymentForm({ clientSecret }) {
                       backgroundColor: "rgba(255,255,255,0.05)",
                     }}
                   >
-                    <CardNumberElement options={ELEMENT_OPTIONS} />
+                    <CardNumberElement
+                      options={ELEMENT_OPTIONS}
+                      onChange={(e) => setCardNumberComplete(e.complete)}
+                    />
                   </Box>
                 </Box>
 
                 <Box>
-                  <Typography variant="subtitle2" gutterBottom>
+                  <Typography
+                    variant="subtitle2"
+                    gutterBottom
+                    sx={{ textAlign: "left" }}
+                  >
                     Expiration Date
                   </Typography>
                   <Box
@@ -120,12 +158,19 @@ export default function PaymentForm({ clientSecret }) {
                       backgroundColor: "rgba(255,255,255,0.05)",
                     }}
                   >
-                    <CardExpiryElement options={ELEMENT_OPTIONS} />
+                    <CardExpiryElement
+                      options={ELEMENT_OPTIONS}
+                      onChange={(e) => setCardExpiryComplete(e.complete)}
+                    />
                   </Box>
                 </Box>
 
                 <Box>
-                  <Typography variant="subtitle2" gutterBottom>
+                  <Typography
+                    variant="subtitle2"
+                    gutterBottom
+                    sx={{ textAlign: "left" }}
+                  >
                     CVC
                   </Typography>
                   <Box
@@ -136,18 +181,31 @@ export default function PaymentForm({ clientSecret }) {
                       backgroundColor: "rgba(255,255,255,0.05)",
                     }}
                   >
-                    <CardCvcElement options={ELEMENT_OPTIONS} />
+                    <CardCvcElement
+                      options={ELEMENT_OPTIONS}
+                      onChange={(e) => setCardCvcComplete(e.complete)}
+                    />
                   </Box>
                 </Box>
 
                 <Box>
-                  <Typography variant="subtitle2" gutterBottom>
+                  <Typography
+                    variant="subtitle2"
+                    gutterBottom
+                    sx={{ textAlign: "left" }}
+                  >
                     ZIP / Postal Code
                   </Typography>
                   <TextField
                     fullWidth
                     variant="outlined"
                     placeholder="ZIP Code"
+                    name="zip"
+                    value={formik.values.zip}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.zip && Boolean(formik.errors.zip)}
+                    helperText={formik.touched.zip && formik.errors.zip}
                     sx={{
                       input: {
                         color: "white",
@@ -157,25 +215,36 @@ export default function PaymentForm({ clientSecret }) {
                       },
                       backgroundColor: "rgba(255,255,255,0.05)",
                       borderRadius: 2,
+                      mb: 5,
                     }}
                   />
                 </Box>
               </Box>
 
-              {error && (
+              {stripeError && (
                 <Typography color="error" sx={{ mb: 1 }}>
-                  {error}
+                  {stripeError}
                 </Typography>
               )}
 
               <Button
                 variant="contained"
-                color="success"
+                // color="success"
                 fullWidth
                 type="submit"
-                disabled={!stripe || loading}
+                disabled={
+                  !stripe ||
+                  !elements ||
+                  loading ||
+                  !allStripeFieldsComplete ||
+                  !formik.isValid
+                }
               >
-                {loading ? <CircularProgress size={24} /> : "Pay Now"}
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Pay Now"
+                )}
               </Button>
             </form>
           )}

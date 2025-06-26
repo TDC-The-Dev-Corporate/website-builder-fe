@@ -397,15 +397,77 @@ export default function PortfolioBuilder() {
                         if (el) {
                           const val = this.get("visibleInEditor");
                           el.classList.toggle("show", val);
-                          el.style.display = val ? "block" : "none";
 
                           if (val) {
+                            // Make modal visible and properly positioned for editing
                             el.style.display = "block";
                             el.style.opacity = "1";
                             el.style.visibility = "visible";
-                            el.style.position = "relative";
+                            el.style.position = "fixed";
+                            el.style.top = "50%";
+                            el.style.left = "50%";
+                            el.style.transform = "translate(-50%, -50%)";
+                            el.style.zIndex = "1050";
                             el.style.minHeight = "300px";
-                            el.style.border = "2px dashed blue";
+                            el.style.minWidth = "400px";
+                            el.style.maxWidth = "90%";
+                            el.style.maxHeight = "90%";
+                            el.style.border = "2px dashed #3b82f6";
+                            el.style.borderRadius = "8px";
+                            el.style.backgroundColor = "white";
+                            el.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
+                            el.style.overflow = "auto";
+
+                            // Add a backdrop
+                            const backdrop = document.createElement("div");
+                            backdrop.className = "gjs-modal-backdrop";
+                            backdrop.style.cssText = `
+                              position: fixed;
+                              top: 0;
+                              left: 0;
+                              width: 100%;
+                              height: 100%;
+                              background: rgba(0,0,0,0.5);
+                              z-index: 1040;
+                              pointer-events: none;
+                            `;
+
+                            // Remove existing backdrop if any
+                            const existingBackdrop = document.querySelector(
+                              ".gjs-modal-backdrop"
+                            );
+                            if (existingBackdrop) {
+                              existingBackdrop.remove();
+                            }
+
+                            // Add backdrop to canvas
+                            const canvas = editor.Canvas.getBody();
+                            canvas.appendChild(backdrop);
+                          } else {
+                            // Reset to normal state
+                            el.style.display = "none";
+                            el.style.position = "";
+                            el.style.top = "";
+                            el.style.left = "";
+                            el.style.transform = "";
+                            el.style.zIndex = "";
+                            el.style.minHeight = "";
+                            el.style.minWidth = "";
+                            el.style.maxWidth = "";
+                            el.style.maxHeight = "";
+                            el.style.border = "";
+                            el.style.borderRadius = "";
+                            el.style.backgroundColor = "";
+                            el.style.boxShadow = "";
+                            el.style.overflow = "";
+
+                            // Remove backdrop
+                            const backdrop = document.querySelector(
+                              ".gjs-modal-backdrop"
+                            );
+                            if (backdrop) {
+                              backdrop.remove();
+                            }
                           }
                         }
                       });
