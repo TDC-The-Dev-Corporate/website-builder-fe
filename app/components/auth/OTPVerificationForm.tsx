@@ -108,207 +108,205 @@ export default function OTPVerificationForm() {
   return (
     <>
       <JsonLd data={formSchema} />
-      <Box
+      <Container
+        maxWidth="lg"
         sx={{
-          minHeight: "100vh",
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-          display: "flex",
-          alignItems: "center",
+          textAlign: "center",
           position: "relative",
           overflow: "hidden",
+          minHeight: "100vh",
+          minWidth: "100vw",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          backgroundImage: "url('/images/Texture.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           py: 8,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background:
-              "url(https://images.pexels.com/photos/1029635/pexels-photo-1029635.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            opacity: 0.15,
-          },
         }}
       >
-        <Container
-          component="main"
-          maxWidth="sm"
-          sx={{ position: "relative", zIndex: 1 }}
-        >
-          <MotionBox
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+        <Box sx={{ position: "relative", zIndex: 1 }}>
+          <Container
+            component="main"
+            maxWidth="sm"
+            sx={{ position: "relative", zIndex: 1 }}
           >
-            <GlassMorphism
-              blur={15}
-              opacity={0.1}
-              sx={{
-                p: { xs: 4, md: 5 },
-                borderRadius: "16px",
-                textAlign: "center",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-              }}
+            <MotionBox
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
             >
-              {isVerified ? (
-                <VerificationSuccess />
-              ) : (
-                <>
-                  <Typography
-                    component="h1"
-                    variant="h4"
-                    sx={{
-                      mb: 2,
-                      fontWeight: 700,
-                      color: "white",
-                    }}
-                  >
-                    Verify Your Account
-                  </Typography>
-
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      mb: 4,
-                      color: "rgba(255, 255, 255, 0.7)",
-                    }}
-                  >
-                    We've sent a verification code to your email. Please enter
-                    it below to continue.
-                  </Typography>
-
-                  {error && (
-                    <Alert
-                      severity="error"
+              <GlassMorphism
+                blur={15}
+                opacity={0.1}
+                sx={{
+                  p: { xs: 4, md: 5 },
+                  borderRadius: "16px",
+                  textAlign: "center",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+              >
+                {isVerified ? (
+                  <VerificationSuccess />
+                ) : (
+                  <>
+                    <Typography
+                      component="h1"
+                      variant="h4"
                       sx={{
-                        mb: 3,
-                        backgroundColor: "rgba(255, 99, 71, 0.1)",
-                        color: "#ff6b6b",
-                        border: "1px solid rgba(255, 99, 71, 0.3)",
-                        "& .MuiAlert-icon": {
-                          color: "#ff6b6b",
-                        },
+                        mb: 2,
+                        fontWeight: 700,
+                        color: "white",
                       }}
                     >
-                      {error}
-                    </Alert>
-                  )}
+                      Verify Your Account
+                    </Typography>
 
-                  <Box
-                    component="form"
-                    onSubmit={handleSubmit(onSubmit)}
-                    sx={{ mt: 1 }}
-                  >
-                    <Grid container spacing={3}>
-                      <Grid item xs={12}>
-                        <TextField
-                          required
-                          fullWidth
-                          label="Verification Code"
-                          {...register("verificationCode", { required: true })}
-                          error={!!errors.verificationCode}
-                          helperText={
-                            errors.verificationCode
-                              ? "Verification code is required"
-                              : ""
-                          }
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <LockClock
-                                  size={20}
-                                  color="rgba(255, 255, 255, 0.7)"
-                                />
-                              </InputAdornment>
-                            ),
-                          }}
-                          sx={textFieldStyles}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Button
-                          type="submit"
-                          fullWidth
-                          variant="contained"
-                          disabled={loading}
-                          sx={{
-                            mt: 2,
-                            p: 1.5,
-                            borderRadius: "8px",
-                            background:
-                              "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
-                            textTransform: "none",
-                            fontSize: "1rem",
-                            fontWeight: 600,
-                            "&:hover": {
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        mb: 4,
+                        color: "rgba(255, 255, 255, 0.7)",
+                      }}
+                    >
+                      We've sent a verification code to your email. Please enter
+                      it below to continue.
+                    </Typography>
+
+                    {error && (
+                      <Alert
+                        severity="error"
+                        sx={{
+                          mb: 3,
+                          backgroundColor: "rgba(255, 99, 71, 0.1)",
+                          color: "#ff6b6b",
+                          border: "1px solid rgba(255, 99, 71, 0.3)",
+                          "& .MuiAlert-icon": {
+                            color: "#ff6b6b",
+                          },
+                        }}
+                      >
+                        {error}
+                      </Alert>
+                    )}
+
+                    <Box
+                      component="form"
+                      onSubmit={handleSubmit(onSubmit)}
+                      sx={{ mt: 1 }}
+                    >
+                      <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                          <TextField
+                            required
+                            fullWidth
+                            label="Verification Code"
+                            {...register("verificationCode", {
+                              required: true,
+                            })}
+                            error={!!errors.verificationCode}
+                            helperText={
+                              errors.verificationCode
+                                ? "Verification code is required"
+                                : ""
+                            }
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <LockClock
+                                    size={20}
+                                    color="rgba(255, 255, 255, 0.7)"
+                                  />
+                                </InputAdornment>
+                              ),
+                            }}
+                            sx={textFieldStyles}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            disabled={loading}
+                            sx={{
+                              mt: 2,
+                              p: 1.5,
+                              borderRadius: "8px",
                               background:
-                                "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
-                            },
-                          }}
-                        >
-                          {loading ? (
-                            <CircularProgress size={24} color="inherit" />
-                          ) : (
-                            "Verify Account"
-                          )}
-                        </Button>
-                      </Grid>
+                                "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
+                              textTransform: "none",
+                              fontSize: "1rem",
+                              fontWeight: 600,
+                              "&:hover": {
+                                background:
+                                  "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
+                              },
+                            }}
+                          >
+                            {loading ? (
+                              <CircularProgress size={24} color="inherit" />
+                            ) : (
+                              "Verify Account"
+                            )}
+                          </Button>
+                        </Grid>
 
-                      <Grid item xs={12}>
-                        <Button
-                          fullWidth
-                          variant="contained"
-                          disabled={loading}
-                          onClick={resendOTP}
-                          sx={{
-                            mb: 2,
-                            p: 1.5,
-                            borderRadius: "8px",
-                            background:
-                              "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
-                            textTransform: "none",
-                            fontSize: "1rem",
-                            fontWeight: 600,
-                            "&:hover": {
+                        <Grid item xs={12}>
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            disabled={loading}
+                            onClick={resendOTP}
+                            sx={{
+                              mb: 2,
+                              p: 1.5,
+                              borderRadius: "8px",
                               background:
-                                "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
-                            },
-                          }}
-                        >
-                          Resend OTP
-                        </Button>
+                                "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
+                              textTransform: "none",
+                              fontSize: "1rem",
+                              fontWeight: 600,
+                              "&:hover": {
+                                background:
+                                  "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
+                              },
+                            }}
+                          >
+                            Resend OTP
+                          </Button>
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </Box>
-                </>
-              )}
-            </GlassMorphism>
-          </MotionBox>
-        </Container>
+                    </Box>
+                  </>
+                )}
+              </GlassMorphism>
+            </MotionBox>
+          </Container>
 
-        <Snackbar
-          open={resendSuccess}
-          autoHideDuration={3000}
-          onClose={() => setResendSuccess(false)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            severity="success"
-            sx={{
-              backgroundColor: "rgba(52, 199, 89, 0.2)",
-              color: "#34C759",
-              border: "1px solid rgba(52, 199, 89, 0.3)",
-              "& .MuiAlert-icon": {
-                color: "#34C759",
-              },
-            }}
+          <Snackbar
+            open={resendSuccess}
+            autoHideDuration={3000}
+            onClose={() => setResendSuccess(false)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
           >
-            New verification code has been sent to your email!
-          </Alert>
-        </Snackbar>
-      </Box>
+            <Alert
+              severity="success"
+              sx={{
+                backgroundColor: "rgba(52, 199, 89, 0.2)",
+                color: "#34C759",
+                border: "1px solid rgba(52, 199, 89, 0.3)",
+                "& .MuiAlert-icon": {
+                  color: "#34C759",
+                },
+              }}
+            >
+              New verification code has been sent to your email!
+            </Alert>
+          </Snackbar>
+        </Box>
+      </Container>
     </>
   );
 }

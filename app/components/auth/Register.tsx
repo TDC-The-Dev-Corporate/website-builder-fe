@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -17,7 +17,9 @@ import {
   Divider,
   Stack,
   IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import HomeIcon from "@mui/icons-material/Home";
 import PhoneNumberInput from "@/app/components/ui/PhoneNumberInput";
 
@@ -29,7 +31,10 @@ import MotionBox from "@/app/components/animations/MotionBox";
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 
 import { AppDispatch, RootState } from "@/lib/redux/store";
-import { register as registerUser } from "@/lib/redux/slices/authSlice";
+import {
+  clearError,
+  register as registerUser,
+} from "@/lib/redux/slices/authSlice";
 import { ThreeDots } from "react-loader-spinner";
 
 const validationSchema = Yup.object({
@@ -48,7 +53,6 @@ const validationSchema = Yup.object({
     .required("Phone number is required")
     .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"),
   address: Yup.string().required("Business address is required"),
-  // licenseNumber: Yup.string().required("License number is required"),
   tradeSpecialization: Yup.string().required(
     "Trade specialization is required"
   ),
@@ -60,6 +64,11 @@ export default function Register() {
   const router = useRouter();
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
   const formik = useFormik({
     initialValues: {
@@ -125,374 +134,392 @@ export default function Register() {
   };
 
   return (
-    <Box
+    <Container
+      maxWidth="lg"
       sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-        display: "flex",
-        alignItems: "center",
+        textAlign: "center",
         position: "relative",
         overflow: "hidden",
+        minHeight: "100vh",
+        minWidth: "100vw",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        backgroundImage: "url('/images/Texture.png')",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
         py: 8,
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background:
-            "url(https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          opacity: 0.2,
-        },
       }}
     >
-      <Container
-        component="main"
-        maxWidth="md"
-        sx={{ position: "relative", zIndex: 1 }}
-      >
-        <MotionBox
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+      <Box sx={{ position: "relative", zIndex: 1 }}>
+        <Container
+          component="main"
+          maxWidth="md"
+          sx={{ position: "relative", zIndex: 1 }}
         >
-          <GlassMorphism
-            blur={15}
-            opacity={0.1}
-            sx={{
-              p: { xs: 4, md: 5 },
-              borderRadius: "16px",
-              textAlign: "center",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              position: "relative",
-            }}
+          <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <IconButton
-              component={Link}
-              href="/"
+            <GlassMorphism
+              blur={15}
+              opacity={0.1}
               sx={{
-                position: "absolute",
-                top: 16,
-                left: 16,
-                color: "rgba(255, 255, 255, 0.7)",
-                "&:hover": {
+                p: { xs: 4, md: 5 },
+                borderRadius: "16px",
+                textAlign: "center",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                position: "relative",
+              }}
+            >
+              <IconButton
+                component={Link}
+                href="/"
+                sx={{
+                  position: "absolute",
+                  top: 16,
+                  left: 16,
+                  color: "rgba(255, 255, 255, 0.7)",
+                  "&:hover": {
+                    color: "white",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+              >
+                <HomeIcon />
+              </IconButton>
+
+              <Typography
+                component="h1"
+                variant="h4"
+                sx={{
+                  mb: 4,
+                  fontWeight: 700,
                   color: "white",
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                },
-              }}
-            >
-              <HomeIcon />
-            </IconButton>
+                }}
+              >
+                Register Your Trade Business
+              </Typography>
 
-            <Typography
-              component="h1"
-              variant="h4"
-              sx={{
-                mb: 4,
-                fontWeight: 700,
-                color: "white",
-              }}
-            >
-              Register Your Trade Business
-            </Typography>
+              {error && (
+                <Alert severity="error" sx={{ mb: 3 }}>
+                  {error}
+                </Alert>
+              )}
 
-            {error && (
-              <Alert severity="error" sx={{ mb: 3 }}>
-                {error}
-              </Alert>
-            )}
-
-            <Box
-              component="form"
-              onSubmit={formik.handleSubmit}
-              sx={{ mt: 1, textAlign: "left" }}
-            >
-              <Grid container spacing={3}>
-                <Grid
-                  item
-                  xs={12}
-                  md={4}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
-                  <Box
+              <Box
+                component="form"
+                onSubmit={formik.handleSubmit}
+                sx={{ mt: 1, textAlign: "left" }}
+              >
+                <Grid container spacing={3}>
+                  <Grid
+                    item
+                    xs={12}
+                    md={4}
                     sx={{
-                      width: 150,
-                      height: 150,
-                      border: "2px dashed rgba(255, 255, 255, 0.3)",
-                      borderRadius: "50%",
                       display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
-                      justifyContent: "center",
-                      mb: 2,
-                      overflow: "hidden",
-                      backgroundColor: "rgba(255, 255, 255, 0.05)",
                     }}
                   >
-                    {imagePreview ? (
-                      <Box
-                        component="img"
-                        src={imagePreview}
-                        alt="Profile preview"
-                        sx={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      <Typography color="rgba(255, 255, 255, 0.7)">
-                        Upload Photo
-                      </Typography>
-                    )}
-                  </Box>
-                  <input
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    id="profile-image"
-                    type="file"
-                    onChange={handleImageChange}
-                  />
-                  <label htmlFor="profile-image">
-                    <Button
-                      variant="outlined"
-                      component="span"
+                    <Box
                       sx={{
-                        color: "white",
-                        borderColor: "rgba(255, 255, 255, 0.2)",
+                        width: 150,
+                        height: 150,
+                        border: "2px dashed rgba(255, 255, 255, 0.3)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        mb: 2,
+                        overflow: "hidden",
+                        backgroundColor: "rgba(255, 255, 255, 0.05)",
+                      }}
+                    >
+                      {imagePreview ? (
+                        <Box
+                          component="img"
+                          src={imagePreview}
+                          alt="Profile preview"
+                          sx={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <Typography color="rgba(255, 255, 255, 0.7)">
+                          Upload Photo
+                        </Typography>
+                      )}
+                    </Box>
+                    <input
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      id="profile-image"
+                      type="file"
+                      onChange={handleImageChange}
+                    />
+                    <label htmlFor="profile-image">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        sx={{
+                          color: "white",
+                          borderColor: "rgba(255, 255, 255, 0.2)",
+                          "&:hover": {
+                            borderColor: "white",
+                            backgroundColor: "rgba(255, 255, 255, 0.1)",
+                          },
+                        }}
+                      >
+                        Choose Photo
+                      </Button>
+                    </label>
+                  </Grid>
+
+                  <Grid item xs={12} md={8}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Full Name"
+                          {...formik.getFieldProps("name")}
+                          error={
+                            formik.touched.name && Boolean(formik.errors.name)
+                          }
+                          helperText={formik.touched.name && formik.errors.name}
+                          sx={textFieldStyles}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Company Name"
+                          {...formik.getFieldProps("companyName")}
+                          error={
+                            formik.touched.companyName &&
+                            Boolean(formik.errors.companyName)
+                          }
+                          helperText={
+                            formik.touched.companyName &&
+                            formik.errors.companyName
+                          }
+                          sx={textFieldStyles}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Email Address"
+                          {...formik.getFieldProps("email")}
+                          error={
+                            formik.touched.email && Boolean(formik.errors.email)
+                          }
+                          helperText={
+                            formik.touched.email && formik.errors.email
+                          }
+                          sx={textFieldStyles}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Username"
+                          {...formik.getFieldProps("username")}
+                          error={
+                            formik.touched.username &&
+                            Boolean(formik.errors.username)
+                          }
+                          helperText={
+                            formik.touched.username && formik.errors.username
+                          }
+                          sx={textFieldStyles}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Password"
+                          type={showPassword ? "text" : "password"}
+                          {...formik.getFieldProps("password")}
+                          error={
+                            formik.touched.password &&
+                            Boolean(formik.errors.password)
+                          }
+                          helperText={
+                            formik.touched.password && formik.errors.password
+                          }
+                          sx={textFieldStyles}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  onClick={() =>
+                                    setShowPassword((prev) => !prev)
+                                  }
+                                  edge="end"
+                                >
+                                  {showPassword ? (
+                                    <VisibilityOff />
+                                  ) : (
+                                    <Visibility />
+                                  )}
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Divider
+                      sx={{
+                        my: 3,
+                        color: "rgba(255, 255, 255, 0.5)",
+                        borderColor: "rgba(255, 255, 255, 0.1)",
+                      }}
+                    >
+                      Business Information
+                    </Divider>
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <PhoneNumberInput
+                      value={formik.values.phoneNumber}
+                      onChange={(phone) =>
+                        formik.setFieldValue("phoneNumber", phone)
+                      }
+                      touched={formik.touched.phoneNumber}
+                      error={formik.errors.phoneNumber}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="License Number"
+                      {...formik.getFieldProps("licenseNumber")}
+                      error={
+                        formik.touched.licenseNumber &&
+                        Boolean(formik.errors.licenseNumber)
+                      }
+                      helperText={
+                        formik.touched.licenseNumber &&
+                        formik.errors.licenseNumber
+                      }
+                      sx={textFieldStyles}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Business Address"
+                      {...formik.getFieldProps("address")}
+                      error={
+                        formik.touched.address && Boolean(formik.errors.address)
+                      }
+                      helperText={
+                        formik.touched.address && formik.errors.address
+                      }
+                      sx={textFieldStyles}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      select
+                      label="Trade Specialization"
+                      {...formik.getFieldProps("tradeSpecialization")}
+                      error={
+                        formik.touched.tradeSpecialization &&
+                        Boolean(formik.errors.tradeSpecialization)
+                      }
+                      helperText={
+                        formik.touched.tradeSpecialization &&
+                        formik.errors.tradeSpecialization
+                      }
+                      sx={textFieldStyles}
+                    >
+                      {tradeSpecializations.map((trade) => (
+                        <MenuItem
+                          key={trade}
+                          value={trade}
+                          sx={{ color: "text.primary" }}
+                        >
+                          {trade}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Button
+                      type="submit"
+                      fullWidth
+                      variant="contained"
+                      disabled={loading}
+                      sx={{
+                        mt: 3,
+                        mb: 2,
+                        p: 1.5,
+                        borderRadius: "8px",
+                        background:
+                          "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
+                        textTransform: "none",
+                        fontSize: "1rem",
+                        fontWeight: 600,
                         "&:hover": {
-                          borderColor: "white",
-                          backgroundColor: "rgba(255, 255, 255, 0.1)",
+                          background:
+                            "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
                         },
                       }}
                     >
-                      Choose Photo
+                      {loading ? (
+                        <ThreeDots
+                          height="28"
+                          width="40"
+                          radius="9"
+                          color="#FFFFFF"
+                          ariaLabel="three-dots-loading"
+                          visible
+                        />
+                      ) : (
+                        "Register"
+                      )}
                     </Button>
-                  </label>
-                </Grid>
+                  </Grid>
 
-                <Grid item xs={12} md={8}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Full Name"
-                        {...formik.getFieldProps("name")}
-                        error={
-                          formik.touched.name && Boolean(formik.errors.name)
-                        }
-                        helperText={formik.touched.name && formik.errors.name}
-                        sx={textFieldStyles}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Company Name"
-                        {...formik.getFieldProps("companyName")}
-                        error={
-                          formik.touched.companyName &&
-                          Boolean(formik.errors.companyName)
-                        }
-                        helperText={
-                          formik.touched.companyName &&
-                          formik.errors.companyName
-                        }
-                        sx={textFieldStyles}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Email Address"
-                        {...formik.getFieldProps("email")}
-                        error={
-                          formik.touched.email && Boolean(formik.errors.email)
-                        }
-                        helperText={formik.touched.email && formik.errors.email}
-                        sx={textFieldStyles}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Username"
-                        {...formik.getFieldProps("username")}
-                        error={
-                          formik.touched.username &&
-                          Boolean(formik.errors.username)
-                        }
-                        helperText={
-                          formik.touched.username && formik.errors.username
-                        }
-                        sx={textFieldStyles}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Password"
-                        type="password"
-                        {...formik.getFieldProps("password")}
-                        error={
-                          formik.touched.password &&
-                          Boolean(formik.errors.password)
-                        }
-                        helperText={
-                          formik.touched.password && formik.errors.password
-                        }
-                        sx={textFieldStyles}
-                      />
-                    </Grid>
+                  <Grid item xs={12}>
+                    <Stack
+                      direction="row"
+                      justifyContent="center"
+                      alignItems="center"
+                      sx={{ mt: 2 }}
+                    >
+                      <Link
+                        href="/AIWebsiteBuilders/auth/login"
+                        style={{
+                          textDecoration: "none",
+                          color: "#60a5fa",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Already have an account? Sign in
+                      </Link>
+                    </Stack>
                   </Grid>
                 </Grid>
-
-                <Grid item xs={12}>
-                  <Divider
-                    sx={{
-                      my: 3,
-                      color: "rgba(255, 255, 255, 0.5)",
-                      borderColor: "rgba(255, 255, 255, 0.1)",
-                    }}
-                  >
-                    Business Information
-                  </Divider>
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <PhoneNumberInput
-                    value={formik.values.phoneNumber}
-                    onChange={(phone) =>
-                      formik.setFieldValue("phoneNumber", phone)
-                    }
-                    touched={formik.touched.phoneNumber}
-                    error={formik.errors.phoneNumber}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="License Number"
-                    {...formik.getFieldProps("licenseNumber")}
-                    error={
-                      formik.touched.licenseNumber &&
-                      Boolean(formik.errors.licenseNumber)
-                    }
-                    helperText={
-                      formik.touched.licenseNumber &&
-                      formik.errors.licenseNumber
-                    }
-                    sx={textFieldStyles}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Business Address"
-                    {...formik.getFieldProps("address")}
-                    error={
-                      formik.touched.address && Boolean(formik.errors.address)
-                    }
-                    helperText={formik.touched.address && formik.errors.address}
-                    sx={textFieldStyles}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    select
-                    label="Trade Specialization"
-                    {...formik.getFieldProps("tradeSpecialization")}
-                    error={
-                      formik.touched.tradeSpecialization &&
-                      Boolean(formik.errors.tradeSpecialization)
-                    }
-                    helperText={
-                      formik.touched.tradeSpecialization &&
-                      formik.errors.tradeSpecialization
-                    }
-                    sx={textFieldStyles}
-                  >
-                    {tradeSpecializations.map((trade) => (
-                      <MenuItem
-                        key={trade}
-                        value={trade}
-                        sx={{ color: "text.primary" }}
-                      >
-                        {trade}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    disabled={loading}
-                    sx={{
-                      mt: 3,
-                      mb: 2,
-                      p: 1.5,
-                      borderRadius: "8px",
-                      background:
-                        "linear-gradient(90deg, #3b82f6 0%, #6366f1 100%)",
-                      textTransform: "none",
-                      fontSize: "1rem",
-                      fontWeight: 600,
-                      "&:hover": {
-                        background:
-                          "linear-gradient(90deg, #2563eb 0%, #4f46e5 100%)",
-                      },
-                    }}
-                  >
-                    {loading ? (
-                      <ThreeDots
-                        height="28"
-                        width="40"
-                        radius="9"
-                        color="#FFFFFF"
-                        ariaLabel="three-dots-loading"
-                        visible
-                      />
-                    ) : (
-                      "Register"
-                    )}
-                  </Button>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Stack
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{ mt: 2 }}
-                  >
-                    <Link
-                      href="/AIWebsiteBuilders/auth/login"
-                      style={{
-                        textDecoration: "none",
-                        color: "#60a5fa",
-                        fontWeight: 500,
-                      }}
-                    >
-                      Already have an account? Sign in
-                    </Link>
-                  </Stack>
-                </Grid>
-              </Grid>
-            </Box>
-          </GlassMorphism>
-        </MotionBox>
-      </Container>
-    </Box>
+              </Box>
+            </GlassMorphism>
+          </MotionBox>
+        </Container>
+      </Box>
+    </Container>
   );
 }
 

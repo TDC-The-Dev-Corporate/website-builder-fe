@@ -110,6 +110,107 @@ export default function TemplateViewer() {
               <span class="tooltip">Customize this template</span>
             </button>
             <script>
+              // Enhanced event delegation system with direct listeners as backup
+              document.addEventListener('DOMContentLoaded', function() {
+                // Event Delegation System
+                document.addEventListener('click', function(e) {
+                  const btn = e.target.closest('[data-action]');
+                  if (!btn) return;
+                  
+                  const action = btn.dataset.action;
+                  const modalId = btn.dataset.modalId;
+                  
+                  if (action === 'open-drawer') {
+                    const drawer = document.getElementById('drawer');
+                    const overlay = document.getElementById('overlay');
+                    if (drawer) drawer.classList.add('active');
+                    if (overlay) overlay.classList.add('active');
+                  }
+                  
+                  if (action === 'close-drawer') {
+                    const drawer = document.getElementById('drawer');
+                    const overlay = document.getElementById('overlay');
+                    if (drawer) drawer.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
+                  }
+                  
+                  if (action === 'open-modal' && modalId) {
+                    const modal = document.getElementById(modalId);
+                    const overlay = document.getElementById('overlay');
+                    if (modal) modal.classList.add('active');
+                    if (overlay) overlay.classList.add('active');
+                  }
+                  
+                  if (action === 'close-modal' && modalId) {
+                    const modal = document.getElementById(modalId);
+                    const overlay = document.getElementById('overlay');
+                    if (modal) modal.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
+                  }
+                });
+                
+                // Additional direct event listeners for close buttons as backup
+                const closeButtons = document.querySelectorAll('[data-action="close-modal"]');
+                closeButtons.forEach(button => {
+                  button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const modalId = this.dataset.modalId;
+                    if (modalId) {
+                      const modal = document.getElementById(modalId);
+                      const overlay = document.getElementById('overlay');
+                      if (modal) modal.classList.remove('active');
+                      if (overlay) overlay.classList.remove('active');
+                    }
+                  });
+                });
+                
+                // Close modals and drawers when clicking on overlay
+                const overlay = document.getElementById('overlay');
+                if (overlay) {
+                  overlay.addEventListener('click', function() {
+                    const drawer = document.getElementById('drawer');
+                    if (drawer) drawer.classList.remove('active');
+                    
+                    // Close all modals
+                    const modals = document.querySelectorAll('.modal');
+                    modals.forEach(modal => {
+                      modal.classList.remove('active');
+                    });
+                    
+                    this.classList.remove('active');
+                  });
+                }
+                
+                // Prevent clicks inside modals from closing them
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                  modal.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                  });
+                });
+                
+                // Handle form submissions
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => {
+                  form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Thank you for your submission! We will contact you shortly.');
+                    this.reset();
+                    
+                    // Close the modal if the form is inside one
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                      modal.classList.remove('active');
+                      const overlay = document.getElementById('overlay');
+                      if (overlay) overlay.classList.remove('active');
+                    }
+                  });
+                });
+              });
+
+              // Floating edit button functionality
               document.querySelector('.floating-edit-btn').addEventListener('click', () => {
                 let messageSent = false;
                 
