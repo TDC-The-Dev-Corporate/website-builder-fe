@@ -249,7 +249,8 @@ export default function Drafts() {
       </Box>
 
       <Grid container spacing={4}>
-        {templates.length > 0 &&
+        {Array.isArray(templates) &&
+          templates.length > 0 &&
           templates.map((template, index) => (
             <Grid item xs={12} sm={6} lg={4} key={template.id}>
               <MotionBox
