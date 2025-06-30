@@ -113,6 +113,12 @@ export const googleLogin = createAsyncThunk<any, void, { rejectValue: any }>(
           "https://tradesbuilderpro.com",
         ];
 
+        console.log("event.origin", event.origin);
+        console.log(
+          "!allowedOrigins.includes(event.origin)",
+          !allowedOrigins.includes(event.origin)
+        );
+
         if (!allowedOrigins.includes(event.origin)) return;
 
         if (event.origin !== baseUrl) return;
