@@ -107,23 +107,29 @@ export const googleLogin = createAsyncThunk<any, void, { rejectValue: any }>(
       );
 
       const handleMessage = (event: MessageEvent) => {
+        console.log("🧠 event.origin", event.origin);
+        console.log("🧠 event.data", event.data);
+
+        // Ignore devtools/metamask noise
+        if (
+          event.data?.source === "react-devtools-bridge" ||
+          event.data?.target === "metamask-inpage"
+        )
+          return;
+
         const allowedOrigins = [
+          "https://tradesbuilderpro.com",
+          "https://api.tradesbuilderpro.com",
           "http://localhost:3000",
           "http://localhost:3001",
-          "https://tradesbuilderpro.com",
         ];
 
-        console.log("event.origin", event.origin);
-        console.log(
-          "!allowedOrigins.includes(event.origin)",
-          !allowedOrigins.includes(event.origin)
-        );
+        if (!allowedOrigins.includes(event.origin)) {
+          console.warn("❌ Message origin not allowed:", event.origin);
+          return;
+        }
 
-        if (!allowedOrigins.includes(event.origin)) return;
-
-        console.log("event.data", event.data);
-
-        if (event.data.success) {
+        if (event.data?.success) {
           resolve(event.data);
         } else {
           reject(rejectWithValue(event.data));
