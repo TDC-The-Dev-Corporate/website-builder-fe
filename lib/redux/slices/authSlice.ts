@@ -107,11 +107,15 @@ export const googleLogin = createAsyncThunk<any, void, { rejectValue: any }>(
       );
 
       const handleMessage = (event: MessageEvent) => {
-        console.log("event", event.origin);
-        console.log("baseUrl", baseUrl);
-        if (event.origin !== baseUrl) return;
+        const allowedOrigins = [
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "https://tradesbuilderpro.com",
+        ];
 
-        window.removeEventListener("message", handleMessage);
+        if (!allowedOrigins.includes(event.origin)) return;
+
+        if (event.origin !== baseUrl) return;
 
         if (event.data.success) {
           resolve(event.data);
