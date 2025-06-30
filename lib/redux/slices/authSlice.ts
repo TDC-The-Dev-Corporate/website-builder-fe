@@ -101,17 +101,13 @@ export const googleLogin = createAsyncThunk<any, void, { rejectValue: any }>(
     return new Promise((resolve, reject) => {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
       const popup = window.open(
-        `${baseUrl}auth/google`,
+        `${baseUrl}/auth/google`,
         "_blank",
         "width=500,height=600"
       );
 
       const handleMessage = (event: MessageEvent) => {
-        const updatedBaseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(
-          /\/$/,
-          ""
-        );
-        if (event.origin !== updatedBaseUrl) return;
+        if (event.origin !== baseUrl) return;
 
         window.removeEventListener("message", handleMessage);
 
