@@ -107,6 +107,8 @@ export const googleLogin = createAsyncThunk<any, void, { rejectValue: any }>(
       );
 
       const handleMessage = (event: MessageEvent) => {
+        console.log("event", event.origin);
+        console.log("baseUrl", baseUrl);
         if (event.origin !== baseUrl) return;
 
         window.removeEventListener("message", handleMessage);
