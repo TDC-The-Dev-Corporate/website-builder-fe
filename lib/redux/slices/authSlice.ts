@@ -115,24 +115,23 @@ export const googleLogin = createAsyncThunk<any, void, { rejectValue: any }>(
 
       const handleMessage = (event: MessageEvent) => {
         console.log("🧠 event.origin", event.origin);
-        console.log("🧠 event.data", event.data);
+        console.log("🧠 FULL event", event);
 
-        // Skip devtools/stripe noise
+        // Skip irrelevant messages
         if (
           event.data?.source === "react-devtools-content-script" ||
           event.data?.source === "react-devtools-bridge" ||
-          event.origin.includes("stripe.com")
+          event.origin.includes("stripe.com") ||
+          event.data?.target === "metamask-inpage"
         )
           return;
 
-        if (!allowedOrigins.includes(event.origin)) {
-          console.warn("❌ Message origin not allowed:", event.origin);
-          return;
-        }
-
+        // Check for expected result
         if (event.data?.success) {
+          console.log("✅ Google login success:", event.data);
           resolve(event.data);
         } else {
+          console.warn("❌ Unexpected message payload", event.data);
           reject(rejectWithValue(event.data));
         }
 
