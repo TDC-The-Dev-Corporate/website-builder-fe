@@ -16,7 +16,8 @@ export const loginUser = async (data: any) => {
 };
 
 export const googleAuth = async () => {
-  window.location.href = "http://localhost:3001/auth/google";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  window.location.href = `${baseUrl}auth/google`;
 };
 
 export const sendOtpEmail = async (data: any) => {
