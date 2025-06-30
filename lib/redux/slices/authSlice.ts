@@ -121,6 +121,8 @@ export const googleLogin = createAsyncThunk<any, void, { rejectValue: any }>(
 
         if (!allowedOrigins.includes(event.origin)) return;
 
+        console.log("event.data", event.data);
+
         if (event.data.success) {
           resolve(event.data);
         } else {
