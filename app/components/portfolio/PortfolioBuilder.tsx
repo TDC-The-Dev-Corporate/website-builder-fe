@@ -539,19 +539,19 @@ export default function PortfolioBuilder() {
 
                         if (!editor) return results;
 
-                        editorHelpers.clearSelection(editor);
-
+                        // ✅ Add to asset manager manually so they show up in modal
                         results.forEach((asset) => {
-                          if (asset.isImage) {
-                            editorHelpers.addImageComponent(editor, asset);
-                          } else if (asset.type?.startsWith("video")) {
-                            editorHelpers.addVideoComponent?.(editor, asset);
-                          } else {
-                            editorHelpers.addFileLinkComponent(editor, asset);
-                          }
+                          editor.AssetManager.add({
+                            src: asset.src,
+                            name: asset.name,
+                            type: asset.isImage ? "image" : asset.type,
+                          });
                         });
 
-                        return results;
+                        // Optionally, select the uploaded asset and insert it
+                        // OR let the user select it manually via the modal
+
+                        return results; // GrapesJS will now show these in the modal
                       } catch (error) {
                         console.error("Upload error:", error);
                         editorRef.current?.showNotification(
@@ -562,6 +562,7 @@ export default function PortfolioBuilder() {
                       }
                     },
                   } as any,
+
                   plugins: [
                     (editor) => {
                       editor.DomComponents.addType("file-link", {

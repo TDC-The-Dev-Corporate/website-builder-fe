@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/app/services/api";
 import LoadingSpinner from "@/app/components/animations/LoadingSpinner";
+import { LoadingScreen } from "@/app/AIWebsiteBuilders/template-selector/helpingComponents";
 
 const Redirect = () => {
   const searchParams = useSearchParams();
@@ -39,7 +40,11 @@ const Redirect = () => {
     validateGoogleCode();
   }, [searchParams, router]);
 
-  return <LoadingSpinner />;
+  return (
+    <LoadingScreen>
+      <LoadingSpinner />{" "}
+    </LoadingScreen>
+  );
 };
 
 export default Redirect;
