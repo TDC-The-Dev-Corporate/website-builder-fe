@@ -52,11 +52,16 @@ export default function LoginForm() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    const result = await dispatch(googleLogin());
-    if (result.payload.success) {
-      router.push("/AIWebsiteBuilders/home");
-    }
+  // const handleGoogleLogin = async () => {
+  //   const result = await dispatch(googleLogin());
+  //   if (result.payload.success) {
+  //     router.push("/AIWebsiteBuilders/home");
+  //   }
+  // };
+
+  const handleGoogleLogin = () => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    window.location.href = `${baseUrl}auth/google`;
   };
 
   return (
