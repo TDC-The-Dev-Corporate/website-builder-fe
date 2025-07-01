@@ -228,7 +228,7 @@ export default function PortfolioBuilder() {
       }
 
       setDeployUrl(
-        `http://localhost:3000/AIWebsiteBuilders/portfolio/${response.payload.user.username}`
+        `https://tradesbuilderpro.com/AIWebsiteBuilders/portfolio/${response.payload.user.username}`
       );
       setShowDeployModal(true);
     } catch (error) {
