@@ -4,6 +4,8 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import { keyframes } from "@mui/system";
 import { motion } from "framer-motion";
 
+const MotionBox = motion(Box);
+
 const pulse = keyframes`
   0% {
     opacity: 0.6;
@@ -44,7 +46,7 @@ const LoadingSpinner = ({
       transition: {
         duration: 0.6,
         repeat: Infinity,
-        ease: "easeInOut",
+        ease: "easeInOut" as const,
       },
     },
   };
@@ -101,10 +103,11 @@ const LoadingSpinner = ({
           }}
         >
           {[0, 1, 2].map((i) => (
-            <Box
+            <MotionBox
               key={i}
-              component={motion.div}
               variants={dotVariants}
+              initial="initial"
+              animate="animate"
               sx={{
                 width: 6,
                 height: 6,
