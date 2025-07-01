@@ -40,15 +40,14 @@ const LoadingSpinner = ({
   };
 
   const dotVariants = {
-    initial: { y: 0 },
-    animate: {
-      y: [0, -10, 0],
+    animate: (i: number) => ({
+      y: i % 2 === 0 ? [-6, 6, -6] : [6, -6, 6],
       transition: {
-        duration: 0.6,
+        duration: 1,
         repeat: Infinity,
         ease: "easeInOut" as const,
       },
-    },
+    }),
   };
 
   return (
@@ -105,12 +104,20 @@ const LoadingSpinner = ({
           {[0, 1, 2].map((i) => (
             <MotionBox
               key={i}
-              variants={dotVariants}
-              initial="initial"
-              animate="animate"
+              custom={i}
+              initial={{ y: 0 }}
+              animate={{
+                y: [0, -8, 0, 8, 0], // up -> center -> down -> center
+              }}
+              transition={{
+                duration: 1.6,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.2, // wave-like delay
+              }}
               sx={{
-                width: 6,
-                height: 6,
+                width: 8,
+                height: 8,
                 borderRadius: "50%",
                 backgroundColor: "primary.main",
               }}
