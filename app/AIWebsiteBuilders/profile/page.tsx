@@ -280,7 +280,7 @@ export default function ViewProfile() {
                         <Typography variant="body1" sx={{ color: "white" }}>
                           {`${
                             process.env.NEXT_PUBLIC_APP_URL ||
-                            "http://localhost:3000"
+                            "https://tradesbuilderpro.com"
                           }/AIWebsiteBuilders/portfolio/${user.username}`}
                         </Typography>
                       </Box>
