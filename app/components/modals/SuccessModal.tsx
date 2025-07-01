@@ -28,7 +28,7 @@ export default function SuccessModal({
       opacity: 1,
       transition: {
         duration: 0.6,
-        ease: "easeInOut",
+        ease: "easeInOut" as const,
         delay: 0.3,
       },
     },
@@ -41,7 +41,7 @@ export default function SuccessModal({
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: "easeInOut",
+        ease: "easeInOut" as const,
       },
     },
   };

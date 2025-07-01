@@ -14,6 +14,7 @@ import { styled } from "@mui/material/styles";
 import MotionBox from "../animations/MotionBox";
 import { GlassMorphism } from "../animations/GlassMorphism";
 import LoadingSpinner from "../animations/LoadingSpinner";
+import { Easing } from "framer-motion";
 interface OnboardingLayoutProps {
   children: React.ReactNode;
   activeStep: number;
@@ -63,7 +64,7 @@ const OnboardingLayout = ({
       y: 0,
       transition: {
         duration: 0.5,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.22, 1, 0.36, 1] as Easing,
       },
     },
   };
