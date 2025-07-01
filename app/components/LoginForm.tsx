@@ -61,7 +61,7 @@ export default function LoginForm() {
 
   const handleGoogleLogin = () => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-    window.location.href = `${baseUrl}auth/google`;
+    window.location.href = `${baseUrl}/auth/google`;
   };
 
   return (
