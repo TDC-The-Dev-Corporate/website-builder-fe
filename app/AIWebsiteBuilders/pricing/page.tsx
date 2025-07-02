@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Check, Star, Zap, Shield } from "lucide-react";
@@ -26,8 +26,10 @@ import {
 import { motion } from "framer-motion";
 
 import PaymentForm from "@/app/components/payment/PaymentForm";
-import { useAppDispatch } from "@/lib/redux/hooks";
-import { createSubsscription } from "@/lib/redux/api/payment";
+import {
+  createSubsscription,
+  fetchSubscriptionStatus,
+} from "@/lib/redux/api/payment";
 
 const MotionCard = motion(Card);
 const MotionBox = motion(Box);
@@ -104,8 +106,26 @@ export default function PricingPage() {
   const [activePlan, setActivePlan] = useState(false);
   const [loading, setLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [userHasActiveSubscription, setUserHasActiveSubscription] =
+    useState(false);
+  const [userSubscription, setUserSubscription] = useState(null);
+  useState(false);
   const router = useRouter();
-  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const checkSub = async () => {
+      const currentSub = await fetchSubscriptionStatus();
+      console.log("currentSub", currentSub);
+
+      if (currentSub) {
+        setUserHasActiveSubscription(true);
+        setUserSubscription(currentSub);
+      } else {
+        setUserHasActiveSubscription(false);
+      }
+    };
+    checkSub();
+  }, []);
 
   const handlePlanSelect = async (planId: string) => {
     const token = localStorage.getItem("token");
@@ -276,13 +296,15 @@ export default function PricingPage() {
                     sx={{
                       height: "100%",
                       position: "relative",
-                      background: plan.popular
-                        ? "linear-gradient(135deg, rgba(52, 199, 89, 0.1) 0%, rgba(10, 132, 255, 0.1) 100%)"
-                        : "rgba(255, 255, 255, 0.05)",
+                      background:
+                        plan.popular && !userSubscription
+                          ? "linear-gradient(135deg, rgba(52, 199, 89, 0.1) 0%, rgba(10, 132, 255, 0.1) 100%)"
+                          : "rgba(255, 255, 255, 0.05)",
                       backdropFilter: "blur(10px)",
-                      border: plan.popular
-                        ? "2px solid #34C759"
-                        : "1px solid rgba(255, 255, 255, 0.1)",
+                      border:
+                        plan.popular && !userSubscription
+                          ? "2px solid #34C759"
+                          : "1px solid rgba(255, 255, 255, 0.1)",
                       borderRadius: 4,
                       overflow: "visible",
                       "&:hover": {
@@ -292,7 +314,7 @@ export default function PricingPage() {
                       transition: "all 0.3s ease-in-out",
                     }}
                   >
-                    {plan.popular && (
+                    {!userSubscription && plan.popular && (
                       <Chip
                         label="Most Popular"
                         sx={{
@@ -308,13 +330,38 @@ export default function PricingPage() {
                       />
                     )}
 
+                    {userSubscription &&
+                      (userSubscription.priceId === plan.monthlyPriceId ||
+                        userSubscription.priceId === plan.yearlyPriceId) && (
+                        <Chip
+                          label="Selected Plan"
+                          sx={{
+                            position: "absolute",
+                            top: -12,
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            backgroundColor: "#34C759",
+                            color: "white",
+                            fontWeight: 600,
+                            zIndex: 1,
+                          }}
+                        />
+                      )}
+
                     <CardContent sx={{ p: 4, height: "100%" }}>
                       <Box
-                        sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          mb: 2,
+                        }}
                       >
                         <Box
                           sx={{
-                            color: plan.popular ? "#34C759" : "#0A84FF",
+                            color:
+                              plan.popular && !userSubscription
+                                ? "#34C759"
+                                : "#0A84FF",
                             mr: 2,
                           }}
                         >
@@ -371,26 +418,30 @@ export default function PricingPage() {
                         )}
                       </Box>
 
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        size="large"
-                        onClick={() => handlePlanSelect(plan.id)}
-                        sx={{
-                          mb: 3,
-                          py: 1.5,
-                          background: plan.popular
-                            ? "linear-gradient(135deg, #34C759 0%, #30B350 100%)"
-                            : "linear-gradient(135deg, #0A84FF 0%, #007AFF 100%)",
-                          "&:hover": {
-                            background: plan.popular
-                              ? "linear-gradient(135deg, #4CD964 0%, #34C759 100%)"
-                              : "linear-gradient(135deg, #5AC8FA 0%, #0A84FF 100%)",
-                          },
-                        }}
-                      >
-                        Get Started
-                      </Button>
+                      {!userHasActiveSubscription && (
+                        <Button
+                          variant="contained"
+                          fullWidth
+                          size="large"
+                          onClick={() => handlePlanSelect(plan.id)}
+                          sx={{
+                            mb: 3,
+                            py: 1.5,
+                            background:
+                              plan.popular && !userSubscription
+                                ? "linear-gradient(135deg, #34C759 0%, #30B350 100%)"
+                                : "linear-gradient(135deg, #0A84FF 0%, #007AFF 100%)",
+                            "&:hover": {
+                              background:
+                                plan.popular && !userSubscription
+                                  ? "linear-gradient(135deg, #4CD964 0%, #34C759 100%)"
+                                  : "linear-gradient(135deg, #5AC8FA 0%, #0A84FF 100%)",
+                            },
+                          }}
+                        >
+                          Get Started
+                        </Button>
+                      )}
 
                       <List sx={{ p: 0 }}>
                         {plan.features.map((feature, featureIndex) => (
@@ -398,7 +449,11 @@ export default function PricingPage() {
                             <ListItemIcon sx={{ minWidth: 28 }}>
                               <Check
                                 size={16}
-                                color={plan.popular ? "#34C759" : "#0A84FF"}
+                                color={
+                                  plan.popular && !userSubscription
+                                    ? "#34C759"
+                                    : "#0A84FF"
+                                }
                               />
                             </ListItemIcon>
                             <ListItemText
