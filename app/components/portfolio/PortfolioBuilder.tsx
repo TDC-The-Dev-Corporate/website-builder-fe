@@ -681,28 +681,18 @@ export default function PortfolioBuilder() {
                         },
                       });
                     },
-
                     rteTinyMce.init({
                       enableOnClick: true,
-                      loadConfig: ({ component, config }) => {
-                        const demoRte = component.get("demorte");
-                        if (demoRte === "fixed") {
-                          return {
-                            toolbar:
-                              "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | link image media",
-                            fixed_toolbar_container_target:
-                              document.querySelector(".rteContainer"),
-                          };
-                        } else if (demoRte === "quickbar") {
-                          return {
-                            plugins: `${config.plugins} quickbars`,
-                            toolbar: false,
-                            quickbars_selection_toolbar:
-                              "bold italic underline strikethrough | quicklink image",
-                          };
-                        }
-                        return {};
-                      },
+                      loadConfig: () => ({
+                        toolbar_mode: "sliding",
+                        toolbar: [
+                          "bold italic underline strikethrough | fontfamily fontsize | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist",
+                          "forecolor backcolor | link image table | code",
+                        ],
+                        plugins: "link image lists advlist code table",
+                        font_size_formats:
+                          "8px 10px 12px 14px 16px 18px 24px 36px",
+                      }),
                     }),
                     tableComponent.init({
                       block: { category: "Extra", label: "Table" },
