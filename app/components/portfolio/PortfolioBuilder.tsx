@@ -29,6 +29,7 @@ import LoadingSpinner from "@/app/components/animations/LoadingSpinner";
 import ContentGenerator from "@/app/components/AI/ContentGenerator";
 import JsonLd from "../JsonLd";
 import {
+  addTooltips,
   grapesJsStyles,
   LoadingScreen,
 } from "@/app/AIWebsiteBuilders/template-selector/helpingComponents";
@@ -774,6 +775,10 @@ export default function PortfolioBuilder() {
                           command: "show-image-generator",
                           attributes: { title: "Generate Images with AI" },
                         });
+                      });
+
+                      editor.onReady(() => {
+                        addTooltips(editor.getComponents());
                       });
                     },
                   ],
