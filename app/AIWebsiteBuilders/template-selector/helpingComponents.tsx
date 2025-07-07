@@ -159,3 +159,36 @@ export const grapesJsStyles = `
           border-bottom-color: #3b82f6;
         }
       `;
+
+export const addTooltips = (components) => {
+  components.forEach((comp) => {
+    const type = comp.get("type");
+
+    console.log("type", type);
+
+    if (type === "image") {
+      comp.addAttributes({
+        title: "💡 Double-click to upload a new image",
+      });
+    }
+
+    if (
+      type === "text" ||
+      type === "textnode" ||
+      comp.is("text") ||
+      type === "link" ||
+      type === "button" ||
+      type === "heading"
+    ) {
+      comp.addAttributes({
+        title:
+          "🖋️ Select the element and use the right panel to edit typography",
+      });
+    }
+
+    // Recurse if the component has children
+    if (comp.components().length > 0) {
+      addTooltips(comp.components());
+    }
+  });
+};
