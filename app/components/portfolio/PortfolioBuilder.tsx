@@ -67,7 +67,8 @@ export default function PortfolioBuilder() {
 
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = "https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js";
+    script.src =
+      "https://cdn.tiny.cloud/1/kidwm7gff8kesm91r8wmgq8kyhm4brq5ln7yfaprivvd5e90/tinymce/6/tinymce.min.js";
     script.referrerPolicy = "origin";
     document.head.appendChild(script);
 
@@ -705,26 +706,15 @@ export default function PortfolioBuilder() {
                           "autolink",
                           "lists",
                           "link",
-                          "image",
                           "charmap",
                           "preview",
                           "anchor",
                           "searchreplace",
                           "visualblocks",
-                          "code",
                           "fullscreen",
-                          "insertdatetime",
-                          "media",
-                          "table",
-                          "code",
                           "help",
                           "wordcount",
                         ],
-                        // toolbar: [
-                        //   "undo redo | blocks | bold italic underline strikethrough | " +
-                        //     "alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | " +
-                        //     "forecolor backcolor | link image table | code",
-                        // ],
                         toolbar: [
                           "bold italic underline strikethrough | fontfamily fontsize | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist",
                           "forecolor backcolor | link image table | code",
