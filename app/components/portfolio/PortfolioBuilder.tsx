@@ -735,7 +735,15 @@ export default function PortfolioBuilder() {
                           example: "/path/to/plugin.js",
                         },
                       }),
-                    }),
+
+                      onInit: (editor) => {
+                        console.log("Active TinyMCE plugins:", editor.plugins);
+                        console.log(
+                          "Toolbar buttons:",
+                          editor.ui.registry.getAll().buttons
+                        );
+                      },
+                    } as any),
                     tableComponent.init({
                       block: { category: "Extra", label: "Table" },
                     }),
