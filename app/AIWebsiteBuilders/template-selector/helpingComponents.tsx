@@ -164,8 +164,6 @@ export const addTooltips = (components) => {
   components.forEach((comp) => {
     const type = comp.get("type");
 
-    console.log("type", type);
-
     if (type === "image") {
       comp.addAttributes({
         title: "💡 Double-click to upload a new image",
@@ -186,7 +184,6 @@ export const addTooltips = (components) => {
       });
     }
 
-    // Recurse if the component has children
     if (comp.components().length > 0) {
       addTooltips(comp.components());
     }

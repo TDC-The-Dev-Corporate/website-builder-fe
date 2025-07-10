@@ -66,6 +66,17 @@ export default function PortfolioBuilder() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js";
+    script.referrerPolicy = "origin";
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  useEffect(() => {
     const template = localStorage.getItem("selectedTemplate");
     if (template) {
       setSelectedTemplate(JSON.parse(template));
@@ -684,15 +695,45 @@ export default function PortfolioBuilder() {
                     },
                     rteTinyMce.init({
                       enableOnClick: true,
-                      loadConfig: () => ({
+                      loadConfig: (editor) => ({
+                        skin: "oxide",
+                        content_css: false,
                         toolbar_mode: "sliding",
+                        menubar: false,
+                        plugins: [
+                          "advlist",
+                          "autolink",
+                          "lists",
+                          "link",
+                          "image",
+                          "charmap",
+                          "preview",
+                          "anchor",
+                          "searchreplace",
+                          "visualblocks",
+                          "code",
+                          "fullscreen",
+                          "insertdatetime",
+                          "media",
+                          "table",
+                          "code",
+                          "help",
+                          "wordcount",
+                        ],
+                        // toolbar: [
+                        //   "undo redo | blocks | bold italic underline strikethrough | " +
+                        //     "alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | " +
+                        //     "forecolor backcolor | link image table | code",
+                        // ],
                         toolbar: [
                           "bold italic underline strikethrough | fontfamily fontsize | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist",
                           "forecolor backcolor | link image table | code",
                         ],
-                        plugins: "link image lists advlist code table",
                         font_size_formats:
                           "8px 10px 12px 14px 16px 18px 24px 36px",
+                        external_plugins: {
+                          example: "/path/to/plugin.js",
+                        },
                       }),
                     }),
                     tableComponent.init({
