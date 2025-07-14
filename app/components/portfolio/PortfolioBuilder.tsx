@@ -66,18 +66,6 @@ export default function PortfolioBuilder() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src =
-      "https://cdn.tiny.cloud/1/kidwm7gff8kesm91r8wmgq8kyhm4brq5ln7yfaprivvd5e90/tinymce/6/tinymce.min.js";
-    script.referrerPolicy = "origin";
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
-  useEffect(() => {
     const template = localStorage.getItem("selectedTemplate");
     if (template) {
       setSelectedTemplate(JSON.parse(template));
@@ -696,44 +684,17 @@ export default function PortfolioBuilder() {
                     },
                     rteTinyMce.init({
                       enableOnClick: true,
-                      loadConfig: (editor) => ({
-                        skin: "oxide",
-                        content_css: false,
+                      loadConfig: () => ({
                         toolbar_mode: "sliding",
-                        menubar: false,
-                        plugins: [
-                          "advlist",
-                          "autolink",
-                          "lists",
-                          "link",
-                          "charmap",
-                          "preview",
-                          "anchor",
-                          "searchreplace",
-                          "visualblocks",
-                          "fullscreen",
-                          "help",
-                          "wordcount",
-                        ],
                         toolbar: [
                           "bold italic underline strikethrough | fontfamily fontsize | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist",
                           "forecolor backcolor | link image table | code",
                         ],
+                        plugins: "link image lists advlist code table",
                         font_size_formats:
                           "8px 10px 12px 14px 16px 18px 24px 36px",
-                        external_plugins: {
-                          example: "/path/to/plugin.js",
-                        },
                       }),
-
-                      onInit: (editor) => {
-                        console.log("Active TinyMCE plugins:", editor.plugins);
-                        console.log(
-                          "Toolbar buttons:",
-                          editor.ui.registry.getAll().buttons
-                        );
-                      },
-                    } as any),
+                    }),
                     tableComponent.init({
                       block: { category: "Extra", label: "Table" },
                     }),
