@@ -2,6 +2,7 @@ import { FC } from "react";
 import { useRouter } from "next/navigation";
 
 import { ArrowBigLeft, Save } from "lucide-react";
+import { PlayCircle } from "lucide-react";
 
 import { Box, Typography } from "@mui/material";
 
@@ -11,7 +12,13 @@ export const EditorHeader: FC<{
   selectedTemplate: any;
   setSaveConfirmationOpen: any;
   isSaving: any;
-}> = ({ selectedTemplate, setSaveConfirmationOpen, isSaving }) => {
+  onStartTutorial: () => void;
+}> = ({
+  selectedTemplate,
+  setSaveConfirmationOpen,
+  isSaving,
+  onStartTutorial,
+}) => {
   const router = useRouter();
   return (
     <AppHeader>
@@ -80,6 +87,13 @@ export const EditorHeader: FC<{
           }}
         >
           {isSaving ? "Saving..." : "Save Changes"}
+        </ActionButton>
+        <ActionButton
+          variant="contained"
+          startIcon={<PlayCircle size={18} />}
+          onClick={onStartTutorial}
+        >
+          Show Tutorial
         </ActionButton>
       </Box>
     </AppHeader>

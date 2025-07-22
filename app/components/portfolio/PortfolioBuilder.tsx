@@ -32,6 +32,7 @@ import {
   addTooltips,
   grapesJsStyles,
   LoadingScreen,
+  waitForElement,
 } from "@/app/AIWebsiteBuilders/template-selector/helpingComponents";
 import { EditorHeader } from "@/app/AIWebsiteBuilders/template-selector/EditorHeader";
 
@@ -44,6 +45,8 @@ import {
 } from "@/lib/redux/slices/portfolioSlice";
 
 import { isDefaultTemplate, uploadToCloudinary } from "@/lib/utils";
+import TutorialOverlay from "../tutorial/TutorialOverlay";
+import { tutorialSteps } from "../tutorial/TutorialSteps";
 
 export default function PortfolioBuilder() {
   const [isLoading, setIsLoading] = useState(true);
@@ -64,6 +67,11 @@ export default function PortfolioBuilder() {
   const dispatch = useAppDispatch();
 
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+  const [tutorialActive, setTutorialActive] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [highlightedElement, setHighlightedElement] =
+    useState<HTMLElement | null>(null);
 
   useEffect(() => {
     const template = localStorage.getItem("selectedTemplate");
@@ -95,6 +103,58 @@ export default function PortfolioBuilder() {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!tutorialActive) return;
+
+    const step = tutorialSteps[currentStep];
+
+    const runStep = async () => {
+      document.querySelectorAll(".tutorial-highlight").forEach((el) => {
+        el.classList.remove("tutorial-highlight");
+      });
+
+      if (step.triggerBefore) {
+        step.triggerBefore();
+      }
+
+      try {
+        const element = await waitForElement(step.selector);
+
+        element.classList.add("tutorial-highlight");
+        setHighlightedElement(element);
+      } catch (error) {
+        console.warn(error);
+      }
+    };
+
+    runStep();
+
+    return () => {
+      document.querySelectorAll(".tutorial-highlight").forEach((el) => {
+        el.classList.remove("tutorial-highlight");
+      });
+    };
+  }, [tutorialActive, currentStep]);
+
+  const handleNextStep = () => {
+    if (currentStep < tutorialSteps.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      setTutorialActive(false);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
+
+  const startTutorial = () => {
+    setTutorialActive(true);
+    setCurrentStep(0);
+  };
 
   const getFullHtml = () => {
     if (!editorRef.current) return "";
@@ -335,12 +395,18 @@ export default function PortfolioBuilder() {
         </LoadingScreen>
       ) : (
         <div
-          style={{ display: "flex", flexDirection: "column", height: "100vh" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+            pointerEvents: tutorialActive ? "none" : "auto",
+          }}
         >
           <EditorHeader
             selectedTemplate={selectedTemplate}
             setSaveConfirmationOpen={setSaveConfirmationOpen}
             isSaving={isSaving}
+            onStartTutorial={startTutorial}
           />
 
           <Box sx={{ flex: 1, position: "relative", overflow: "hidden" }}>
@@ -737,6 +803,18 @@ export default function PortfolioBuilder() {
                           });
                         }
 
+                        editor.on("component:selected", () => {
+                          if (tutorialActive) {
+                            const current = tutorialSteps[currentStep];
+                            const element = document.querySelector(
+                              current.selector
+                            );
+                            if (element) {
+                              element.classList.add("tutorial-highlight");
+                            }
+                          }
+                        });
+
                         editor.BlockManager.add("service-card", {
                           label: "Service Card",
                           content: `<div class="service-card" style="padding: 20px; border-radius: 8px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -918,6 +996,16 @@ export default function PortfolioBuilder() {
           />
         </DialogContent>
       </Dialog>
+
+      {tutorialActive && (
+        <TutorialOverlay
+          steps={tutorialSteps}
+          currentStep={currentStep}
+          onNext={handleNextStep}
+          onPrev={handlePrevStep}
+          onClose={() => setTutorialActive(false)}
+        />
+      )}
 
       {/* AI Image Generator Dialog */}
 
