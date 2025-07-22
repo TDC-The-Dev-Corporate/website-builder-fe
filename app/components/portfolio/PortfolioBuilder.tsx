@@ -11,7 +11,8 @@ import StudioEditor from "@grapesjs/studio-sdk/react";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
 import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
 import { accordionComponent } from "@grapesjs/studio-sdk-plugins";
-import { rteTinyMce } from "@grapesjs/studio-sdk-plugins";
+// import { rteTinyMce } from "@grapesjs/studio-sdk-plugins";
+import grapesjsPluginCKEditor from "grapesjs-plugin-ckeditor";
 import "@grapesjs/studio-sdk/style";
 
 import { carpenterTemplate } from "@/lib/templates/carpenter";
@@ -380,7 +381,6 @@ export default function PortfolioBuilder() {
       "AI image generation",
     ],
   };
-
   return (
     <>
       <JsonLd data={builderSchema} />
@@ -588,6 +588,25 @@ export default function PortfolioBuilder() {
                     });
                   }
                 });
+
+                editor.on("rte:enable", () => {
+                  const interval = setInterval(() => {
+                    document.querySelectorAll("iframe").forEach((iframe) => {
+                      try {
+                        const doc =
+                          iframe.contentDocument ||
+                          iframe.contentWindow?.document;
+                        const warning = doc?.querySelector(
+                          ".cke_notification_warning"
+                        );
+                        if (warning) {
+                          warning.remove();
+                          clearInterval(interval);
+                        }
+                      } catch (err) {}
+                    });
+                  }, 300);
+                });
               }}
               options={{
                 ...{
@@ -748,19 +767,20 @@ export default function PortfolioBuilder() {
                         },
                       });
                     },
-                    rteTinyMce.init({
-                      enableOnClick: true,
-                      loadConfig: () => ({
-                        toolbar_mode: "sliding",
-                        toolbar: [
-                          "bold italic underline strikethrough | fontfamily fontsize | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist",
-                          "forecolor backcolor | link image table | code",
-                        ],
-                        plugins: "link image lists advlist code table",
-                        font_size_formats:
-                          "8px 10px 12px 14px 16px 18px 24px 36px",
-                      }),
-                    }),
+                    grapesjsPluginCKEditor,
+                    // rteTinyMce.init({
+                    //   enableOnClick: true,
+                    //   loadConfig: () => ({
+                    //     toolbar_mode: "sliding",
+                    //     toolbar: [
+                    //       "bold italic underline strikethrough | fontfamily fontsize | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist",
+                    //       "forecolor backcolor | link image table | code",
+                    //     ],
+                    //     plugins: "link image lists advlist code table",
+                    //     font_size_formats:
+                    //       "8px 10px 12px 14px 16px 18px 24px 36px",
+                    //   }),
+                    // }),
                     tableComponent.init({
                       block: { category: "Extra", label: "Table" },
                     }),
@@ -860,6 +880,33 @@ export default function PortfolioBuilder() {
                       });
                     },
                   ],
+                  pluginOpts: {
+                    "grapesjs-plugin-ckeditor": {
+                      position: "left",
+                      options: {
+                        toolbar: [
+                          "bold",
+                          "italic",
+                          "underline",
+                          "strikethrough",
+                          "|",
+                          "fontSize",
+                          "fontFamily",
+                          "fontColor",
+                          "highlight",
+                          "|",
+                          "bulletedList",
+                          "numberedList",
+                          "|",
+                          "alignment",
+                          "|",
+                          "link",
+                          "undo",
+                          "redo",
+                        ],
+                      },
+                    },
+                  },
                   layerManager: {
                     appendTo: ".layers-container",
                   },
