@@ -958,6 +958,7 @@ export default function PortfolioBuilder() {
                 <Fab
                   color="primary"
                   onClick={() => setShowContentGenerator(true)}
+                  data-tutorial="ai-generator"
                   sx={{
                     background:
                       "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",

@@ -1,65 +1,3 @@
-// // PortfolioBuilder.tsx
-// export const tutorialSteps: TutorialStep[] = [
-//   {
-//     selector: ".dummy-text",
-//     message:
-//       "👋 Welcome! Let us guide you through the editor so you can start building your website with ease.",
-//   },
-//   {
-//     selector: ".gs-cmp-button:nth-of-type(1)",
-//     message:
-//       "Click this button to open the Blocks panel, where you can explore and drag components onto your page to start building your layout.",
-//   },
-//   {
-//     selector: ".gs-cmp-editor-topbar__wrp-center .gs-select-field > button",
-//     message: "Select different screen views from this button.",
-//   },
-//   {
-//     selector: "button.gs-cmp-button:has(path[d^='M3 16C3 18.8'])",
-//     message: "Use this button to outline all the components on the page.",
-//   },
-//   {
-//     selector: "button.gs-cmp-button:has(path[d^='M12,9A3,3'])",
-//     message:
-//       "This is the Preview button. Click here to preview your design in a live view.",
-//   },
-//   {
-//     selector:
-//       "button.gs-cmp-button:has(path[d^='M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5'])",
-//     message:
-//       "Click here to toggle Full Screen mode and get a distraction-free view of your workspace.",
-//   },
-//   {
-//     selector:
-//       "button.gs-cmp-button:has(path[d^='M12.89,3L14.85,3.4L11.11,21L9.15'])",
-//     message: "Click here to view and export your project's HTML/CSS code.",
-//   },
-//   {
-//     selector:
-//       "button.gs-cmp-button:has(path[d^='M2 12H4V17H20V12H22V17C22 18.11'])",
-//     message: "Click here to import your HTML code into the editor.",
-//   },
-//   {
-//     selector:
-//       "button.gs-cmp-button:has(path[d^='M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19'])",
-//     message: "Click here to clear all the components from your page.",
-//   },
-//   {
-//     selector: "div.gs-cmp-popover > button#headlessui-popover-button-\\:r9\\:",
-//     message: "Click here to change the editor theme.",
-//   },
-//   //   {
-//   //     selector: ".gs-block-item:has(div[title='1 Column'])",
-//   //     message:
-//   //       "Drag this block to insert a single-column layout into your page. Great for adding full-width sections like headers, banners, or paragraphs.",
-//   //     triggerBefore: () => {
-//   //       (
-//   //         document.querySelector(".gs-cmp-button:nth-of-type(1)") as HTMLElement
-//   //       )?.click();
-//   //     },
-//   //   },
-// ];
-
 export interface TutorialStep {
   selector: string;
   message: string;
@@ -127,9 +65,27 @@ export const tutorialSteps: TutorialStep[] = [
       "Clear your canvas completely to start over. Don't worry - we'll always ask for confirmation before removing your work!",
   },
   {
-    selector: "div.gs-cmp-popover > button#headlessui-popover-button-\\:r9\\:",
+    selector: "button.gs-utl-p-1.gs-utl-text-sm.gs-utl-w-full",
     title: "Customize Your Workspace 🎨",
     message:
       "Choose from different editor themes to match your preference. Dark mode, light mode, or something in between - make it yours!",
+  },
+  {
+    selector: '[data-tutorial="back-button"]',
+    title: "Go Back ⬅️",
+    message:
+      "Use this button to return to the previous page or step. It's handy when you want to revisit your earlier settings.",
+  },
+  {
+    selector: '[data-tutorial="save-button"]',
+    title: "Save Your Work 💾",
+    message:
+      "Click this to save your progress. It's important to save frequently to avoid losing changes.",
+  },
+  {
+    selector: '[data-tutorial="ai-generator"]',
+    title: "Generate Content with AI ✨",
+    message:
+      "Click here to open the AI Content Generator. It can help you create amazing text with just a few prompts!",
   },
 ];
