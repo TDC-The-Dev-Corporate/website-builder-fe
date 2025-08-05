@@ -70,6 +70,15 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+
+  /* Fix for iframe content */
+  .gjs-cv-canvas iframe {
+    height: 100% !important;
+  }
+
+  .cke_notification_warning {
+    display: none !important;
+  }
 }
 
 @layer base {

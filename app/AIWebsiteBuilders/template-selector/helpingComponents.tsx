@@ -5,7 +5,8 @@ export const AppHeader = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   padding: theme.spacing(1, 2),
-  backgroundColor: theme.palette.appleGray.dark,
+  // backgroundColor: theme.palette.appleGray.dark,
+  backgroundColor: "black",
   boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
   zIndex: 1000,
   position: "relative",
@@ -30,6 +31,17 @@ export const LoadingScreen = styled(Box)(({ theme }) => ({
 }));
 
 export const grapesJsStyles = `
+    .tutorial-highlight {
+  z-index: 3000 !important;
+  position: relative !important;
+  box-shadow: 0 0 0 4px #3b82f6, 0 0 20px 10px rgba(59, 130, 246, 0.5) !important;
+}
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  }
       .modal {
           display: block;
           position: relative;
@@ -187,5 +199,24 @@ export const addTooltips = (components) => {
     if (comp.components().length > 0) {
       addTooltips(comp.components());
     }
+  });
+};
+
+export const waitForElement = (
+  selector: string,
+  timeout = 5000
+): Promise<HTMLElement> => {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const el = document.querySelector(selector) as HTMLElement | null;
+      if (el) {
+        clearInterval(interval);
+        resolve(el);
+      } else if (Date.now() - start > timeout) {
+        clearInterval(interval);
+        reject(new Error(`Timeout: Element ${selector} not found`));
+      }
+    }, 100);
   });
 };

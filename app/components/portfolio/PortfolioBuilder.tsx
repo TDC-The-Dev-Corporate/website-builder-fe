@@ -11,7 +11,8 @@ import StudioEditor from "@grapesjs/studio-sdk/react";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
 import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
 import { accordionComponent } from "@grapesjs/studio-sdk-plugins";
-import { rteTinyMce } from "@grapesjs/studio-sdk-plugins";
+// import { rteTinyMce } from "@grapesjs/studio-sdk-plugins";
+import grapesjsPluginCKEditor from "grapesjs-plugin-ckeditor";
 import "@grapesjs/studio-sdk/style";
 
 import { carpenterTemplate } from "@/lib/templates/carpenter";
@@ -32,6 +33,7 @@ import {
   addTooltips,
   grapesJsStyles,
   LoadingScreen,
+  waitForElement,
 } from "@/app/AIWebsiteBuilders/template-selector/helpingComponents";
 import { EditorHeader } from "@/app/AIWebsiteBuilders/template-selector/EditorHeader";
 
@@ -44,6 +46,8 @@ import {
 } from "@/lib/redux/slices/portfolioSlice";
 
 import { isDefaultTemplate, uploadToCloudinary } from "@/lib/utils";
+import TutorialOverlay from "../tutorial/TutorialOverlay";
+import { tutorialSteps } from "../tutorial/TutorialSteps";
 
 export default function PortfolioBuilder() {
   const [isLoading, setIsLoading] = useState(true);
@@ -64,6 +68,11 @@ export default function PortfolioBuilder() {
   const dispatch = useAppDispatch();
 
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+  const [tutorialActive, setTutorialActive] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [highlightedElement, setHighlightedElement] =
+    useState<HTMLElement | null>(null);
 
   useEffect(() => {
     const template = localStorage.getItem("selectedTemplate");
@@ -95,6 +104,58 @@ export default function PortfolioBuilder() {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!tutorialActive) return;
+
+    const step = tutorialSteps[currentStep];
+
+    const runStep = async () => {
+      document.querySelectorAll(".tutorial-highlight").forEach((el) => {
+        el.classList.remove("tutorial-highlight");
+      });
+
+      if (step.triggerBefore) {
+        step.triggerBefore();
+      }
+
+      try {
+        const element = await waitForElement(step.selector);
+
+        element.classList.add("tutorial-highlight");
+        setHighlightedElement(element);
+      } catch (error) {
+        console.warn(error);
+      }
+    };
+
+    runStep();
+
+    return () => {
+      document.querySelectorAll(".tutorial-highlight").forEach((el) => {
+        el.classList.remove("tutorial-highlight");
+      });
+    };
+  }, [tutorialActive, currentStep]);
+
+  const handleNextStep = () => {
+    if (currentStep < tutorialSteps.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      setTutorialActive(false);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
+
+  const startTutorial = () => {
+    setTutorialActive(true);
+    setCurrentStep(0);
+  };
 
   const getFullHtml = () => {
     if (!editorRef.current) return "";
@@ -320,7 +381,6 @@ export default function PortfolioBuilder() {
       "AI image generation",
     ],
   };
-
   return (
     <>
       <JsonLd data={builderSchema} />
@@ -335,12 +395,18 @@ export default function PortfolioBuilder() {
         </LoadingScreen>
       ) : (
         <div
-          style={{ display: "flex", flexDirection: "column", height: "100vh" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+            pointerEvents: tutorialActive ? "none" : "auto",
+          }}
         >
           <EditorHeader
             selectedTemplate={selectedTemplate}
             setSaveConfirmationOpen={setSaveConfirmationOpen}
             isSaving={isSaving}
+            onStartTutorial={startTutorial}
           />
 
           <Box sx={{ flex: 1, position: "relative", overflow: "hidden" }}>
@@ -522,6 +588,25 @@ export default function PortfolioBuilder() {
                     });
                   }
                 });
+
+                editor.on("rte:enable", () => {
+                  const interval = setInterval(() => {
+                    document.querySelectorAll("iframe").forEach((iframe) => {
+                      try {
+                        const doc =
+                          iframe.contentDocument ||
+                          iframe.contentWindow?.document;
+                        const warning = doc?.querySelector(
+                          ".cke_notification_warning"
+                        );
+                        if (warning) {
+                          warning.remove();
+                          clearInterval(interval);
+                        }
+                      } catch (err) {}
+                    });
+                  }, 300);
+                });
               }}
               options={{
                 ...{
@@ -682,19 +767,20 @@ export default function PortfolioBuilder() {
                         },
                       });
                     },
-                    rteTinyMce.init({
-                      enableOnClick: true,
-                      loadConfig: () => ({
-                        toolbar_mode: "sliding",
-                        toolbar: [
-                          "bold italic underline strikethrough | fontfamily fontsize | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist",
-                          "forecolor backcolor | link image table | code",
-                        ],
-                        plugins: "link image lists advlist code table",
-                        font_size_formats:
-                          "8px 10px 12px 14px 16px 18px 24px 36px",
-                      }),
-                    }),
+                    grapesjsPluginCKEditor,
+                    // rteTinyMce.init({
+                    //   enableOnClick: true,
+                    //   loadConfig: () => ({
+                    //     toolbar_mode: "sliding",
+                    //     toolbar: [
+                    //       "bold italic underline strikethrough | fontfamily fontsize | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist",
+                    //       "forecolor backcolor | link image table | code",
+                    //     ],
+                    //     plugins: "link image lists advlist code table",
+                    //     font_size_formats:
+                    //       "8px 10px 12px 14px 16px 18px 24px 36px",
+                    //   }),
+                    // }),
                     tableComponent.init({
                       block: { category: "Extra", label: "Table" },
                     }),
@@ -736,6 +822,18 @@ export default function PortfolioBuilder() {
                             },
                           });
                         }
+
+                        editor.on("component:selected", () => {
+                          if (tutorialActive) {
+                            const current = tutorialSteps[currentStep];
+                            const element = document.querySelector(
+                              current.selector
+                            );
+                            if (element) {
+                              element.classList.add("tutorial-highlight");
+                            }
+                          }
+                        });
 
                         editor.BlockManager.add("service-card", {
                           label: "Service Card",
@@ -782,6 +880,33 @@ export default function PortfolioBuilder() {
                       });
                     },
                   ],
+                  pluginOpts: {
+                    "grapesjs-plugin-ckeditor": {
+                      position: "left",
+                      options: {
+                        toolbar: [
+                          "bold",
+                          "italic",
+                          "underline",
+                          "strikethrough",
+                          "|",
+                          "fontSize",
+                          "fontFamily",
+                          "fontColor",
+                          "highlight",
+                          "|",
+                          "bulletedList",
+                          "numberedList",
+                          "|",
+                          "alignment",
+                          "|",
+                          "link",
+                          "undo",
+                          "redo",
+                        ],
+                      },
+                    },
+                  },
                   layerManager: {
                     appendTo: ".layers-container",
                   },
@@ -880,6 +1005,7 @@ export default function PortfolioBuilder() {
                 <Fab
                   color="primary"
                   onClick={() => setShowContentGenerator(true)}
+                  data-tutorial="ai-generator"
                   sx={{
                     background:
                       "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
@@ -918,6 +1044,16 @@ export default function PortfolioBuilder() {
           />
         </DialogContent>
       </Dialog>
+
+      {tutorialActive && (
+        <TutorialOverlay
+          steps={tutorialSteps}
+          currentStep={currentStep}
+          onNext={handleNextStep}
+          onPrev={handlePrevStep}
+          onClose={() => setTutorialActive(false)}
+        />
+      )}
 
       {/* AI Image Generator Dialog */}
 

@@ -60,3 +60,9 @@ interface UploadedAsset {
   isImage: boolean;
   type: string;
 }
+
+interface TutorialStep {
+  selector: string;
+  message: string;
+  triggerBefore?: () => void;
+}
