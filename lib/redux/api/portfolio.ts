@@ -12,6 +12,7 @@ export const updatePortfolio = async (id: string, data: any) => {
 
 export const getPortfolioByUserName = async (name: string) => {
   const response = await api.get(`portfolios/userByName/${name}`);
+  console.log("portfolio response", response);
   return response.data;
 };
 

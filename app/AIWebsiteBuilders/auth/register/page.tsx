@@ -32,7 +32,7 @@ export default function RegisterPage() {
   const registerSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "Register Trade Business Account",
+     name: "Register Trade Business Account",
     description: "Create your trade business account on TradesBuilder",
     breadcrumb: {
       "@type": "BreadcrumbList",

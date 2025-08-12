@@ -49,7 +49,7 @@ export default function OnboardingFlow() {
 
       if (isLastStep) {
         console.log("Final selections:", { ...selections, ...update });
-        router.push("/AIWebsiteBuilders/auth/login");
+        router.push("/AIWebsiteBuilders/home");
       } else {
         setCurrentStep((prev) => prev + 1);
         setTransition("entering");

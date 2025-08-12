@@ -14,6 +14,11 @@ import {
   Alert,
   CircularProgress,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 
 import { Edit, Camera, Trash2, ArrowLeft } from "lucide-react";
@@ -92,6 +97,7 @@ export default function EditProfileForm() {
   const [imagePreview, setImagePreview] = useState(user?.profileImage || null);
   const [openCropper, setOpenCropper] = useState(false);
   const [rawImage, setRawImage] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -181,7 +187,18 @@ export default function EditProfileForm() {
     if (result.type === "user/delete/fulfilled") {
       await logoutUser();
       setDeleting(false);
+      setDeleteModalOpen(false);
+    } else {
+      setDeleting(false);
     }
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
   };
 
   const profileSchema = {
@@ -464,7 +481,7 @@ export default function EditProfileForm() {
                               key={trade}
                               value={trade}
                               sx={{
-                                color: "white",
+                                color: "black",
                                 "&:hover": {
                                   backgroundColor: "rgba(59, 130, 246, 0.1)",
                                 },
@@ -506,6 +523,25 @@ export default function EditProfileForm() {
                         flexDirection: { xs: "column", sm: "row" },
                       }}
                     >
+                      <Button
+                        variant="contained"
+                        onClick={handleDeleteClick}
+                        disabled={deleting}
+                        startIcon={<Trash2 size={18} />}
+                        sx={{
+                          backgroundColor: "rgba(239, 68, 68, 0.1)",
+                          color: "#ef4444",
+                          "&:hover": {
+                            backgroundColor: "rgba(239, 68, 68, 0.2)",
+                          },
+                          px: 4,
+                          py: 1.5,
+                          minWidth: 160,
+                        }}
+                      >
+                        Delete Account
+                      </Button>
+
                       <Box sx={{ display: "flex", gap: 2 }}>
                         <Button
                           type="submit"
@@ -546,29 +582,6 @@ export default function EditProfileForm() {
                           Cancel
                         </Button>
                       </Box>
-
-                      <Button
-                        variant="contained"
-                        onClick={handleAccountDeletion}
-                        disabled={deleting}
-                        startIcon={<Trash2 size={18} />}
-                        sx={{
-                          backgroundColor: "rgba(239, 68, 68, 0.1)",
-                          color: "#ef4444",
-                          "&:hover": {
-                            backgroundColor: "rgba(239, 68, 68, 0.2)",
-                          },
-                          px: 4,
-                          py: 1.5,
-                          minWidth: 160,
-                        }}
-                      >
-                        {deleting ? (
-                          <CircularProgress size={24} />
-                        ) : (
-                          "Delete Account"
-                        )}
-                      </Button>
                     </Box>
                   </Grid>
                 </Grid>
@@ -576,6 +589,83 @@ export default function EditProfileForm() {
             </Box>
           </GlassMorphism>
         </MotionBox>
+
+        {/* Delete Account Confirmation Modal */}
+        <Dialog
+          open={deleteModalOpen}
+          onClose={handleDeleteCancel}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              backgroundColor: "rgba(15, 23, 42, 0.95)",
+              backdropFilter: "blur(10px)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRadius: "16px",
+            },
+          }}
+        >
+          <DialogTitle
+            sx={{
+              color: "white",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Trash2 size={24} color="#ef4444" />
+            Delete Account
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText
+              sx={{
+                color: "rgba(255, 255, 255, 0.8)",
+                fontSize: "1rem",
+                lineHeight: 1.6,
+              }}
+            >
+              Are you sure you want to delete your account? This action cannot be undone.
+              <br />
+              <br />
+              <strong style={{ color: "#ef4444" }}>
+                All your data, including portfolios and projects, will be permanently removed.
+              </strong>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ p: 3, gap: 2 }}>
+            <Button
+              onClick={handleDeleteCancel}
+              variant="outlined"
+              sx={{
+                color: "white",
+                borderColor: "rgba(255, 255, 255, 0.2)",
+                "&:hover": {
+                  borderColor: "white",
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+                px: 3,
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAccountDeletion}
+              variant="contained"
+              disabled={deleting}
+              startIcon={deleting ? <CircularProgress size={16} /> : <Trash2 size={16} />}
+              sx={{
+                backgroundColor: "#ef4444",
+                "&:hover": {
+                  backgroundColor: "#dc2626",
+                },
+                px: 3,
+              }}
+            >
+              {deleting ? "Deleting..." : "Delete Account"}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {openCropper && rawImage && (
           <ImageCropper

@@ -51,6 +51,12 @@ interface ForgotPassword {
   confirmPassword: string;
 }
 
+interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+}
+
 interface UploadedAsset {
   id: string;
   src: string;

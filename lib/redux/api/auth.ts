@@ -1,6 +1,6 @@
 import api from "@/app/services/api";
 
-export const registerUser = async (data: any) => {
+export const registerUser = async (data: RegisterData) => {
   const response = await api.post("auth/register", data);
   return response.data;
 };

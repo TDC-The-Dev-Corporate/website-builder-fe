@@ -10,23 +10,18 @@ import {
   Container,
   TextField,
   Typography,
-  CircularProgress,
   Alert,
   Grid,
-  MenuItem,
-  Divider,
   Stack,
   IconButton,
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import HomeIcon from "@mui/icons-material/Home";
-import PhoneNumberInput from "@/app/components/ui/PhoneNumberInput";
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
-import { tradeSpecializations } from "@/app/types/constants";
 import MotionBox from "@/app/components/animations/MotionBox";
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 
@@ -42,73 +37,32 @@ const validationSchema = Yup.object({
     .email("Invalid email address")
     .required("Email is required"),
   name: Yup.string().required("Full name is required"),
-  username: Yup.string()
-    .required("Username is required")
-    .matches(/^\S*$/, "Username should not contain spaces"),
   password: Yup.string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters"),
-  companyName: Yup.string().required("Company name is required"),
-  phoneNumber: Yup.string()
-    .required("Phone number is required")
-    .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"),
-  address: Yup.string().required("Business address is required"),
-  tradeSpecialization: Yup.string().required(
-    "Trade specialization is required"
-  ),
-  profileImage: Yup.mixed().notRequired(),
 });
 
 export default function Register() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { loading, error } = useSelector((state: RootState) => state.auth);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     dispatch(clearError());
   }, [dispatch]);
 
-  const formik = useFormik({
+  const formik = useFormik<RegisterData>({
     initialValues: {
       email: "",
       name: "",
-      username: "",
       password: "",
-      companyName: "",
-      phoneNumber: "",
-      address: "",
-      licenseNumber: "",
-      tradeSpecialization: "",
-      profileImage: null,
     },
     validationSchema,
     onSubmit: async (values) => {
       try {
-        if (values.profileImage) {
-          const formData = new FormData();
-          formData.append("file", values.profileImage);
-          formData.append(
-            "upload_preset",
-            process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
-          );
-
-          const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-            {
-              method: "POST",
-              body: formData,
-            }
-          );
-
-          const data = await response.json();
-          values.profileImage = data.secure_url;
-        }
-
         const result = await dispatch(registerUser(values));
         if (result.payload.success) {
-          // router.push("/AIWebsiteBuilders/auth/verify-otp");
           router.push(
             `/AIWebsiteBuilders/auth/verify-otp?email=${encodeURIComponent(
               values.email
@@ -120,18 +74,6 @@ export default function Register() {
       }
     },
   });
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      formik.setFieldValue("profileImage", file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   return (
     <Container
@@ -155,7 +97,7 @@ export default function Register() {
       <Box sx={{ position: "relative", zIndex: 1 }}>
         <Container
           component="main"
-          maxWidth="md"
+          maxWidth="sm"
           sx={{ position: "relative", zIndex: 1 }}
         >
           <MotionBox
@@ -200,7 +142,7 @@ export default function Register() {
                   color: "white",
                 }}
               >
-                Register Your Trade Business
+                Create Your Account
               </Typography>
 
               {error && (
@@ -215,246 +157,61 @@ export default function Register() {
                 sx={{ mt: 1, textAlign: "left" }}
               >
                 <Grid container spacing={3}>
-                  <Grid
-                    item
-                    xs={12}
-                    md={4}
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 150,
-                        height: 150,
-                        border: "2px dashed rgba(255, 255, 255, 0.3)",
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        mb: 2,
-                        overflow: "hidden",
-                        backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Full Name"
+                      {...formik.getFieldProps("name")}
+                      error={
+                        formik.touched.name && Boolean(formik.errors.name)
+                      }
+                      helperText={formik.touched.name && formik.errors.name}
+                      sx={textFieldStyles}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Email Address"
+                      {...formik.getFieldProps("email")}
+                      error={
+                        formik.touched.email && Boolean(formik.errors.email)
+                      }
+                      helperText={formik.touched.email && formik.errors.email}
+                      sx={textFieldStyles}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Password"
+                      type={showPassword ? "text" : "password"}
+                      {...formik.getFieldProps("password")}
+                      error={
+                        formik.touched.password &&
+                        Boolean(formik.errors.password)
+                      }
+                      helperText={
+                        formik.touched.password && formik.errors.password
+                      }
+                      sx={textFieldStyles}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowPassword((prev) => !prev)}
+                              edge="end"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
                       }}
-                    >
-                      {imagePreview ? (
-                        <Box
-                          component="img"
-                          src={imagePreview}
-                          alt="Profile preview"
-                          sx={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : (
-                        <Typography color="rgba(255, 255, 255, 0.7)">
-                          Upload Photo
-                        </Typography>
-                      )}
-                    </Box>
-                    <input
-                      accept="image/*"
-                      style={{ display: "none" }}
-                      id="profile-image"
-                      type="file"
-                      onChange={handleImageChange}
                     />
-                    <label htmlFor="profile-image">
-                      <Button
-                        variant="outlined"
-                        component="span"
-                        sx={{
-                          color: "white",
-                          borderColor: "rgba(255, 255, 255, 0.2)",
-                          "&:hover": {
-                            borderColor: "white",
-                            backgroundColor: "rgba(255, 255, 255, 0.1)",
-                          },
-                        }}
-                      >
-                        Choose Photo
-                      </Button>
-                    </label>
-                  </Grid>
-
-                  <Grid item xs={12} md={8}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          label="Full Name"
-                          {...formik.getFieldProps("name")}
-                          error={
-                            formik.touched.name && Boolean(formik.errors.name)
-                          }
-                          helperText={formik.touched.name && formik.errors.name}
-                          sx={textFieldStyles}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          label="Company Name"
-                          {...formik.getFieldProps("companyName")}
-                          error={
-                            formik.touched.companyName &&
-                            Boolean(formik.errors.companyName)
-                          }
-                          helperText={
-                            formik.touched.companyName &&
-                            formik.errors.companyName
-                          }
-                          sx={textFieldStyles}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Email Address"
-                          {...formik.getFieldProps("email")}
-                          error={
-                            formik.touched.email && Boolean(formik.errors.email)
-                          }
-                          helperText={
-                            formik.touched.email && formik.errors.email
-                          }
-                          sx={textFieldStyles}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Username"
-                          {...formik.getFieldProps("username")}
-                          error={
-                            formik.touched.username &&
-                            Boolean(formik.errors.username)
-                          }
-                          helperText={
-                            formik.touched.username && formik.errors.username
-                          }
-                          sx={textFieldStyles}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Password"
-                          type={showPassword ? "text" : "password"}
-                          {...formik.getFieldProps("password")}
-                          error={
-                            formik.touched.password &&
-                            Boolean(formik.errors.password)
-                          }
-                          helperText={
-                            formik.touched.password && formik.errors.password
-                          }
-                          sx={textFieldStyles}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton
-                                  onClick={() =>
-                                    setShowPassword((prev) => !prev)
-                                  }
-                                  edge="end"
-                                >
-                                  {showPassword ? (
-                                    <VisibilityOff />
-                                  ) : (
-                                    <Visibility />
-                                  )}
-                                </IconButton>
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </Grid>
-                    </Grid>
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Divider
-                      sx={{
-                        my: 3,
-                        color: "rgba(255, 255, 255, 0.5)",
-                        borderColor: "rgba(255, 255, 255, 0.1)",
-                      }}
-                    >
-                      Business Information
-                    </Divider>
-                  </Grid>
-
-                  <Grid item xs={12} sm={6}>
-                    <PhoneNumberInput
-                      value={formik.values.phoneNumber}
-                      onChange={(phone) =>
-                        formik.setFieldValue("phoneNumber", phone)
-                      }
-                      touched={formik.touched.phoneNumber}
-                      error={formik.errors.phoneNumber}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="License Number"
-                      {...formik.getFieldProps("licenseNumber")}
-                      error={
-                        formik.touched.licenseNumber &&
-                        Boolean(formik.errors.licenseNumber)
-                      }
-                      helperText={
-                        formik.touched.licenseNumber &&
-                        formik.errors.licenseNumber
-                      }
-                      sx={textFieldStyles}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Business Address"
-                      {...formik.getFieldProps("address")}
-                      error={
-                        formik.touched.address && Boolean(formik.errors.address)
-                      }
-                      helperText={
-                        formik.touched.address && formik.errors.address
-                      }
-                      sx={textFieldStyles}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      select
-                      label="Trade Specialization"
-                      {...formik.getFieldProps("tradeSpecialization")}
-                      error={
-                        formik.touched.tradeSpecialization &&
-                        Boolean(formik.errors.tradeSpecialization)
-                      }
-                      helperText={
-                        formik.touched.tradeSpecialization &&
-                        formik.errors.tradeSpecialization
-                      }
-                      sx={textFieldStyles}
-                    >
-                      {tradeSpecializations.map((trade) => (
-                        <MenuItem
-                          key={trade}
-                          value={trade}
-                          sx={{ color: "text.primary" }}
-                        >
-                          {trade}
-                        </MenuItem>
-                      ))}
-                    </TextField>
                   </Grid>
 
                   <Grid item xs={12}>
@@ -489,7 +246,7 @@ export default function Register() {
                           visible
                         />
                       ) : (
-                        "Register"
+                        "Create Account"
                       )}
                     </Button>
                   </Grid>

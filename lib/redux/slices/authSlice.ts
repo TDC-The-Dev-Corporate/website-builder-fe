@@ -298,6 +298,16 @@ const authSlice = createSlice({
       })
       .addCase(verifyUser.fulfilled, (state, action) => {
         state.loading = false;
+        // Set user as logged in after successful verification
+        const { data } = action.payload;
+        if (data && data.access_token) {
+          const { access_token, ...userDetails } = data;
+          state.token = access_token;
+          state.user = userDetails;
+          localStorage.setItem("token", access_token);
+          localStorage.setItem("user", JSON.stringify(userDetails));
+          localStorage.setItem("verified", "true");
+        }
       })
       .addCase(verifyUser.rejected, (state, action) => {
         state.loading = false;
