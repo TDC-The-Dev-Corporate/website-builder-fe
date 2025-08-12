@@ -12,12 +12,14 @@ interface PortfolioState {
   layout: TemplateLayout;
   loading: boolean;
   error: string | null;
+  portfolios: any[];
 }
 
 const initialState: PortfolioState = {
   layout: null,
   loading: false,
   error: null,
+  portfolios: [],
 };
 
 export const generatePortfolio = createAsyncThunk<
@@ -26,37 +28,46 @@ export const generatePortfolio = createAsyncThunk<
   { rejectValue: string }
 >("portfolios/create", async (data, { rejectWithValue }) => {
   try {
-    const response = await createPortfolio(data);
-    return response;
+    const portfolio = await createPortfolio(data);
+    console.log("Portfolio created successfully:", portfolio);
+    return portfolio;
   } catch (error: any) {
-    const errorMessage = error.message || "Failed to create portfolio";
-    return rejectWithValue(errorMessage);
+    console.error("Failed to create portfolio:", error);
+    return rejectWithValue(error.message || "Failed to create portfolio");
   }
 });
 
 export const updateExistingPortfolio = createAsyncThunk(
   "portfolio/update",
-  async ({ id, data }: { id: string; data: any }, thunkAPI) => {
+  async ({ id, data }: { id: string; data: any }, { rejectWithValue, dispatch }) => {
     try {
       const updatedPortfolio = await updatePortfolio(id, data);
+      console.log("Portfolio updated successfully:", updatedPortfolio);
+      
+      // Clear cache and refresh portfolios after successful update
+      await clearCache();
+      dispatch(getAllPortfolios());
+      
       return updatedPortfolio;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response?.data || "Update failed");
+      console.error("Failed to update portfolio:", error);
+      return rejectWithValue(error.message || "Failed to update portfolio");
     }
   }
 );
 
 export const getAllPortfolios = createAsyncThunk<
-  any,
+  any[],
   void,
   { rejectValue: string }
->("portfolios/get", async (_, { rejectWithValue }) => {
+>("portfolio/getAll", async (_, { rejectWithValue }) => {
   try {
-    const response = await getPortfolios();
-    return response;
+    const portfolios = await getPortfolios();
+    console.log("Portfolios fetched successfully:", portfolios.length);
+    return portfolios;
   } catch (error: any) {
-    const errorMessage = error.message || "Failed to create portfolio";
-    return rejectWithValue(errorMessage);
+    console.error("Failed to fetch portfolios:", error);
+    return rejectWithValue(error.message || "Failed to fetch portfolios");
   }
 });
 
@@ -75,24 +86,38 @@ export const resetCache = createAsyncThunk<any, void, { rejectValue: string }>(
 
 export const publishPortfolio = createAsyncThunk(
   "portfolio/publish",
-  async (id: string, { rejectWithValue }) => {
+  async (id: string, { rejectWithValue, dispatch }) => {
     try {
-      const data = await publish(id);
-      return data;
+      const publishedPortfolio = await publish(id);
+      console.log("Portfolio published successfully:", publishedPortfolio);
+      
+      // Clear cache and refresh portfolios after successful publish
+      await clearCache();
+      dispatch(getAllPortfolios());
+      
+      return publishedPortfolio;
     } catch (error: any) {
-      return rejectWithValue(error?.response?.data || error.message);
+      console.error("Failed to publish portfolio:", error);
+      return rejectWithValue(error.message || "Failed to publish portfolio");
     }
   }
 );
 
 export const deleteDraft = createAsyncThunk(
   "portfolio/delete",
-  async (id: string, { rejectWithValue }) => {
+  async (id: string, { rejectWithValue, dispatch }) => {
     try {
-      const data = await remove(id);
-      return data;
+      const result = await remove(id);
+      console.log("Portfolio deleted successfully:", id);
+      
+      // Clear cache and refresh portfolios after successful deletion
+      await clearCache();
+      dispatch(getAllPortfolios());
+      
+      return result;
     } catch (error: any) {
-      return rejectWithValue(error?.response?.data || error.message);
+      console.error("Failed to delete portfolio:", error);
+      return rejectWithValue(error.message || "Failed to delete portfolio");
     }
   }
 );
@@ -126,6 +151,7 @@ const portfolioSlice = createSlice({
         updateExistingPortfolio.fulfilled,
         (state, action: PayloadAction<TemplateLayout>) => {
           state.loading = false;
+          state.layout = action.payload; // Update the current layout with the saved data
         }
       )
       .addCase(updateExistingPortfolio.rejected, (state, action) => {
@@ -136,8 +162,10 @@ const portfolioSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getAllPortfolios.fulfilled, (state) => {
+      .addCase(getAllPortfolios.fulfilled, (state, action) => {
         state.loading = false;
+        // Store the portfolios in state for future reference
+        state.portfolios = action.payload;
       })
       .addCase(getAllPortfolios.rejected, (state, action) => {
         state.loading = false;

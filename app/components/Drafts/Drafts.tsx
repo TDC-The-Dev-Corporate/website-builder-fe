@@ -14,7 +14,7 @@ import {
   IconButton,
   Chip,
 } from "@mui/material";
-import { Eye, Edit2, Trash2 } from "lucide-react";
+import { Eye, Edit2, Trash2, Upload } from "lucide-react";
 
 import MotionBox from "@/app/components/animations/MotionBox";
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
@@ -24,28 +24,33 @@ import {
   deleteDraft,
   getAllPortfolios,
   resetCache,
+  publishPortfolio,
 } from "@/lib/redux/slices/portfolioSlice";
 import { useAppDispatch } from "@/lib/redux/hooks";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Drafts() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { toast } = useToast();
   const [templates, setTemplates] = useState([]);
   const [saveConfirmationOpen, setSaveConfirmationOpen] = useState(false);
+  const [publishConfirmationOpen, setPublishConfirmationOpen] = useState(false);
   const [draftId, setDraftId] = useState("");
+  const [publishingId, setPublishingId] = useState("");
 
   const executedRef = useRef(false);
+  
+  const fetchDrafts = async () => {
+    const drafts = await dispatch(getAllPortfolios());
+    if (drafts.payload && Array.isArray(drafts.payload)) {
+      setTemplates(drafts.payload);
+    }
+  };
+
   useEffect(() => {
-    const fetchDrafts = async () => {
-      if (executedRef.current) return;
-      executedRef.current = true;
-
-      const drafts = await dispatch(getAllPortfolios());
-      if (drafts.payload) {
-        setTemplates(drafts.payload);
-      }
-    };
-
+    if (executedRef.current) return;
+    executedRef.current = true;
     fetchDrafts();
   }, [dispatch]);
 
@@ -206,6 +211,42 @@ export default function Drafts() {
     setSaveConfirmationOpen(true);
   };
 
+  const handlePublish = (templateId) => {
+    setPublishingId(templateId);
+    setPublishConfirmationOpen(true);
+  };
+
+  const handlePublishConfirm = async (templateId: string) => {
+    setPublishConfirmationOpen(false);
+
+    try {
+      const response = await dispatch(publishPortfolio(templateId));
+
+      if (publishPortfolio.fulfilled.match(response)) {
+        // Update the template in local state - only one can be published at a time
+        setTemplates((prevTemplates) =>
+          prevTemplates.map((t) =>
+            t.id === templateId ? { ...t, published: true } : { ...t, published: false }
+          )
+        );
+        
+        toast({
+          title: "Success",
+          description: "Portfolio published successfully!",
+        });
+      } else {
+        throw new Error("Failed to publish portfolio");
+      }
+    } catch (err) {
+      console.error("Error publishing portfolio:", err);
+      toast({
+        title: "Error",
+        description: "Failed to publish portfolio. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSaveConfirm = async (draftId: string) => {
     await dispatch(resetCache());
     setSaveConfirmationOpen(false);
@@ -295,26 +336,42 @@ export default function Drafts() {
                         }}
                       />
                     ) : (
-                      <Tooltip title="Delete draft">
-                        <IconButton
-                          onClick={() => handleDelete(template.id)}
-                          sx={{
-                            position: "absolute",
-                            right: 8,
-                            zIndex: 1,
-                            color: "#ef4444",
-                            backdropFilter: "blur(6px)",
-                            backgroundColor: "rgba(255, 255, 255, 0.3)",
-                            borderRadius: "50%",
-                            padding: "6px",
-                            "&:hover": {
-                              backgroundColor: "rgba(255, 255, 255, 0.5)",
-                            },
-                          }}
-                        >
-                          <Trash2 size={18} />
-                        </IconButton>
-                      </Tooltip>
+                      <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 1, display: "flex", gap: 1 }}>
+                        <Tooltip title="Publish portfolio">
+                          <IconButton
+                            onClick={() => handlePublish(template.id)}
+                            sx={{
+                              color: "#10b981",
+                              backdropFilter: "blur(6px)",
+                              backgroundColor: "rgba(255, 255, 255, 0.3)",
+                              borderRadius: "50%",
+                              padding: "6px",
+                              "&:hover": {
+                                backgroundColor: "rgba(255, 255, 255, 0.5)",
+                              },
+                            }}
+                          >
+                            <Upload size={18} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete draft">
+                          <IconButton
+                            onClick={() => handleDelete(template.id)}
+                            sx={{
+                              color: "#ef4444",
+                              backdropFilter: "blur(6px)",
+                              backgroundColor: "rgba(255, 255, 255, 0.3)",
+                              borderRadius: "50%",
+                              padding: "6px",
+                              "&:hover": {
+                                backgroundColor: "rgba(255, 255, 255, 0.5)",
+                              },
+                            }}
+                          >
+                            <Trash2 size={18} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     )}
                     <iframe
                       srcDoc={template.htmlContent}
@@ -398,13 +455,24 @@ export default function Drafts() {
       <ConfirmationModal
         open={saveConfirmationOpen}
         onClose={() => setSaveConfirmationOpen(false)}
-        title="Save Portfolio"
+        title="Delete Draft"
         message="Are you sure you want to delete this draft?"
         draftId={draftId}
         confirmText="Delete Draft"
         cancelText="Cancel"
         onConfirm={handleSaveConfirm}
         severity="warning"
+      />
+      <ConfirmationModal
+        open={publishConfirmationOpen}
+        onClose={() => setPublishConfirmationOpen(false)}
+        title="Publish Portfolio"
+        message="Are you sure you want to publish this portfolio? This will make it live on your public URL."
+        draftId={publishingId}
+        confirmText="Publish"
+        cancelText="Cancel"
+        onConfirm={handlePublishConfirm}
+        severity="info"
       />
     </Box>
   );

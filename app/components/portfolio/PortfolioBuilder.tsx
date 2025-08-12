@@ -23,7 +23,6 @@ import { painterTemplate } from "@/lib/templates/painter";
 
 import DeploySuccessModal from "@/app/components/modals/DeploySuccessModal";
 import ConfirmationModal from "@/app/components/modals/ConfirmationModal";
-import SuccessModal from "@/app/components/modals/SuccessModal";
 import FileUploadManager from "@/app/components/FileUploadManager";
 import LoadingSpinner from "@/app/components/animations/LoadingSpinner";
 import ContentGenerator from "@/app/components/AI/ContentGenerator";
@@ -43,6 +42,7 @@ import {
   resetCache,
   updateExistingPortfolio,
 } from "@/lib/redux/slices/portfolioSlice";
+import { useToast } from "@/hooks/use-toast";
 
 import { isDefaultTemplate, uploadToCloudinary } from "@/lib/utils";
 import TutorialOverlay from "../tutorial/TutorialOverlay";
@@ -53,18 +53,26 @@ export default function PortfolioBuilder() {
   const editorRef = useRef(null);
 
   const [saveConfirmationOpen, setSaveConfirmationOpen] = useState(false);
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [publishConfirmationOpen, setPublishConfirmationOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [showDeployModal, setShowDeployModal] = useState(false);
   const [deployUrl, setDeployUrl] = useState("");
   const [portfolioId, setPortfolioId] = useState("");
+  const [isPublished, setIsPublished] = useState(false);
 
   const [showContentGenerator, setShowContentGenerator] = useState(false);
 
   const [userTrade, setUserTrade] = useState("");
   const [businessName, setBusinessName] = useState("");
 
+  // Debug: Track publishConfirmationOpen state changes
+  useEffect(() => {
+    console.log("publishConfirmationOpen state changed:", publishConfirmationOpen);
+  }, [publishConfirmationOpen]);
+
   const dispatch = useAppDispatch();
+  const { toast } = useToast();
 
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
@@ -76,7 +84,20 @@ export default function PortfolioBuilder() {
   useEffect(() => {
     const template = localStorage.getItem("selectedTemplate");
     if (template) {
-      setSelectedTemplate(JSON.parse(template));
+      const parsedTemplate = JSON.parse(template);
+      setSelectedTemplate(parsedTemplate);
+      
+      // Set portfolio ID if it exists (for saved drafts/published portfolios)
+      if (parsedTemplate.id && !isDefaultTemplate(parsedTemplate.id)) {
+        setPortfolioId(parsedTemplate.id);
+        console.log("Portfolio ID loaded from template:", parsedTemplate.id);
+      }
+      
+      // Check if this portfolio is already published
+      const publishedStatus = localStorage.getItem("published");
+      const isTemplatePublished = parsedTemplate.isPublished || parsedTemplate.deployUrl || publishedStatus === "true";
+      setIsPublished(isTemplatePublished);
+      console.log("Portfolio published status:", isTemplatePublished);
     }
 
     const user = localStorage.getItem("user");
@@ -103,6 +124,14 @@ export default function PortfolioBuilder() {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Cleanup effect to ensure cache is cleared when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clear any pending operations or caches when component unmounts
+      dispatch(resetCache());
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     if (!tutorialActive) return;
@@ -234,18 +263,47 @@ export default function PortfolioBuilder() {
   };
 
   const handleSaveConfirm = async (draftName) => {
+    console.log("=== SAVE STARTED ===");
+    console.log("Current button states - isSaving:", isSaving, "isPublishing:", isPublishing);
+    console.log("Selected template:", selectedTemplate);
+    console.log("Portfolio ID:", portfolioId);
+    console.log("Draft name:", draftName);
+    console.log("Is published:", isPublished);
+    console.log("Is default template:", isDefaultTemplate(selectedTemplate.id));
+    
     setSaveConfirmationOpen(false);
     setIsSaving(true);
 
-    const fullHtml = getFullHtml();
-    if (!fullHtml) {
-      setIsSaving(false);
-      return;
-    }
-
     try {
+      const fullHtml = getFullHtml();
+      if (!fullHtml) {
+        console.error("Failed to get HTML content");
+        toast({
+          title: "Error",
+          description: "Failed to generate HTML content. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("HTML generated, length:", fullHtml.length);
+      
+      console.log("Clearing cache...");
       await dispatch(resetCache());
+      
       const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        console.error("User not found in localStorage");
+        toast({
+          title: "Error",
+          description: "User session not found. Please log in again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("User found:", user.id);
+
       const data = {
         userId: user.id,
         htmlContent: fullHtml,
@@ -254,50 +312,168 @@ export default function PortfolioBuilder() {
           : selectedTemplate.name || "",
       };
 
+      console.log("Save data prepared:", data);
+
       let response;
 
-      if (isDefaultTemplate(selectedTemplate.id))
+      if (isDefaultTemplate(selectedTemplate.id)) {
+        console.log("=== CREATING NEW PORTFOLIO ===");
         response = await dispatch(generatePortfolio(data));
-      else
+      } else {
+        console.log("=== UPDATING EXISTING PORTFOLIO ===");
+        console.log("Portfolio ID:", selectedTemplate.id);
         response = await dispatch(
           updateExistingPortfolio({ id: selectedTemplate.id, data })
         );
-      if (response.payload) {
-        setPortfolioId(response.payload.id);
       }
-      setIsSaving(false);
-      localStorage.getItem("published") === "true"
-        ? setSuccessModalOpen(false)
-        : setSuccessModalOpen(true);
-    } catch (err) {
-      console.error("Error saving portfolio:", err);
-      setIsSaving(false);
+
+      console.log("Redux response:", response);
+      console.log("Response type:", response.type);
+      console.log("Response meta:", response.meta);
+
+      // Check for both fulfilled and rejected cases
+      if (generatePortfolio.fulfilled.match(response) || updateExistingPortfolio.fulfilled.match(response)) {
+        console.log("=== SAVE SUCCESSFUL ===");
+        console.log("Response payload:", response.payload);
+        
+        setPortfolioId(response.payload.id);
+        
+        // Update localStorage with the new portfolio info
+        const updatedTemplate = {
+          ...selectedTemplate,
+          id: response.payload.id,
+          name: data.name
+        };
+        console.log("Updated template:", updatedTemplate);
+        
+        localStorage.setItem("selectedTemplate", JSON.stringify(updatedTemplate));
+        setSelectedTemplate(updatedTemplate);
+        
+        setIsSaving(false);
+        
+        // Just show toast notification, no modal
+        toast({
+          title: "Success",
+          description: "Portfolio saved successfully!",
+        });
+      } else {
+        // Handle error case
+        console.error("=== SAVE FAILED ===");
+        console.error("Response:", response);
+        const errorMessage = response.payload || "Failed to save portfolio";
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        setIsSaving(false);
+      }
+    } catch (error: any) {
+      console.error("=== SAVE ERROR ===", error);
+      toast({
+        title: "Error", 
+        description: error.message || "An unexpected error occurred while saving the portfolio",
+        variant: "destructive",
+      });
     } finally {
-      localStorage.removeItem("selectedTemplate");
+      // Always reset saving state in finally block to prevent stuck state
+      console.log("=== RESETTING SAVING STATE ===");
+      setIsSaving(false);
     }
   };
 
-  const handleDeployNow = async () => {
-    setSuccessModalOpen(false);
-    setIsSaving(true);
+  const handlePublishConfirm = async () => {
+    console.log("🚀 handlePublishConfirm called!");
+    setPublishConfirmationOpen(false);
+    setIsPublishing(true);
 
     try {
-      const response = await dispatch(publishPortfolio(portfolioId));
-
-      if (response.type !== "portfolio/publish/fulfilled") {
-        throw new Error("Deployment failed");
+      console.log("=== PUBLISH STARTED ===");
+      console.log("Portfolio ID:", portfolioId);
+      console.log("Selected Template:", selectedTemplate);
+      
+      if (!portfolioId) {
+        console.error("No portfolio ID found");
+        throw new Error("Portfolio must be saved before publishing");
       }
 
-      setDeployUrl(
-        `https://tradesbuilderpro.com/AIWebsiteBuilders/portfolio/${response.payload.user.username}`
-      );
-      setShowDeployModal(true);
-    } catch (error) {
-      console.error("Deployment error:", error);
+      const response = await dispatch(publishPortfolio(portfolioId));
+      console.log("Publish response:", response);
+
+      if (publishPortfolio.fulfilled.match(response)) {
+        console.log("=== PUBLISH SUCCESSFUL ===");
+        // Update published status
+        localStorage.setItem("published", "true");
+        setIsPublished(true);
+        
+        // Update the selected template with published status
+        const updatedTemplate = {
+          ...selectedTemplate,
+          isPublished: true,
+          published: true,
+          deployUrl: `https://tradesbuilderpro.com/AIWebsiteBuilders/portfolio/${response.payload.user.username}`
+        };
+        localStorage.setItem("selectedTemplate", JSON.stringify(updatedTemplate));
+        setSelectedTemplate(updatedTemplate);
+
+        setDeployUrl(
+          `https://tradesbuilderpro.com/AIWebsiteBuilders/portfolio/${response.payload.user.username}`
+        );
+        setShowDeployModal(true);
+        
+        toast({
+          title: "Success",
+          description: "Portfolio published successfully!",
+        });
+      } else {
+        // Handle error case
+        console.error("=== PUBLISH FAILED ===");
+        console.error("Response:", response);
+        throw new Error("Failed to publish portfolio");
+      }
+    } catch (error: any) {
+      console.error("Publish error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to publish portfolio. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSaving(false);
+      setIsPublishing(false);
     }
   };
+
+  // Expose handlePublishConfirm on window for direct testing
+  useEffect(() => {
+    (window as any).handlePublishConfirm = handlePublishConfirm;
+    return () => {
+      delete (window as any).handlePublishConfirm;
+    };
+  }, [handlePublishConfirm]);
+
+  const handleModalClose = () => {
+    console.log("handleModalClose called");
+    console.log("publishConfirmationOpen before close:", publishConfirmationOpen);
+    setSaveConfirmationOpen(false);
+    setPublishConfirmationOpen(false);
+    setIsSaving(false); // Reset saving state when modal is closed
+    setIsPublishing(false); // Reset publishing state when modal is closed
+    console.log("Modal closed, saving and publishing state reset"); // Debug log
+  };
+
+  // Add a function to reset all states - useful for debugging
+  const resetAllStates = () => {
+    setIsSaving(false);
+    setIsPublishing(false);
+    setSaveConfirmationOpen(false);
+    setPublishConfirmationOpen(false);
+    console.log("All states reset");
+  };
+
+  // Reset states when component mounts or selectedTemplate changes
+  useEffect(() => {
+    resetAllStates();
+  }, [selectedTemplate?.id]);
 
   const handleInsertContent = (content: string, type: string) => {
     if (!editorRef.current) return;
@@ -404,8 +580,12 @@ export default function PortfolioBuilder() {
           <EditorHeader
             selectedTemplate={selectedTemplate}
             setSaveConfirmationOpen={setSaveConfirmationOpen}
+            setPublishConfirmationOpen={setPublishConfirmationOpen}
             isSaving={isSaving}
+            isPublishing={isPublishing}
             onStartTutorial={startTutorial}
+            isPublished={isPublished}
+            portfolioId={portfolioId}
           />
 
           <Box sx={{ flex: 1, position: "relative", overflow: "hidden" }}>
@@ -1117,10 +1297,10 @@ export default function PortfolioBuilder() {
 
       <ConfirmationModal
         open={saveConfirmationOpen}
-        onClose={() => setSaveConfirmationOpen(false)}
+        onClose={handleModalClose}
         title="Save Portfolio"
-        message="Do you want to save your changes as a draft?"
-        confirmText="Save Draft"
+        message="Do you want to save your changes?"
+        confirmText="Save"
         cancelText="Cancel"
         onConfirm={handleSaveConfirm}
         severity="info"
@@ -1131,12 +1311,15 @@ export default function PortfolioBuilder() {
         }
       />
 
-      <SuccessModal
-        open={successModalOpen}
-        onClose={() => setSuccessModalOpen(false)}
-        title="Draft Saved Successfully!"
-        message="Your portfolio has been saved as a draft. Would you like to deploy it now?"
-        onDeploy={handleDeployNow}
+      <ConfirmationModal
+        open={publishConfirmationOpen}
+        onClose={handleModalClose}
+        title="Publish Portfolio"
+        message="Do you want to publish your portfolio and make it live?"
+        confirmText="Publish"
+        cancelText="Cancel"
+        onConfirm={handlePublishConfirm}
+        severity="warning"
       />
 
       <DeploySuccessModal
