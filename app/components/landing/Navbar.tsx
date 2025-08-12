@@ -1,4 +1,4 @@
-import React, { JSX, useState } from "react";
+import React, { JSX, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -25,8 +25,25 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
 
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const open = Boolean(anchorEl);
   const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is logged in on component mount and when localStorage changes
+    const checkLoginStatus = () => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+    };
+    
+    checkLoginStatus();
+    
+    // Listen for storage changes (when user logs in/out in another tab)
+    window.addEventListener("storage", checkLoginStatus);
+    
+    return () => {
+      window.removeEventListener("storage", checkLoginStatus);
+    };
+  }, []);
 
   const handleNavClick = (ref: React.RefObject<HTMLElement>) => {
     if (ref.current) {
@@ -125,11 +142,11 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
               ))}
             </Box>
 
-            {/* Sign In Button */}
+            {/* Sign In / Dashboard Button */}
             <Button
               variant="outlined"
               onClick={() => {
-                if (!localStorage.getItem("token"))
+                if (!isLoggedIn)
                   router.push("/AIWebsiteBuilders/auth/login");
                 else router.push("/AIWebsiteBuilders/home");
               }}
@@ -158,7 +175,7 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
                   textTransform: "none",
                 }}
               >
-                Sign In
+                {isLoggedIn ? "Dashboard" : "Sign In"}
               </Typography>
               <NorthEastIcon
                 className="rotate-icon"
@@ -228,6 +245,11 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
                 <Button
                   variant="outlined"
                   fullWidth
+                  onClick={() => {
+                    if (!isLoggedIn)
+                      router.push("/AIWebsiteBuilders/auth/login");
+                    else router.push("/AIWebsiteBuilders/home");
+                  }}
                   sx={{
                     height: "40px",
                     padding: "8px 24px",
@@ -249,7 +271,7 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
                       textTransform: "none",
                     }}
                   >
-                    Sign In
+                    {isLoggedIn ? "Dashboard" : "Sign In"}
                   </Typography>
                   <img
                     style={{

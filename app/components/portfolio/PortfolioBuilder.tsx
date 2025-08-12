@@ -12,7 +12,6 @@ import { tableComponent } from "@grapesjs/studio-sdk-plugins";
 import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
 import { accordionComponent } from "@grapesjs/studio-sdk-plugins";
 // import { rteTinyMce } from "@grapesjs/studio-sdk-plugins";
-import grapesjsPluginCKEditor from "grapesjs-plugin-ckeditor";
 import "@grapesjs/studio-sdk/style";
 
 import { carpenterTemplate } from "@/lib/templates/carpenter";
@@ -561,6 +560,55 @@ export default function PortfolioBuilder() {
                   canvasBody.addEventListener("drop", (event) => {
                     event.preventDefault();
                   });
+
+                  // Configure component types for text editing
+                  editor.DomComponents.addType("button", {
+                    isComponent: (el) => el.tagName === "BUTTON",
+                    model: {
+                      defaults: {
+                        tagName: "button",
+                        editable: true,
+                        droppable: false,
+                        traits: [
+                          "id",
+                          "title",
+                          { type: "text", name: "text", label: "Button Text" }
+                        ],
+                      },
+                    },
+                  });
+
+                  editor.DomComponents.addType("link", {
+                    isComponent: (el) => el.tagName === "A",
+                    model: {
+                      defaults: {
+                        tagName: "a",
+                        editable: true,
+                        traits: [
+                          "id",
+                          "title",
+                          { type: "text", name: "text", label: "Link Text" },
+                          { type: "text", name: "href", label: "URL" },
+                          { type: "text", name: "target", label: "Target" }
+                        ],
+                      },
+                    },
+                  });
+
+                  // Configure text elements to be editable
+                  ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'div'].forEach(tagName => {
+                    editor.DomComponents.addType(tagName, {
+                      isComponent: (el) => el.tagName === tagName.toUpperCase(),
+                      model: {
+                        defaults: {
+                          tagName: tagName,
+                          editable: true,
+                          droppable: tagName === 'div',
+                          traits: ['id', 'title']
+                        }
+                      }
+                    });
+                  });
                 });
 
                 editor.on("canvas:dragdata", async (dataTransfer, result) => {
@@ -588,29 +636,67 @@ export default function PortfolioBuilder() {
                     });
                   }
                 });
-
-                editor.on("rte:enable", () => {
-                  const interval = setInterval(() => {
-                    document.querySelectorAll("iframe").forEach((iframe) => {
-                      try {
-                        const doc =
-                          iframe.contentDocument ||
-                          iframe.contentWindow?.document;
-                        const warning = doc?.querySelector(
-                          ".cke_notification_warning"
-                        );
-                        if (warning) {
-                          warning.remove();
-                          clearInterval(interval);
-                        }
-                      } catch (err) {}
-                    });
-                  }, 300);
-                });
               }}
               options={{
                 ...{
                   licenseKey: licenseKey,
+
+                  // Configure default Rich Text Editor
+                  richTextEditor: {
+                    actions: [
+                      'bold', 'italic', 'underline', 'strikethrough',
+                      {
+                        name: 'createLink',
+                        icon: '<i class="fa fa-link"></i>',
+                        attributes: { title: 'Add/Edit Link' },
+                        result: (rte) => {
+                          const selection = rte.selection();
+                          
+                          // Check if we're already in a link
+                          const range = rte.doc.getSelection().getRangeAt(0);
+                          let linkElement = null;
+                          let parentNode = range.startContainer;
+                          
+                          // Find if we're inside a link
+                          while (parentNode && parentNode.nodeType !== 9) { // 9 = DOCUMENT_NODE
+                            if (parentNode.tagName === 'A') {
+                              linkElement = parentNode;
+                              break;
+                            }
+                            parentNode = parentNode.parentNode;
+                          }
+                          
+                          let currentUrl = '';
+                          if (linkElement) {
+                            currentUrl = linkElement.getAttribute('href') || '';
+                          }
+                          
+                          const url = prompt('Enter the URL:', currentUrl || 'https://');
+                          
+                          if (url !== null && url.trim()) {
+                            if (linkElement) {
+                              // Edit existing link
+                              linkElement.setAttribute('href', url);
+                            } else {
+                              // Create new link
+                              const selectedText = selection.toString();
+                              if (selectedText && selectedText.trim()) {
+                                rte.insertHTML(`<a href="${url}">${selectedText}</a>`);
+                              } else {
+                                rte.insertHTML(`<a href="${url}">${url}</a>`);
+                              }
+                            }
+                          }
+                        }
+                      },
+                      'fontSize', 'textColor', 'bgColor',
+                      'alignLeft', 'alignCenter', 'alignRight'
+                    ],
+                    // Enable RTE globally
+                    enable: true,
+                    focusOnActivation: true,
+                    selectOnActivation: true
+                  },
 
                   assets: {
                     storageType: "self",
@@ -767,7 +853,6 @@ export default function PortfolioBuilder() {
                         },
                       });
                     },
-                    grapesjsPluginCKEditor,
                     // rteTinyMce.init({
                     //   enableOnClick: true,
                     //   loadConfig: () => ({
@@ -880,33 +965,6 @@ export default function PortfolioBuilder() {
                       });
                     },
                   ],
-                  pluginOpts: {
-                    "grapesjs-plugin-ckeditor": {
-                      position: "left",
-                      options: {
-                        toolbar: [
-                          "bold",
-                          "italic",
-                          "underline",
-                          "strikethrough",
-                          "|",
-                          "fontSize",
-                          "fontFamily",
-                          "fontColor",
-                          "highlight",
-                          "|",
-                          "bulletedList",
-                          "numberedList",
-                          "|",
-                          "alignment",
-                          "|",
-                          "link",
-                          "undo",
-                          "redo",
-                        ],
-                      },
-                    },
-                  },
                   layerManager: {
                     appendTo: ".layers-container",
                   },
