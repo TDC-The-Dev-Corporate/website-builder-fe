@@ -10,12 +10,25 @@ import { Box, Dialog, DialogContent, Fab, Tooltip } from "@mui/material";
 // Import link utilities and components
 import { createLinkEditor, fixAllLinks, processTemplateLinks } from "./utils/linkUtils";
 import { defineLinkComponent, setupLinkEventHandlers } from "./components/LinkComponent";
+import { generateFullHtml } from "./utils/htmlGenerator";
+import { fixAllLinksBeforeOperation } from "./utils/linkMaintenance";
+import { editorHelpers } from "./utils/editorHelpers";
+import { builderSchema } from "./utils/schemas";
+import {
+  // richTextEditorConfig,
+  createAssetManagerConfig,
+  deviceManagerConfig,
+  panelsConfig,
+  layerManagerConfig,
+  selectorManagerConfig
+} from "./config/editorConfig";
+import { createEditorPlugins } from "./config/editorPlugins";
+import { createTemplatesConfig, loadSelectedTemplate as loadTemplate } from "./config/templateConfig";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
 import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
 import { accordionComponent } from "@grapesjs/studio-sdk-plugins";
-// import { rteTinyMce } from "@grapesjs/studio-sdk-plugins";
 import "@grapesjs/studio-sdk/style";
 
 import { carpenterTemplate } from "@/lib/templates/carpenter";
@@ -114,20 +127,9 @@ export default function PortfolioBuilder() {
     }
   }, []);
 
-  const loadSelectedTemplate = (editor) => {
-    if (selectedTemplate) {
-      editor.DomComponents.clear();
-      editor.CssComposer.clear();
-      editor.setComponents(selectedTemplate.data.pages[0].component);
-      
-      // Use the imported processTemplateLinks function instead of defining it inline
-      const processLinks = () => processTemplateLinks(editor, (e, el, model) => createLinkEditor(e, el, model, editor));
-      
-      // Process immediately and then again after a delay to catch any late-loading links
-      setTimeout(processLinks, 500);
-      setTimeout(processLinks, 2000); // Try again later in case some components load late
-    }
-  };  const licenseKey = process.env.NEXT_PUBLIC_GRAPESJS_LICENSE_KEY;
+  // Template loading is now handled by modular config
+
+  const licenseKey = process.env.NEXT_PUBLIC_GRAPESJS_LICENSE_KEY;
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
@@ -194,117 +196,15 @@ export default function PortfolioBuilder() {
     setCurrentStep(0);
   };
 
-  const getFullHtml = () => {
-    if (!editorRef.current) return "";
-    const editor = editorRef.current;
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>${editor.getCss()}</style>
-          <script>
-            // Event Delegation System
-            document.addEventListener('click', function(e) {
-              const btn = e.target.closest('[data-action]');
-              if (!btn) return;
-              
-              const action = btn.dataset.action;
-              const modalId = btn.dataset.modalId;
-              
-              if (action === 'open-drawer') {
-                document.getElementById('drawer').classList.add('active');
-                document.getElementById('overlay').classList.add('active');
-              }
-              
-              if (action === 'close-drawer') {
-                document.getElementById('drawer').classList.remove('active');
-                document.getElementById('overlay').classList.remove('active');
-              }
-              
-              if (action === 'open-modal' && modalId) {
-                document.getElementById(modalId).classList.add('active');
-                document.getElementById('overlay').classList.add('active');
-              }
-              
-              if (action === 'close-modal' && modalId) {
-                document.getElementById(modalId).classList.remove('active');
-                document.getElementById('overlay').classList.remove('active');
-              }
-            });
-            
-            // Close modals and drawers when clicking on overlay
-            document.getElementById('overlay')?.addEventListener('click', function() {
-              document.getElementById('drawer')?.classList.remove('active');
-              
-              // Close all modals
-              const modals = document.querySelectorAll('.modal');
-              modals.forEach(modal => {
-                modal.classList.remove('active');
-              });
-              
-              this.classList.remove('active');
-            });
-            
-            // Prevent clicks inside modals from closing them
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-              modal.addEventListener('click', function(e) {
-                e.stopPropagation();
-              });
-            });
-            
-            // Handle form submissions
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-              form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                alert('Form submission is simulated in this template. In a real website, this would submit data to a server.');
-                this.reset();
-              });
-            });
-          </script>
-        </head>
-        <body>
-          ${editor.getHtml()}
-        </body>
-        </html>
-      `;
-  };
+  const getFullHtml = () => generateFullHtml(editorRef.current);
 
   const handleSaveConfirm = async (draftName) => {
     setSaveConfirmationOpen(false);
     setIsSaving(true);
 
     try {
-      // Fix all links before saving to ensure href values are properly updated
-      if (editorRef.current) {
-        console.log("Ensuring all links are properly updated before saving...");
-        // Get all link components
-        const links = editorRef.current.DomComponents.getWrapper().find('a');
-        console.log(`Found ${links.length} links to check before saving`);
-
-        // Process each link to ensure href is correctly set
-        links.forEach((link, index) => {
-          try {
-            const href = link.get('href') || link.getAttributes().href || '';
-            console.log(`Pre-save check link ${index + 1}:`, { href });
-
-            // Set href on both model and attributes to ensure it's saved
-            link.set('href', href);
-            link.setAttributes({ href });
-
-            // Update DOM element directly
-            if (link.view && link.view.el) {
-              link.view.el.setAttribute('href', href);
-            }
-          } catch (err) {
-            console.error("Error fixing link before save:", err);
-          }
-        });
-
-        // Store changes
-        editorRef.current.store();
-      }
+      // Fix all links before saving using utility function
+      fixAllLinksBeforeOperation(editorRef.current);
 
       const fullHtml = getFullHtml();
       if (!fullHtml) {
@@ -419,35 +319,8 @@ export default function PortfolioBuilder() {
     setIsPublishing(true);
 
     try {
-      // Fix all links before publishing to ensure href values are properly updated
-      if (editorRef.current) {
-        console.log("Ensuring all links are properly updated before publishing...");
-        // Get all link components
-        const links = editorRef.current.DomComponents.getWrapper().find('a');
-        console.log(`Found ${links.length} links to check before publishing`);
-
-        // Process each link to ensure href is correctly set
-        links.forEach((link, index) => {
-          try {
-            const href = link.get('href') || link.getAttributes().href || '';
-            console.log(`Pre-publish check link ${index + 1}:`, { href });
-
-            // Set href on both model and attributes to ensure it's saved
-            link.set('href', href);
-            link.setAttributes({ href });
-
-            // Update DOM element directly
-            if (link.view && link.view.el) {
-              link.view.el.setAttribute('href', href);
-            }
-          } catch (err) {
-            console.error("Error fixing link before publish:", err);
-          }
-        });
-
-        // Store changes
-        editorRef.current.store();
-      }
+      // Fix all links before publishing using utility function
+      fixAllLinksBeforeOperation(editorRef.current);
 
       console.log("=== PUBLISH STARTED ===");
       console.log("Portfolio ID:", portfolioId);
@@ -538,85 +411,12 @@ export default function PortfolioBuilder() {
 
   const handleInsertContent = (content: string, type: string) => {
     if (!editorRef.current) return;
-
-    const editor = editorRef.current;
-    const selected = editor.getSelected();
-
-    if (selected) {
-      if (type === "heading") {
-        selected.components(`<h2>${content}</h2>`);
-      } else if (type === "list") {
-        selected.components(content);
-      } else {
-        selected.components(`<div>${content}</div>`);
-      }
-    } else {
-      // Add to canvas if nothing is selected
-      editor.addComponents(`<div>${content}</div>`);
-    }
-
-    editor.trigger("change:canvasOffset");
+    editorHelpers.insertContent(editorRef.current, content, type);
   };
 
-  const editorHelpers = {
-    clearSelection: (editor) => {
-      const selected = editor.getSelected();
-      if (selected) {
-        selected.remove();
-      }
-    },
+  // Editor helpers are now imported from utils/editorHelpers.ts
 
-    addImageComponent: (editor, asset) => {
-      editor.addComponents(
-        `<img src="${asset.src}" alt="${asset.name}" style="max-width:100%;height:auto;"/>`
-      );
-    },
-
-    addVideoComponent: (editor, asset) => {
-      editor.addComponents({
-        type: "video",
-        src: asset.src,
-        style: "max-width: 100%; height: auto;",
-        attributes: {
-          controls: true,
-        },
-      });
-    },
-
-    addFileLinkComponent: (editor, asset) => {
-      editor.addComponents(`
-        <a href="${asset.src}" 
-           download="${asset.name}" 
-           data-file-link="true"
-           style="display: block; padding: 12px 16px; margin: 10px 0; ">
-          ${asset.name}
-        </a>
-      `);
-    },
-  };
-
-  const builderSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "TradesBuilder Website Builder",
-    applicationCategory: "WebsiteBuilder",
-    description: "Create and customize your trade business website",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
-    featureList: [
-      "Drag-and-drop interface",
-      "Professional templates",
-      "Mobile responsive",
-      "Custom styling",
-      "Image and video upload",
-      "Real-time preview",
-      "AI content generation",
-      "AI image generation",
-    ],
-  };
+  // Schema is now imported from utils/schemas.ts
   return (
     <>
       <JsonLd data={builderSchema} />
@@ -653,26 +453,26 @@ export default function PortfolioBuilder() {
             <StudioEditor
               onEditor={(editor) => {
                 editorRef.current = editor;
-                
+
                 // Use imported link utilities and component definition
                 console.log('Registering link component before loading template...');
-                
+
                 // Define our custom link component
                 defineLinkComponent(editor, (e, el, model) => createLinkEditor(e, el, model, editorRef));
-                
+
                 // Set up event handlers for link interaction
                 setupLinkEventHandlers(editor, (e, el, model) => createLinkEditor(e, el, model, editorRef));
-                
+
                 // Process all existing links immediately when the editor loads
                 // This ensures all links are properly initialized from the start
                 setTimeout(() => {
                   fixAllLinks(editor);
                   editor.store(); // Store the changes
                 }, 500);
-                
+
                 // Add event listener for storage to ensure links are properly saved
                 editor.on('storage:start', () => fixAllLinks(editor));
-                
+
                 // Also process links before publishing
                 editor.on('component:selected', (component) => {
                   if (component && component.get('type') === 'link') {
@@ -682,7 +482,7 @@ export default function PortfolioBuilder() {
                     component.setAttributes({ href });
                     component.getEl().setAttribute('href', href);
                   }
-                });                loadSelectedTemplate(editor);
+                }); loadTemplate(editor, selectedTemplate, processTemplateLinks, createLinkEditor);
 
                 editor.DomComponents.addType("modal", {
                   isComponent: (el) => el.classList?.contains("modal"),
@@ -974,13 +774,6 @@ export default function PortfolioBuilder() {
 
                   // Link component is now defined in LinkComponent.ts
 
-
-
-
-
-
-
-
                   // Configure text elements to be editable
                   ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'div'].forEach(tagName => {
                     editor.DomComponents.addType(tagName, {
@@ -1028,400 +821,34 @@ export default function PortfolioBuilder() {
                   licenseKey: licenseKey,
 
                   // Configure default Rich Text Editor
-                  richTextEditor: {
-                    actions: [
-                      'bold', 'italic', 'underline', 'strikethrough',
-                      {
-                        name: 'createLink',
-                        icon: '<i class="fa fa-link"></i>',
-                        attributes: { title: 'Add/Edit Link' },
-                        result: (rte) => {
-                          const selection = rte.selection();
+                  // richTextEditor: richTextEditorConfig,
 
-                          // Check if we're already in a link
-                          const range = rte.doc.getSelection().getRangeAt(0);
-                          let linkElement = null;
-                          let parentNode = range.startContainer;
+                  assets: createAssetManagerConfig(uploadToCloudinary, editorRef) as any,
 
-                          // Find if we're inside a link
-                          while (parentNode && parentNode.nodeType !== 9) { // 9 = DOCUMENT_NODE
-                            if (parentNode.tagName === 'A') {
-                              linkElement = parentNode;
-                              break;
-                            }
-                            parentNode = parentNode.parentNode;
-                          }
-
-                          let currentUrl = '';
-                          if (linkElement) {
-                            currentUrl = linkElement.getAttribute('href') || '';
-                          }
-
-                          const url = prompt('Enter the URL:', currentUrl || '');
-
-                          if (url !== null && url.trim()) {
-                            if (linkElement) {
-                              // Edit existing link
-                              linkElement.setAttribute('href', url);
-                            } else {
-                              // Create new link
-                              const selectedText = selection.toString();
-                              if (selectedText && selectedText.trim()) {
-                                rte.insertHTML(`<a href="${url}">${selectedText}</a>`);
-                              } else {
-                                rte.insertHTML(`<a href="${url}">${url}</a>`);
-                              }
-                            }
-                          }
-                        }
-                      },
-                      'fontSize', 'textColor', 'bgColor',
-                      'alignLeft', 'alignCenter', 'alignRight'
-                    ],
-                    // Enable RTE globally
-                    enable: true,
-                    focusOnActivation: true,
-                    selectOnActivation: true
-                  },
-
-                  assets: {
-                    storageType: "self",
-                    upload: true,
-                    dropzone: false,
-                    openAssetsOnDrop: false,
-                    autoAdd: false,
-                    onUpload: async ({ files }) => {
-                      try {
-                        const results = await uploadToCloudinary(files);
-                        const editor = editorRef.current;
-
-                        if (!editor) return results;
-
-                        // ✅ Add to asset manager manually so they show up in modal
-                        results.forEach((asset) => {
-                          editor.AssetManager.add({
-                            src: asset.src,
-                            name: asset.name,
-                            type: asset.isImage ? "image" : asset.type,
-                          });
-                        });
-
-                        // Optionally, select the uploaded asset and insert it
-                        // OR let the user select it manually via the modal
-
-                        return results; // GrapesJS will now show these in the modal
-                      } catch (error) {
-                        console.error("Upload error:", error);
-                        editorRef.current?.showNotification(
-                          "Upload failed",
-                          "error"
-                        );
-                        return [];
-                      }
-                    },
-                  } as any,
-
-                  plugins: [
-                    (editor) => {
-                      editor.DomComponents.addType("file-link", {
-                        isComponent: (el) =>
-                          el.tagName === "A" &&
-                          el.getAttribute("data-file-link") === "true",
-                        model: {
-                          defaults: {
-                            tagName: "a",
-                            attributes: {
-                              "data-file-link": "true",
-                              target: "_blank",
-                              rel: "noopener noreferrer",
-                              download: "",
-                              style:
-                                "display: block; padding: 12px 16px; margin: 10px 0; background-color: #f8f9fa; border-radius: 6px; color: #3b82f6; text-decoration: none; border-left: 4px solid #3b82f6;",
-                            },
-                            traits: [
-                              {
-                                type: "text",
-                                name: "href",
-                                label: "File URL",
-                                changeProp: true,
-                              },
-                              {
-                                type: "text",
-                                name: "download",
-                                label: "File name",
-                                changeProp: true,
-                              },
-                              {
-                                type: "text",
-                                name: "style",
-                                label: "Style",
-                                changeProp: true,
-                              },
-                            ],
-                          },
-                        },
-                        view: {
-                          events: {
-                            dblclick: "onActive",
-                          } as any,
-                        },
-                      });
-                    },
-                    (editor) => {
-                      editor.DomComponents.addType("video", {
-                        isComponent: (el) => el.tagName === "VIDEO",
-                        model: {
-                          defaults: {
-                            tagName: "video",
-                            attributes: {
-                              controls: true,
-                              style: "max-width: 100%;",
-                              preload: "auto",
-                            },
-                            traits: [
-                              {
-                                type: "text",
-                                name: "src",
-                                label: "Video URL",
-                                placeholder:
-                                  "example.com/video.mp4 or YouTube/Vimeo URL",
-                                changeProp: true,
-                              },
-                              {
-                                type: "select",
-                                name: "provider",
-                                label: "Video Provider",
-                                options: [
-                                  {
-                                    id: "html5",
-                                    value: "html5",
-                                    name: "HTML5 Video",
-                                  },
-                                  {
-                                    id: "youtube",
-                                    value: "youtube",
-                                    name: "YouTube",
-                                  },
-                                  {
-                                    id: "vimeo",
-                                    value: "vimeo",
-                                    name: "Vimeo",
-                                  },
-                                ],
-                                changeProp: true,
-                              },
-                              {
-                                type: "text",
-                                name: "videoId",
-                                label: "Video ID",
-                                placeholder: "Only for YouTube/Vimeo",
-                              },
-                            ],
-                          },
-                        },
-
-                        view: {
-                          events: {
-                            dblclick: "onActive",
-                          } as any,
-
-                          onRender({ el }) {
-                            const video = el as HTMLVideoElement;
-                            if (!video.poster) {
-                              video.poster =
-                                'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23ddd"/><polygon points="40,30 70,50 40,70" fill="%23fff"/></svg>';
-                            }
-                          },
-
-                          onTraitsChange() {
-                            this.model.updateVideo();
-                          },
-                        },
-                      });
-                    },
-                    tableComponent.init({
-                      block: { category: "Extra", label: "Table" },
-                    }),
-                    iconifyComponent.init({
-                      block: { category: "Icons", label: "Icon" },
-                    }),
-                    accordionComponent.init({
-                      block: { category: "Components", label: "Accordion" },
-                      blockGroup: { category: "Components" },
-                    }),
-                    (editor) => {
-                      if (selectedTemplate) {
-                        editor.runCommand("studio:layoutRemove", {
-                          id: "template-selector",
-                        });
-                      }
-
-                      editor.onReady(() => {
-                        if (selectedTemplate) {
-                          loadSelectedTemplate(editor);
-                        } else {
-                          editor.runCommand("studio:layoutToggle", {
-                            id: "template-selector",
-                            header: false,
-                            placer: {
-                              type: "dialog",
-                              title: "Choose a Template",
-                              size: "l",
-                            },
-                            layout: {
-                              type: "panelTemplates",
-                              content: { itemsPerRow: 3 },
-                              onSelect: ({ loadTemplate, template }) => {
-                                loadTemplate(template);
-                                editor.runCommand("studio:layoutRemove", {
-                                  id: "template-selector",
-                                });
-                              },
-                            },
-                          });
-                        }
-
-                        editor.on("component:selected", () => {
-                          if (tutorialActive) {
-                            const current = tutorialSteps[currentStep];
-                            const element = document.querySelector(
-                              current.selector
-                            );
-                            if (element) {
-                              element.classList.add("tutorial-highlight");
-                            }
-                          }
-                        });
-
-                        editor.BlockManager.add("service-card", {
-                          label: "Service Card",
-                          content: `<div class="service-card" style="padding: 20px; border-radius: 8px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                          <h3 style="margin-top: 0;">Service Name</h3>
-                          <p>Service description goes here.</p>
-                          <button style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Learn More</button>
-                        </div>`,
-                          category: "Trade Components",
-                        });
-
-                        editor.BlockManager.add("testimonial", {
-                          label: "Testimonial",
-                          content: `<div class="testimonial" style="padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                          <p style="font-style: italic;">"Great work! Highly recommend this tradesman."</p>
-                          <p style="font-weight: bold;">- Happy Customer</p>
-                        </div>`,
-                          category: "Trade Components",
-                        });
-
-                        // Add Link block with plain HTML structure to avoid component creation issues
-                        editor.BlockManager.add("link-block", {
-                          label: "Link",
-                          content: `<a href="" style="color: #3b82f6; text-decoration: underline; display: inline-block; padding: 5px 0;">Link Text</a>`,
-                          category: "Basic",
-                        });
-
-                        // Add AI Content Generation button to toolbar
-                        editor.Panels.addButton("options", {
-                          id: "generate-content",
-                          className: "fa fa-magic",
-                          command: "show-content-generator",
-                          attributes: { title: "Generate Content with AI" },
-                        });
-
-                        editor.Commands.add("show-content-generator", {
-                          run: () => setShowContentGenerator(true),
-                        });
-
-                        // Add AI Image Generation button to toolbar
-                        editor.Panels.addButton("options", {
-                          id: "generate-image",
-                          className: "fa fa-image",
-                          command: "show-image-generator",
-                          attributes: { title: "Generate Images with AI" },
-                        });
-                      });
-
-                      editor.onReady(() => {
-                        addTooltips(editor.getComponents());
-                      });
-                    },
-                  ],
-                  layerManager: {
-                    appendTo: ".layers-container",
-                  },
-                  selectorManager: {
-                    appendTo: ".styles-container",
-                  },
-                  deviceManager: {
-                    devices: [
-                      {
-                        id: "desktop",
-                        name: "Desktop",
-                        width: "",
-                      },
-                      {
-                        id: "tablet",
-                        name: "Tablet",
-                        width: "768px",
-                        widthMedia: "992px",
-                      },
-                      {
-                        id: "mobile",
-                        name: "Mobile",
-                        width: "320px",
-                        widthMedia: "576px",
-                      },
-                    ],
-                  },
-                  panels: {
-                    defaults: [
-                      {
-                        id: "layers",
-                        el: ".panel__right",
-                        buttons: [
-                          {
-                            id: "layer-visibility",
-                            className: "fa fa-eye",
-                            command: "sw-visibility",
-                            attributes: { title: "Toggle visibility" },
-                          },
-                        ],
-                      },
-                      {
-                        id: "panel-switcher",
-                        el: ".panel__switcher",
-                        buttons: [
-                          {
-                            id: "show-layers",
-                            className: "fa fa-bars",
-                            command: "show-layers",
-                            attributes: { title: "Layers" },
-                          },
-                          {
-                            id: "show-style",
-                            className: "fa fa-paint-brush",
-                            command: "show-styles",
-                            attributes: { title: "Styles" },
-                          },
-                          {
-                            id: "show-traits",
-                            className: "fa fa-cog",
-                            command: "show-traits",
-                            attributes: { title: "Settings" },
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  templates: {
-                    onLoad: async () => [
-                      carpenterTemplate,
-                      hvacTemplate,
-                      plumberTemplate,
-                      electricianTemplate,
-                      landscaperTemplate,
-                      painterTemplate,
-                    ],
-                  },
+                  plugins: createEditorPlugins(
+                    selectedTemplate,
+                    (editor) => loadTemplate(editor, selectedTemplate, processTemplateLinks, createLinkEditor),
+                    setShowContentGenerator,
+                    tutorialActive,
+                    tutorialSteps,
+                    currentStep,
+                    addTooltips,
+                    tableComponent,
+                    iconifyComponent,
+                    accordionComponent
+                  ).filter(Boolean),
+                  layerManager: layerManagerConfig,
+                  selectorManager: selectorManagerConfig,
+                  deviceManager: deviceManagerConfig,
+                  panels: panelsConfig,
+                  templates: createTemplatesConfig(
+                    carpenterTemplate,
+                    hvacTemplate,
+                    plumberTemplate,
+                    electricianTemplate,
+                    landscaperTemplate,
+                    painterTemplate
+                  ),
                 },
               }}
             />
