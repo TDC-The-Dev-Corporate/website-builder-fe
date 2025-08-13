@@ -7,6 +7,10 @@ import { Wand2, Image as ImageIcon } from "lucide-react";
 
 import { Box, Dialog, DialogContent, Fab, Tooltip } from "@mui/material";
 
+// Import link utilities and components
+import { createLinkEditor, fixAllLinks, processTemplateLinks } from "./utils/linkUtils";
+import { defineLinkComponent, setupLinkEventHandlers } from "./components/LinkComponent";
+
 import StudioEditor from "@grapesjs/studio-sdk/react";
 import { tableComponent } from "@grapesjs/studio-sdk-plugins";
 import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
@@ -110,507 +114,20 @@ export default function PortfolioBuilder() {
     }
   }, []);
 
-  // Helper function to create link editor UI
-  const createLinkEditor = (e, el, model) => {
-    console.log('Creating link editor manually', { el, model });
-    
-    // Ensure we don't proceed with an invalid element
-    if (!el) {
-      console.error('Invalid element provided to createLinkEditor');
-      return;
-    }
-    
-    // Get document from the element
-    const doc = el.ownerDocument;
-    const editorId = "link-editor-box";
-    
-    // Remove any existing editor boxes
-    let box = doc.querySelector(`#${editorId}`);
-    if (box) box.remove();
-
-    box = doc.createElement("div");
-    box.id = editorId;
-    
-    // Apply modern styling to the box
-    Object.assign(box.style, {
-      position: "absolute",
-      padding: "18px",
-      background: "white",
-      border: "none",
-      borderRadius: "12px",
-      boxShadow: "0 10px 25px rgba(0,0,0,0.2), 0 0 0 2px rgba(59, 130, 246, 0.3)",
-      zIndex: "9999",
-      fontFamily: "system-ui, -apple-system, sans-serif",
-      fontSize: "14px",
-      width: "300px",
-      transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-      opacity: "0",
-      transform: "translateY(10px)"
-    });
-    
-    // Create a title for the editor
-    const title = doc.createElement("h3");
-    title.textContent = "Edit Link";
-    Object.assign(title.style, {
-      margin: "0 0 12px 0",
-      padding: "0 0 8px 0",
-      borderBottom: "1px solid #eaeaea",
-      fontSize: "16px",
-      fontWeight: "600",
-      color: "#333"
-    });
-    
-    // Label for URL field
-    const urlLabel = doc.createElement("label");
-    urlLabel.textContent = "Link URL:";
-    urlLabel.htmlFor = "link-url-input";
-    Object.assign(urlLabel.style, {
-      display: "block",
-      marginBottom: "4px",
-      fontWeight: "500",
-      color: "#555",
-      fontSize: "13px"
-    });
-    
-    // Add helper text for link types
-    const helperText = doc.createElement("div");
-    helperText.textContent = 
-  "Use 'https://' for external sites, plain text for internal pages (e.g., about → /about), and '#' for page sections (e.g., #contact).";
-
-    Object.assign(helperText.style, {
-      fontSize: "11px",
-      color: "#666",
-      marginBottom: "6px",
-      fontStyle: "italic"
-    });
-    
-    // Input for URL
-    const urlInput = doc.createElement("input");
-    urlInput.id = "link-url-input";
-    urlInput.type = "text";
-    urlInput.placeholder = "Enter URL (e.g., example.com or #section)";
-    Object.assign(urlInput.style, {
-      width: "100%",
-      padding: "8px 10px",
-      border: "1px solid #ddd",
-      borderRadius: "6px",
-      marginBottom: "12px",
-      fontSize: "14px",
-      boxSizing: "border-box",
-      outline: "none"
-    });
-    
-    // Focus effect for inputs
-    urlInput.onfocus = () => {
-      urlInput.style.borderColor = "#3b82f6";
-      urlInput.style.boxShadow = "0 0 0 2px rgba(59, 130, 246, 0.15)";
-    };
-    
-    urlInput.onblur = () => {
-      urlInput.style.borderColor = "#ddd";
-      urlInput.style.boxShadow = "none";
-    };
-    
-    // Get href from model's attributes or DOM element
-    const hrefValue = (model ? model.getAttributes().href : el.getAttribute('href')) || "";
-    // Use the actual href value without defaulting to https:// for anchor links
-    urlInput.value = hrefValue;
-    
-    // Label for text field
-    const textLabel = doc.createElement("label");
-    textLabel.textContent = "Link Text:";
-    textLabel.htmlFor = "link-text-input";
-    Object.assign(textLabel.style, {
-      display: "block",
-      marginBottom: "4px",
-      fontWeight: "500",
-      color: "#555",
-      fontSize: "13px"
-    });
-    
-    // Input for link text
-    const textInput = doc.createElement("input");
-    textInput.id = "link-text-input";
-    textInput.type = "text";
-    textInput.placeholder = "Enter link text";
-    Object.assign(textInput.style, {
-      width: "100%",
-      padding: "8px 10px",
-      border: "1px solid #ddd",
-      borderRadius: "6px",
-      marginBottom: "12px",
-      fontSize: "14px",
-      boxSizing: "border-box",
-      outline: "none"
-    });
-    
-    // Focus effect for text input
-    textInput.onfocus = () => {
-      textInput.style.borderColor = "#3b82f6";
-      textInput.style.boxShadow = "0 0 0 2px rgba(59, 130, 246, 0.15)";
-    };
-    
-    textInput.onblur = () => {
-      textInput.style.borderColor = "#ddd";
-      textInput.style.boxShadow = "none";
-    };
-    
-    // Get current text from element or component
-    let currentText = "";
-    if (model && model.components().length) {
-      currentText = model.components().models.map(comp => {
-        if (comp.get('tagName') === 'br') return '\n';
-        return comp.get('content') || comp.get('components')?.models[0]?.get('content') || '';
-      }).join('');
-    }
-    
-    if (!currentText) {
-      currentText = el.textContent || el.innerText || "";
-    }
-    
-    textInput.value = currentText;
-
-    // Container for buttons
-    const buttonContainer = doc.createElement("div");
-    Object.assign(buttonContainer.style, {
-      display: "flex",
-      justifyContent: "flex-end",
-      marginTop: "16px",
-      gap: "8px"
-    });
-    
-    // Cancel button
-    const cancelBtn = doc.createElement("button");
-    cancelBtn.textContent = "Cancel";
-    Object.assign(cancelBtn.style, {
-      padding: "8px 16px",
-      background: "#f5f5f5",
-      color: "#444",
-      border: "none",
-      borderRadius: "6px",
-      cursor: "pointer",
-      fontWeight: "500",
-      fontSize: "14px",
-      transition: "all 0.2s ease"
-    });
-    
-    // Hover effects
-    cancelBtn.onmouseover = () => {
-      cancelBtn.style.background = "#eaeaea";
-    };
-    
-    cancelBtn.onmouseout = () => {
-      cancelBtn.style.background = "#f5f5f5";
-    };
-    
-    cancelBtn.onclick = () => {
-      box.style.opacity = "0";
-      box.style.transform = "translateY(10px)";
-      setTimeout(() => box.remove(), 300);
-    };
-    
-    // Save button
-    const saveBtn = doc.createElement("button");
-    saveBtn.textContent = "Save";
-    Object.assign(saveBtn.style, {
-      padding: "8px 16px",
-      background: "#3b82f6",
-      color: "white",
-      border: "none",
-      borderRadius: "6px",
-      cursor: "pointer",
-      fontWeight: "500",
-      fontSize: "14px",
-      boxShadow: "0 2px 4px rgba(59, 130, 246, 0.25)",
-      transition: "all 0.2s ease"
-    });
-
-    // Hover effects
-    saveBtn.onmouseover = () => {
-      saveBtn.style.background = "#2563eb";
-      saveBtn.style.boxShadow = "0 4px 6px rgba(59, 130, 246, 0.3)";
-    };
-    
-    saveBtn.onmouseout = () => {
-      saveBtn.style.background = "#3b82f6";
-      saveBtn.style.boxShadow = "0 2px 4px rgba(59, 130, 246, 0.25)";
-    };
-
-    // Save button handler
-    saveBtn.onclick = () => {
-      // Get values without defaulting to https:// for anchor links
-      const newHref = urlInput.value.trim();
-      const newText = textInput.value.trim() || 'Link';
-      
-      // If it's an anchor link (starts with #), use as-is
-      // If it contains a protocol (like https://), use as-is
-      // If it's any other value, just use it as-is (no prefix)
-      // If it's empty, keep it empty
-      const finalHref = newHref ? 
-        (newHref.startsWith('#') ? newHref : 
-         (newHref.includes('://') ? newHref : `${newHref}`)) 
-        : '';
-      
-      console.log('Manual link editor saving:', { 
-        href: finalHref, 
-        text: newText,
-        hasModel: !!model
-      });
-      
-      try {
-        // Update the model if we have one
-        if (model) {
-          try {
-            // This is the key fix - update the model properly with multiple approaches
-            // 1. Set the href property
-            model.set('href', finalHref);
-            
-            // 2. Update attributes directly
-            model.setAttributes({ href: finalHref });
-            
-            // 3. Update the content property
-            model.set('content', newText);
-            
-            // 4. Reset components and add a fresh text component
-            model.components().reset();
-            model.append({
-              type: 'text',
-              content: newText
-            });
-            
-            // 5. Force model update to ensure it's saved in the editor's state
-            model.trigger('change:href');
-            model.trigger('change:content');
-            model.trigger('change:attributes');
-            
-            // 6. Store changes in the editor
-            if (editorRef.current) {
-              editorRef.current.store();
-            }
-            
-            console.log('Updated model successfully:', {
-              href: model.get('href'),
-              attrHref: model.getAttributes().href,
-              content: model.get('content')
-            });
-          } catch (err) {
-            console.log('Error updating model:', err);
-          }
-        }
-        
-        // Always update DOM directly for immediate visual feedback
-        el.setAttribute('href', finalHref);
-        if (newText) {
-          el.textContent = newText;
-        }
-        
-        // Fade out and remove the editor
-        box.style.opacity = "0";
-        box.style.transform = "translateY(10px)";
-        setTimeout(() => box.remove(), 300);
-      } catch (err) {
-        console.error("Error updating link:", err);
-        box.remove();
-      }
-    };
-
-    // Keyboard shortcuts info
-    const tooltip = doc.createElement("div");
-    tooltip.textContent = "Tip: Press Enter to save, Esc to cancel";
-    Object.assign(tooltip.style, {
-      fontSize: "11px",
-      color: "#777",
-      marginTop: "4px",
-      textAlign: "center",
-      fontStyle: "italic"
-    });
-    
-    // Keyboard shortcuts handler
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        saveBtn.click();
-      } else if (e.key === "Escape") {
-        cancelBtn.click();
-      }
-    };
-    
-    urlInput.addEventListener("keydown", handleKeyDown);
-    textInput.addEventListener("keydown", handleKeyDown);
-    
-    // Build the editor UI
-    box.appendChild(title);
-    box.appendChild(urlLabel);
-    box.appendChild(helperText);
-    box.appendChild(urlInput);
-    box.appendChild(textLabel);
-    box.appendChild(textInput);
-    buttonContainer.appendChild(cancelBtn);
-    buttonContainer.appendChild(saveBtn);
-    box.appendChild(buttonContainer);
-    box.appendChild(tooltip);
-    
-    // Add to document
-    doc.body.appendChild(box);
-
-    // Calculate position
-    const rect = el.getBoundingClientRect();
-    const scrollY = window.scrollY || doc.documentElement.scrollTop;
-    const scrollX = window.scrollX || doc.documentElement.scrollLeft;
-    
-    // Position the box
-    const windowHeight = window.innerHeight;
-    const boxHeight = 300; // Estimated height
-    
-    let topPosition;
-    if (rect.top > boxHeight) {
-      // Position above the element
-      topPosition = rect.top + scrollY - boxHeight - 10;
-    } else {
-      // Position below the element
-      topPosition = rect.bottom + scrollY + 10;
-    }
-    
-    // Center the box horizontally
-    const leftPosition = rect.left + scrollX + (rect.width / 2) - 140;
-    
-    // Keep the box within the viewport
-    const rightEdge = leftPosition + 280;
-    const viewportWidth = window.innerWidth;
-    
-    if (rightEdge > viewportWidth) {
-      box.style.left = `${viewportWidth - 290}px`;
-    } else if (leftPosition < 10) {
-      box.style.left = "10px";
-    } else {
-      box.style.left = `${leftPosition}px`;
-    }
-    
-    box.style.top = `${topPosition}px`;
-    
-    // Animate the box appearing
-    setTimeout(() => {
-      box.style.opacity = "1";
-      box.style.transform = "translateY(0)";
-      
-      // Add a highlight animation
-      box.animate([
-        { boxShadow: "0 10px 25px rgba(0,0,0,0.2), 0 0 0 4px rgba(59, 130, 246, 0.5)" },
-        { boxShadow: "0 10px 25px rgba(0,0,0,0.2), 0 0 0 2px rgba(59, 130, 246, 0.3)" }
-      ], { 
-        duration: 600,
-        easing: "ease-out"
-      });
-    }, 10);
-    
-    // Focus on URL input
-    urlInput.focus();
-  };
-  
   const loadSelectedTemplate = (editor) => {
     if (selectedTemplate) {
       editor.DomComponents.clear();
       editor.CssComposer.clear();
       editor.setComponents(selectedTemplate.data.pages[0].component);
       
-      // Simplified template link processing that doesn't create new components
-      const processTemplateLinks = () => {
-        console.log('Processing template links...');
-        
-        try {
-          // Get all links in the template through DOM API
-          const canvas = editor.Canvas.getBody();
-          const domLinks = canvas.querySelectorAll('a:not([data-file-link])');
-          console.log(`Found ${domLinks.length} links in DOM`);
-          
-          // Process each DOM link - just attach event handlers directly
-          domLinks.forEach((domLink, index) => {
-            try {
-              console.log(`Processing DOM Link ${index + 1}:`, {
-                href: domLink.getAttribute('href'),
-                text: domLink.textContent
-              });
-              
-              // Try to find the corresponding component
-              const wrapper = editor.DomComponents.getWrapper();
-              const components = wrapper.find('[tagName=a]');
-              let linkComp = null;
-              
-              for (let i = 0; i < components.length; i++) {
-                const comp = components[i];
-                if (comp.view && comp.view.el === domLink) {
-                  linkComp = comp;
-                  break;
-                }
-              }
-              
-              // If we found a component, try to set its type to 'link'
-              if (linkComp) {
-                console.log(`Found component for DOM link ${index + 1}:`, {
-                  type: linkComp.get('type'),
-                  href: linkComp.getAttributes().href
-                });
-                
-                // Only try to change type if not already a link
-                if (linkComp.get('type') !== 'link') {
-                  try {
-                    console.log('Converting component to link type');
-                    linkComp.set('type', 'link');
-                  } catch (e) {
-                    console.log('Could not convert to link type, applying handler directly');
-                  }
-                }
-              } else {
-                console.log(`No component found for DOM link ${index + 1}, applying handler directly`);
-              }
-              
-              // Always add direct handler to DOM element regardless of component
-              // This ensures links are editable even if component processing fails
-              const dblclickHandler = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Manual dblclick handler triggered for link');
-                
-                // Just use the direct link editor with DOM element
-                // This bypasses any component issues
-                createLinkEditor(e, domLink, linkComp);
-              };
-              
-              // Remove any existing handler to prevent duplicates
-              if (domLink._dblclickHandler) {
-                domLink.removeEventListener('dblclick', domLink._dblclickHandler);
-              }
-              
-              // Add our new handler
-              domLink._dblclickHandler = dblclickHandler;
-              domLink.addEventListener('dblclick', dblclickHandler);
-              console.log('Added dblclick handler to link element');
-            } catch (err) {
-              console.error(`Error processing link ${index + 1}:`, err);
-            }
-          });
-          
-          // Count link types for debugging
-          const allLinks = editor.DomComponents.getWrapper().find('a');
-          const linkTypeCounts = {};
-          allLinks.forEach(link => {
-            const type = link.get('type');
-            linkTypeCounts[type] = (linkTypeCounts[type] || 0) + 1;
-          });
-          console.log(`Link processing complete. Found ${allLinks.length} links in component tree`);
-          console.log('Link type counts:', linkTypeCounts);
-          
-        } catch (err) {
-          console.error('Error in processTemplateLinks:', err);
-        }
-      };
+      // Use the imported processTemplateLinks function instead of defining it inline
+      const processLinks = () => processTemplateLinks(editor, (e, el, model) => createLinkEditor(e, el, model, editor));
       
       // Process immediately and then again after a delay to catch any late-loading links
-      setTimeout(processTemplateLinks, 500);
-      setTimeout(processTemplateLinks, 2000); // Try again later in case some components load late
+      setTimeout(processLinks, 500);
+      setTimeout(processLinks, 2000); // Try again later in case some components load late
     }
-  };
-
-  const licenseKey = process.env.NEXT_PUBLIC_GRAPESJS_LICENSE_KEY;
+  };  const licenseKey = process.env.NEXT_PUBLIC_GRAPESJS_LICENSE_KEY;
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
@@ -765,17 +282,17 @@ export default function PortfolioBuilder() {
         // Get all link components
         const links = editorRef.current.DomComponents.getWrapper().find('a');
         console.log(`Found ${links.length} links to check before saving`);
-        
+
         // Process each link to ensure href is correctly set
         links.forEach((link, index) => {
           try {
             const href = link.get('href') || link.getAttributes().href || '';
             console.log(`Pre-save check link ${index + 1}:`, { href });
-            
+
             // Set href on both model and attributes to ensure it's saved
             link.set('href', href);
             link.setAttributes({ href });
-            
+
             // Update DOM element directly
             if (link.view && link.view.el) {
               link.view.el.setAttribute('href', href);
@@ -784,11 +301,11 @@ export default function PortfolioBuilder() {
             console.error("Error fixing link before save:", err);
           }
         });
-        
+
         // Store changes
         editorRef.current.store();
       }
-      
+
       const fullHtml = getFullHtml();
       if (!fullHtml) {
         console.error("Failed to get HTML content");
@@ -908,17 +425,17 @@ export default function PortfolioBuilder() {
         // Get all link components
         const links = editorRef.current.DomComponents.getWrapper().find('a');
         console.log(`Found ${links.length} links to check before publishing`);
-        
+
         // Process each link to ensure href is correctly set
         links.forEach((link, index) => {
           try {
             const href = link.get('href') || link.getAttributes().href || '';
             console.log(`Pre-publish check link ${index + 1}:`, { href });
-            
+
             // Set href on both model and attributes to ensure it's saved
             link.set('href', href);
             link.setAttributes({ href });
-            
+
             // Update DOM element directly
             if (link.view && link.view.el) {
               link.view.el.setAttribute('href', href);
@@ -927,11 +444,11 @@ export default function PortfolioBuilder() {
             console.error("Error fixing link before publish:", err);
           }
         });
-        
+
         // Store changes
         editorRef.current.store();
       }
-      
+
       console.log("=== PUBLISH STARTED ===");
       console.log("Portfolio ID:", portfolioId);
       console.log("Selected Template:", selectedTemplate);
@@ -1137,68 +654,24 @@ export default function PortfolioBuilder() {
               onEditor={(editor) => {
                 editorRef.current = editor;
                 
-                // Make sure our link component is registered BEFORE loading the template
-                // This ensures links in the template will be processed correctly
+                // Use imported link utilities and component definition
                 console.log('Registering link component before loading template...');
                 
-                // Function to fix all links in the document
-                const fixAllLinks = () => {
-                  console.log('Fixing all links in the document');
-                  
-                  // Get all link components
-                  const links = editor.DomComponents.getWrapper().find('a');
-                  console.log(`Found ${links.length} links to process`);
-                  
-                  // Update each link to ensure content and href are properly set
-                  links.forEach(link => {
-          try {
-            // Get the current values
-            const attrs = link.getAttributes();
-            const href = attrs.href || '';
-            const content = link.get('content') || link.getEl().textContent || 'Link';
-            
-            console.log('Processing link:', { href, content });                      // Ensure href is set on both the model and DOM
-                      link.set('href', href);
-                      link.setAttributes({ href });
-                      link.getEl().setAttribute('href', href);
-                      
-                      // Set content safely by clearing and adding a new text component
-                      if (link.components().length) {
-                        link.components().reset([{
-                          type: 'text',
-                          content: content
-                        }]);
-                      } else {
-                        link.append({
-                          type: 'text',
-                          content: content
-                        });
-                      }
-                      
-                      // Also update the textContent directly
-                      link.getEl().textContent = content;
-                      
-                      console.log('Updated link:', { 
-                        href: link.get('href'), 
-                        attrHref: link.getAttributes().href,
-                        domHref: link.getEl().getAttribute('href'),
-                        content 
-                      });
-                    } catch (err) {
-                      console.error('Error updating link:', err);
-                    }
-                  });
-                };
+                // Define our custom link component
+                defineLinkComponent(editor, (e, el, model) => createLinkEditor(e, el, model, editorRef));
+                
+                // Set up event handlers for link interaction
+                setupLinkEventHandlers(editor, (e, el, model) => createLinkEditor(e, el, model, editorRef));
                 
                 // Process all existing links immediately when the editor loads
                 // This ensures all links are properly initialized from the start
                 setTimeout(() => {
-                  fixAllLinks();
+                  fixAllLinks(editor);
                   editor.store(); // Store the changes
                 }, 500);
                 
                 // Add event listener for storage to ensure links are properly saved
-                editor.on('storage:start', fixAllLinks);
+                editor.on('storage:start', () => fixAllLinks(editor));
                 
                 // Also process links before publishing
                 editor.on('component:selected', (component) => {
@@ -1209,21 +682,7 @@ export default function PortfolioBuilder() {
                     component.setAttributes({ href });
                     component.getEl().setAttribute('href', href);
                   }
-                });
-                
-                // First make sure the default component doesn't process links
-                const origIsComponent = editor.DomComponents.getType('default').model.isComponent;
-                editor.DomComponents.addType('default', {
-                  isComponent: (el) => {
-                    if (el.tagName === 'A' && !el.getAttribute('data-file-link')) {
-                      // Don't let default component handle links
-                      return false;
-                    }
-                    return origIsComponent(el);
-                  }
-                });
-                
-                loadSelectedTemplate(editor);
+                });                loadSelectedTemplate(editor);
 
                 editor.DomComponents.addType("modal", {
                   isComponent: (el) => el.classList?.contains("modal"),
@@ -1352,151 +811,151 @@ export default function PortfolioBuilder() {
                   },
                 });
 
-                  editor.on("load", () => {
-                    const panelManager = editor.Panels;
+                editor.on("load", () => {
+                  const panelManager = editor.Panels;
 
-                    const devicesElement = document.createElement("div");
-                    devicesElement.className = "panel__devices";
+                  const devicesElement = document.createElement("div");
+                  devicesElement.className = "panel__devices";
 
-                    panelManager
-                      .getPanel("views-container")
-                      ?.set("appendContent", devicesElement);
+                  panelManager
+                    .getPanel("views-container")
+                    ?.set("appendContent", devicesElement);
 
-                    const canvasBody = editor.Canvas.getBody();
+                  const canvasBody = editor.Canvas.getBody();
 
-                    canvasBody.addEventListener("dragover", (event) => {
+                  canvasBody.addEventListener("dragover", (event) => {
+                    event.preventDefault();
+                  });
+
+                  canvasBody.addEventListener("drop", (event) => {
+                    event.preventDefault();
+                  });
+
+                  // Add a direct dblclick handler on the canvas to ensure all links are editable
+                  canvasBody.addEventListener("dblclick", (event) => {
+                    const el = event.target as HTMLElement;
+                    const linkEl = el.tagName === 'A' ? el : el.closest('a');
+
+                    if (linkEl && !linkEl.getAttribute('data-file-link')) {
+                      console.log('Direct canvas dblclick on link element');
                       event.preventDefault();
-                    });
+                      event.stopPropagation();
 
-                    canvasBody.addEventListener("drop", (event) => {
-                      event.preventDefault();
-                    });
-                    
-                    // Add a direct dblclick handler on the canvas to ensure all links are editable
-                    canvasBody.addEventListener("dblclick", (event) => {
-                      const el = event.target as HTMLElement;
-                      const linkEl = el.tagName === 'A' ? el : el.closest('a');
-                      
-                      if (linkEl && !linkEl.getAttribute('data-file-link')) {
-                        console.log('Direct canvas dblclick on link element');
-                        event.preventDefault();
-                        event.stopPropagation();
-                        
-                        // Find the component for this element if it exists
-                        // But don't rely on it - we'll use direct DOM approach
-                        const wrapper = editor.DomComponents.getWrapper();
-                        const allLinks = wrapper.find('a');
-                        const matchingComponents = allLinks.filter(comp => comp.view && comp.view.el === linkEl);
-                        
-                        const linkComp = matchingComponents.length > 0 ? matchingComponents[0] : null;
-                        
-                        // Always use the direct link editor with the DOM element
-                        // This ensures it works regardless of component state
-                        console.log('Using direct link editor for consistent behavior');
-                        createLinkEditor(event, linkEl, linkComp);
+                      // Find the component for this element if it exists
+                      // But don't rely on it - we'll use direct DOM approach
+                      const wrapper = editor.DomComponents.getWrapper();
+                      const allLinks = wrapper.find('a');
+                      const matchingComponents = allLinks.filter(comp => comp.view && comp.view.el === linkEl);
+
+                      const linkComp = matchingComponents.length > 0 ? matchingComponents[0] : null;
+
+                      // Always use the direct link editor with the DOM element
+                      // This ensures it works regardless of component state
+                      console.log('Using direct link editor for consistent behavior');
+                      createLinkEditor(event, linkEl, linkComp, editor);
+                    }
+                  });
+
+                  // Add a global click listener for links with direct double-click handling
+                  canvasBody.addEventListener("click", (event) => {
+                    const el = event.target as HTMLElement;
+                    const linkEl = el.tagName === 'A' ? el : el.closest('a');
+
+                    if (linkEl && !linkEl.getAttribute('data-file-link')) {
+                      console.log('Link clicked:', {
+                        element: linkEl,
+                        href: linkEl.getAttribute('href'),
+                        hasFileLink: linkEl.getAttribute('data-file-link'),
+                      });
+
+                      // Try to find the component model for this element
+                      const wrapper = editor.DomComponents.getWrapper();
+                      const allLinks = wrapper.find('a');
+                      const matchingComponents = allLinks.filter(comp => comp.view && comp.view.el === linkEl);
+
+                      console.log('Component found:', {
+                        found: matchingComponents.length > 0,
+                        type: matchingComponents.length > 0 ? matchingComponents[0].get('type') : 'none',
+                        components: matchingComponents
+                      });
+
+                      // Always ensure the element has a dblclick handler
+                      // This is the most reliable approach
+                      if (!(linkEl as any).__hasFixedDblClick) {
+                        (linkEl as any).__hasFixedDblClick = true;
+                        linkEl.addEventListener('dblclick', (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Direct dblclick event on link');
+
+                          // Find the component but don't rely on it
+                          const currentLinks = wrapper.find('a');
+                          const currentMatch = currentLinks.find(comp => comp.view && comp.view.el === linkEl);
+
+                          // Always use direct DOM approach
+                          createLinkEditor(e, linkEl, currentMatch || null, editor);
+                        });
                       }
-                    });
-                    
-                    // Add a global click listener for links with direct double-click handling
-                    canvasBody.addEventListener("click", (event) => {
-                      const el = event.target as HTMLElement;
-                      const linkEl = el.tagName === 'A' ? el : el.closest('a');
-                      
-                      if (linkEl && !linkEl.getAttribute('data-file-link')) {
-                        console.log('Link clicked:', {
-                          element: linkEl,
-                          href: linkEl.getAttribute('href'),
-                          hasFileLink: linkEl.getAttribute('data-file-link'),
-                        });
-                        
-                        // Try to find the component model for this element
-                        const wrapper = editor.DomComponents.getWrapper();
-                        const allLinks = wrapper.find('a');
-                        const matchingComponents = allLinks.filter(comp => comp.view && comp.view.el === linkEl);
-                        
-                        console.log('Component found:', {
-                          found: matchingComponents.length > 0,
-                          type: matchingComponents.length > 0 ? matchingComponents[0].get('type') : 'none',
-                          components: matchingComponents
-                        });
-                        
-                        // Always ensure the element has a dblclick handler
-                        // This is the most reliable approach
-                        if (!(linkEl as any).__hasFixedDblClick) {
-                          (linkEl as any).__hasFixedDblClick = true;
-                          linkEl.addEventListener('dblclick', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            console.log('Direct dblclick event on link');
-                            
-                            // Find the component but don't rely on it
-                            const currentLinks = wrapper.find('a');
-                            const currentMatch = currentLinks.find(comp => comp.view && comp.view.el === linkEl);
-                            
-                            // Always use direct DOM approach
-                            createLinkEditor(e, linkEl, currentMatch || null);
-                          });
-                        }
-                      }
-                    });
-                    
-                    // Set up a component:add event listener to ensure all links are handled correctly
-                    editor.on('component:add', (model) => {
-                      if (model.get('tagName') === 'a' && !model.getAttributes()['data-file-link']) {
-                        console.log('New link component added:', {
-                          type: model.get('type'),
-                          href: model.getAttributes().href
-                        });
-                        
-                        // Ensure the component is recognized as a link type
-                        if (model.get('type') !== 'link') {
-                          console.log('Converting component to link type');
-                          model.set('type', 'link');
-                          // Initialize href property
-                          const href = model.getAttributes().href || '';
-                          model.set('href', href);
-                          
-                          // Force a view update
-                          setTimeout(() => {
-                            const view = model.getView();
-                            if (view) {
-                              console.log('Re-rendering view for new link');
-                              view.render();
-                            }
-                          }, 10000);
-                        }
-                      }
-                    });
-                    
-                    // Also watch for component:update to catch any links that might change
-                    editor.on('component:update', (model) => {
-                      if (model.get('tagName') === 'a' && !model.getAttributes()['data-file-link'] && model.get('type') !== 'link') {
-                        console.log('Link component updated but not of type link:', {
-                          type: model.get('type'),
-                          href: model.getAttributes().href
-                        });
+                    }
+                  });
+
+                  // Set up a component:add event listener to ensure all links are handled correctly
+                  editor.on('component:add', (model) => {
+                    if (model.get('tagName') === 'a' && !model.getAttributes()['data-file-link']) {
+                      console.log('New link component added:', {
+                        type: model.get('type'),
+                        href: model.getAttributes().href
+                      });
+
+                      // Ensure the component is recognized as a link type
+                      if (model.get('type') !== 'link') {
+                        console.log('Converting component to link type');
                         model.set('type', 'link');
+                        // Initialize href property
+                        const href = model.getAttributes().href || '';
+                        model.set('href', href);
+
+                        // Force a view update
+                        setTimeout(() => {
+                          const view = model.getView();
+                          if (view) {
+                            console.log('Re-rendering view for new link');
+                            view.render();
+                          }
+                        }, 10000);
                       }
-                    });
-                    
-                    // Override the default handling of links to ensure our custom component is used
-                    const originalAddType = editor.DomComponents.addType;
-                    editor.DomComponents.addType = function(type, methods) {
-                      // When we detect the 'default' type being added, make sure links are handled by our custom component
-                      if (type === 'default') {
-                        const origIsComponent = methods.isComponent;
-                        if (origIsComponent) {
-                          methods.isComponent = function(el) {
-                            // If it's an anchor tag but not a file link, don't let the default component claim it
-                            if (el.tagName === 'A' && !el.getAttribute('data-file-link')) {
-                              return false;
-                            }
-                            return origIsComponent(el);
-                          };
-                        }
+                    }
+                  });
+
+                  // Also watch for component:update to catch any links that might change
+                  editor.on('component:update', (model) => {
+                    if (model.get('tagName') === 'a' && !model.getAttributes()['data-file-link'] && model.get('type') !== 'link') {
+                      console.log('Link component updated but not of type link:', {
+                        type: model.get('type'),
+                        href: model.getAttributes().href
+                      });
+                      model.set('type', 'link');
+                    }
+                  });
+
+                  // Override the default handling of links to ensure our custom component is used
+                  const originalAddType = editor.DomComponents.addType;
+                  editor.DomComponents.addType = function (type, methods) {
+                    // When we detect the 'default' type being added, make sure links are handled by our custom component
+                    if (type === 'default') {
+                      const origIsComponent = methods.isComponent;
+                      if (origIsComponent) {
+                        methods.isComponent = function (el) {
+                          // If it's an anchor tag but not a file link, don't let the default component claim it
+                          if (el.tagName === 'A' && !el.getAttribute('data-file-link')) {
+                            return false;
+                          }
+                          return origIsComponent(el);
+                        };
                       }
-                      return originalAddType.call(this, type, methods);
-                    };                  // Configure component types for text editing
+                    }
+                    return originalAddType.call(this, type, methods);
+                  };                  // Configure component types for text editing
                   editor.DomComponents.addType("button", {
                     isComponent: (el) => el.tagName === "BUTTON",
                     model: {
@@ -1513,548 +972,7 @@ export default function PortfolioBuilder() {
                     },
                   });
 
-                 // 1. Define the custom 'link' component type
-editor.DomComponents.addType("link", {
-  // Simple isComponent function to identify links
-  isComponent: el => {
-    // This function identifies if an element should be treated as a link component
-    if (el.tagName === "A") {
-      // Exclude file links which have their own component type
-      return !el.getAttribute("data-file-link");
-    }
-    return false;
-  },
-  // Note: Priority would be useful but we'll use a different approach since it's not supported in the type
-  model: {
-    defaults: {
-      tagName: "a",
-      editable: true,
-      draggable: true,
-      droppable: false, // Prevent dropping elements inside links
-      selectable: true,
-      highlightable: true,
-      attributes: {
-        href: '',
-        target: '',
-        style: 'color: #3b82f6; text-decoration: underline;'
-      },
-      content: 'Link',
-      traits: [
-        { 
-          type: "text", 
-          name: "href", 
-          label: "URL", 
-          placeholder: "example.com or #section",
-          changeProp: true,
-          default: ''
-        },
-        {
-          type: "select",
-          name: "target",
-          label: "Target",
-          options: [
-            { id: '', value: '', name: 'Same tab' },
-            { id: '_blank', value: '_blank', name: 'New tab' }
-          ],
-          changeProp: true
-        }
-      ]
-    },
-    
-    init() {
-      try {
-        // Initialize href property from attributes
-        const attrs = this.getAttributes();
-        // Don't add any default value if href is empty
-        const href = attrs.href !== undefined ? attrs.href : '';
-        
-        // Make sure href is properly set on both model and attributes
-        this.set('href', href); // Set as property
-        this.setAttributes({ href }); // Make sure attribute is set
-        
-        // Set default content if there's none
-        if (!this.components().length) {
-          // We need to use a different approach than just this.components('Link')
-          // since that can cause the "Invalid array length" error
-          this.append({
-            type: 'text',
-            content: 'Link'
-          });
-        }
-        
-        // Listen for href trait changes
-        this.on('change:href', this.updateHref);
-        this.on('change:attributes:href', this.updateHrefFromAttrs);
-        this.on('change:content', this.updateContent);
-        
-        // Make sure we update the DOM element href when initialized
-        // This ensures existing links always have their href properly set
-        if (this.view && this.view.el) {
-          this.view.el.setAttribute('href', href);
-          console.log('Updated DOM element href:', href);
-        }
-        
-        // Log initialization success
-        console.log('Link component initialized successfully with href:', href);
-      } catch (error) {
-        console.error('Error initializing link component:', error);
-      }
-    },
-    
-    updateHref() {
-      // When href property changes, update the attributes
-      const href = this.get('href') || '';
-      this.setAttributes({ href });
-    },
-    
-    updateHrefFromAttrs() {
-      // When href attribute changes, update the property
-      const attrs = this.getAttributes();
-      const href = attrs.href || '';
-      this.set('href', href);
-    },
-    
-    updateContent() {
-      // This method ensures the content is properly maintained
-      // when modified through traits or API
-      const content = this.get('content');
-      if (content && typeof content === 'string') {
-        // Safely update content without causing array length errors
-        if (this.components().length) {
-          // Reset and create a new text component
-          this.components().reset([{
-            type: 'text',
-            content: content
-          }]);
-        } else {
-          // Add new component
-          this.append({
-            type: 'text',
-            content: content
-          });
-        }
-      }
-    }
-  },
-  
-  view: {
-    events: {
-      'dblclick': 'onDblClick'
-    } as any,
-    
-    // Add an initialize method to ensure events are bound
-    initialize() {
-      try {
-        // Let the parent method handle the basic setup
-        const parentInit = (this.constructor as any).__super__.initialize;
-        if (parentInit) {
-          parentInit.apply(this, arguments);
-        }
-        
-        // Add double-click handler for link editing
-        const el = this.el;
-        if (el && !el.__hasDblClickHandler) {
-          el.__hasDblClickHandler = true;
-          el.addEventListener('dblclick', this.onDblClick.bind(this));
-        }
-      } catch (error) {
-        console.error('Error in link view initialize:', error);
-      }
-    },
-    
-    // Simplified remove method
-    remove() {
-      // Call the parent remove method
-      return (this.constructor as any).__super__.remove.apply(this, arguments);
-    },
-    
-    onDblClick(e) {
-      try {
-        e.preventDefault();
-        const model = this.model;
-        
-        // Debug: Log when a double click happens and component details
-        console.log('Link double-clicked!', {
-          type: model.get('type'),
-          tagName: model.get('tagName'),
-          href: model.getAttributes().href,
-          content: model.get('content'),
-          components: model.components().length,
-          el: this.el
-        });
-      
-        // Create link editor
-        const doc = this.el.ownerDocument;
-        const editorId = "link-editor-box";
-      
-      // Remove any existing editor boxes
-      let box = doc.querySelector(`#${editorId}`);
-      if (box) box.remove();
-
-      box = doc.createElement("div");
-      box.id = editorId;
-      
-      // Apply modern styling to the box with a more prominent appearance
-      Object.assign(box.style, {
-        position: "absolute",
-        padding: "18px",
-        background: "white",
-        border: "none",
-        borderRadius: "12px",
-        boxShadow: "0 10px 25px rgba(0,0,0,0.2), 0 0 0 2px rgba(59, 130, 246, 0.3)",
-        zIndex: "9999",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-        fontSize: "14px",
-        width: "300px",
-        transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-        opacity: "0",
-        transform: "translateY(10px)"
-      });
-      
-      // Create a title for the editor
-      const title = doc.createElement("h3");
-      title.textContent = "Edit Link";
-      Object.assign(title.style, {
-        margin: "0 0 12px 0",
-        padding: "0 0 8px 0",
-        borderBottom: "1px solid #eaeaea",
-        fontSize: "16px",
-        fontWeight: "600",
-        color: "#333"
-      });
-      
-      // Label for URL field with modern styling
-      const urlLabel = doc.createElement("label");
-      urlLabel.textContent = "Link URL:";
-      urlLabel.htmlFor = "link-url-input";
-      Object.assign(urlLabel.style, {
-        display: "block",
-        marginBottom: "4px",
-        fontWeight: "500",
-        color: "#555",
-        fontSize: "13px"
-      });
-      
-      // Input for URL with improved styling
-      const urlInput = doc.createElement("input");
-      urlInput.id = "link-url-input";
-      urlInput.type = "text";
-      urlInput.placeholder = "Enter URL (e.g., example.com or #section)";
-      Object.assign(urlInput.style, {
-        width: "100%",
-        padding: "8px 10px",
-        border: "1px solid #ddd",
-        borderRadius: "6px",
-        marginBottom: "12px",
-        fontSize: "14px",
-        boxSizing: "border-box",
-        outline: "none"
-      });
-      
-      // Focus effect for inputs
-      urlInput.onfocus = () => {
-        urlInput.style.borderColor = "#3b82f6";
-        urlInput.style.boxShadow = "0 0 0 2px rgba(59, 130, 246, 0.15)";
-      };
-      
-      urlInput.onblur = () => {
-        urlInput.style.borderColor = "#ddd";
-        urlInput.style.boxShadow = "none";
-      };
-      
-      // Get href from model's attributes without adding default https://
-      urlInput.value = model.getAttributes().href || "";
-      
-      // Label for text field
-      const textLabel = doc.createElement("label");
-      textLabel.textContent = "Link Text:";
-      textLabel.htmlFor = "link-text-input";
-      Object.assign(textLabel.style, {
-        display: "block",
-        marginBottom: "4px",
-        fontWeight: "500",
-        color: "#555",
-        fontSize: "13px"
-      });
-      
-      // Input for link text with improved styling
-      const textInput = doc.createElement("input");
-      textInput.id = "link-text-input";
-      textInput.type = "text";
-      textInput.placeholder = "Enter link text";
-      Object.assign(textInput.style, {
-        width: "100%",
-        padding: "8px 10px",
-        border: "1px solid #ddd",
-        borderRadius: "6px",
-        marginBottom: "12px",
-        fontSize: "14px",
-        boxSizing: "border-box",
-        outline: "none"
-      });
-      
-      // Focus effect for text input
-      textInput.onfocus = () => {
-        textInput.style.borderColor = "#3b82f6";
-        textInput.style.boxShadow = "0 0 0 2px rgba(59, 130, 246, 0.15)";
-      };
-      
-      textInput.onblur = () => {
-        textInput.style.borderColor = "#ddd";
-        textInput.style.boxShadow = "none";
-      };
-      
-      // Get current text from DOM element or component
-      // Use component content first, then fallback to DOM content
-      let currentText = "";
-      if (model.components().length) {
-        // For complex content, get the inner HTML
-        currentText = model.components().models.map(comp => {
-          if (comp.get('tagName') === 'br') return '\n';
-          return comp.get('content') || comp.get('components')?.models[0]?.get('content') || '';
-        }).join('');
-      }
-      
-      if (!currentText && this.el) {
-        currentText = this.el.textContent || this.el.innerText || "";
-      }
-      
-      textInput.value = currentText;
-
-      // Container for the buttons with modern styling
-      const buttonContainer = doc.createElement("div");
-      Object.assign(buttonContainer.style, {
-        display: "flex",
-        justifyContent: "flex-end",
-        marginTop: "16px",
-        gap: "8px"
-      });
-      
-      // Cancel button with improved styling
-      const cancelBtn = doc.createElement("button");
-      cancelBtn.textContent = "Cancel";
-      Object.assign(cancelBtn.style, {
-        padding: "8px 16px",
-        background: "#f5f5f5",
-        color: "#444",
-        border: "none",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontWeight: "500",
-        fontSize: "14px",
-        transition: "all 0.2s ease"
-      });
-      
-      // Hover effect for cancel button
-      cancelBtn.onmouseover = () => {
-        cancelBtn.style.background = "#eaeaea";
-      };
-      
-      cancelBtn.onmouseout = () => {
-        cancelBtn.style.background = "#f5f5f5";
-      };
-      
-      cancelBtn.onclick = () => {
-        box.style.opacity = "0";
-        box.style.transform = "translateY(10px)";
-        setTimeout(() => box.remove(), 300);
-      };
-      
-      // Save button with improved styling
-      const saveBtn = doc.createElement("button");
-      saveBtn.textContent = "Save";
-      Object.assign(saveBtn.style, {
-        padding: "8px 16px",
-        background: "#3b82f6",
-        color: "white",
-        border: "none",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontWeight: "500",
-        fontSize: "14px",
-        boxShadow: "0 2px 4px rgba(59, 130, 246, 0.25)",
-        transition: "all 0.2s ease"
-      });
-
-      // Hover effect for save button
-      saveBtn.onmouseover = () => {
-        saveBtn.style.background = "#2563eb";
-        saveBtn.style.boxShadow = "0 4px 6px rgba(59, 130, 246, 0.3)";
-      };
-      
-      saveBtn.onmouseout = () => {
-        saveBtn.style.background = "#3b82f6";
-        saveBtn.style.boxShadow = "0 2px 4px rgba(59, 130, 246, 0.25)";
-      };
-
-      saveBtn.onclick = () => {
-        // Get values without defaulting to https:// for anchor links
-        const newHref = urlInput.value.trim();
-        const newText = textInput.value.trim() || 'Link';
-        const finalHref = newHref ? 
-          (newHref.startsWith('#') ? newHref : 
-           (newHref.includes('://') ? newHref : `${newHref}`)) 
-          : '';
-        
-        try {
-          console.log('Updating link with:', { href: finalHref, text: newText });
-          
-          // This is critical - we need to update the model's href in multiple ways to ensure it sticks
-          // 1. Set the href property
-          model.set('href', finalHref);
-          
-          // 2. Update attributes explicitly 
-          model.setAttributes({ href: finalHref });
-          
-          // 3. Update the content property
-          model.set('content', newText);
-          
-          // 4. Clear all existing components and add a fresh text component
-          // This is the most reliable way to update content without array errors
-          model.components().reset();
-          model.append({
-            type: 'text',
-            content: newText
-          });
-          
-          // 5. Also update DOM directly for immediate visual feedback
-          this.el.setAttribute('href', finalHref);
-          this.el.textContent = newText;
-          
-          // 6. Force model update to ensure it's saved in the editor's state
-          model.trigger('change:href');
-          model.trigger('change:content');
-          model.trigger('change:attributes');
-          
-          // 7. Double check to make sure href is set
-          setTimeout(() => {
-            const currentHref = model.getAttributes().href;
-            if (currentHref !== finalHref) {
-              console.log('Href mismatch detected, fixing:', { expected: finalHref, actual: currentHref });
-              model.setAttributes({ href: finalHref });
-              this.el.setAttribute('href', finalHref);
-            }
-          }, 0);
-          
-          // Store the editor state to persist changes
-          editor.store();
-          
-          console.log('Link updated successfully:', { 
-            href: model.getAttributes().href,
-            content: model.get('content'),
-            textContent: this.el.textContent
-          });
-          
-          // Add a nice fade-out effect with transform
-          box.style.opacity = "0";
-          box.style.transform = "translateY(10px)";
-          setTimeout(() => box.remove(), 300);
-        } catch (err) {
-          console.error("Error updating link:", err);
-          box.remove();
-        }
-      };
-
-      // Add tooltip to show keyboard shortcut
-      const tooltip = doc.createElement("div");
-      tooltip.textContent = "Tip: Press Enter to save, Esc to cancel";
-      Object.assign(tooltip.style, {
-        fontSize: "11px",
-        color: "#777",
-        marginTop: "4px",
-        textAlign: "center",
-        fontStyle: "italic"
-      });
-      
-      // Keyboard shortcuts
-      const handleKeyDown = (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          saveBtn.click();
-        } else if (e.key === "Escape") {
-          cancelBtn.click();
-        }
-      };
-      
-      urlInput.addEventListener("keydown", handleKeyDown);
-      textInput.addEventListener("keydown", handleKeyDown);
-      
-      // Add everything to the box
-      box.appendChild(title);
-      box.appendChild(urlLabel);
-      box.appendChild(urlInput);
-      box.appendChild(textLabel);
-      box.appendChild(textInput);
-      buttonContainer.appendChild(cancelBtn);
-      buttonContainer.appendChild(saveBtn);
-      box.appendChild(buttonContainer);
-      box.appendChild(tooltip);
-      
-      doc.body.appendChild(box);
-
-      // Calculate position
-      const rect = this.el.getBoundingClientRect();
-      const scrollY = window.scrollY || doc.documentElement.scrollTop;
-      const scrollX = window.scrollX || doc.documentElement.scrollLeft;
-      
-      // Position the box above the element if there's enough space, otherwise below
-      const windowHeight = window.innerHeight;
-      const boxHeight = 300; // Estimated height
-      
-      let topPosition;
-      if (rect.top > boxHeight) {
-        // Position above the element
-        topPosition = rect.top + scrollY - boxHeight - 10;
-      } else {
-        // Position below the element
-        topPosition = rect.bottom + scrollY + 10;
-      }
-      
-      // Center the box horizontally relative to the element
-      const leftPosition = rect.left + scrollX + (rect.width / 2) - 140;
-      
-      // Keep the box within the viewport
-      const rightEdge = leftPosition + 280;
-      const viewportWidth = window.innerWidth;
-      
-      if (rightEdge > viewportWidth) {
-        box.style.left = `${viewportWidth - 290}px`;
-      } else if (leftPosition < 10) {
-        box.style.left = "10px";
-      } else {
-        box.style.left = `${leftPosition}px`;
-      }
-      
-      box.style.top = `${topPosition}px`;
-      
-      // Animate the box appearing with a subtle pop effect
-      setTimeout(() => {
-        box.style.opacity = "1";
-        box.style.transform = "translateY(0)";
-        
-        // Add a subtle highlight animation
-        box.animate([
-          { boxShadow: "0 10px 25px rgba(0,0,0,0.2), 0 0 0 4px rgba(59, 130, 246, 0.5)" },
-          { boxShadow: "0 10px 25px rgba(0,0,0,0.2), 0 0 0 2px rgba(59, 130, 246, 0.3)" }
-        ], { 
-          duration: 600,
-          easing: "ease-out"
-        });
-      }, 10);
-      
-      // Focus on URL input for immediate editing
-      urlInput.focus();
-      } catch (error) {
-        console.error('Error in link editor:', error);
-        // Use the fallback direct link editor if there's an error
-        try {
-          createLinkEditor(e, this.el, this.model);
-        } catch (fallbackError) {
-          console.error('Fallback link editor also failed:', fallbackError);
-        }
-      }
-    }
-  }
-});
+                  // Link component is now defined in LinkComponent.ts
 
 
 
@@ -2393,7 +1311,7 @@ editor.DomComponents.addType("link", {
                         </div>`,
                           category: "Trade Components",
                         });
-                        
+
                         // Add Link block with plain HTML structure to avoid component creation issues
                         editor.BlockManager.add("link-block", {
                           label: "Link",
