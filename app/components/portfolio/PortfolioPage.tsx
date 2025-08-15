@@ -10,10 +10,14 @@ import AppLoader from "@/app/components/loader/AppLoader";
 import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
 
 export default function PortfolioPage() {
+  console.log('🚀 PortfolioPage.tsx: Component loaded');
+  
   const params = useParams();
   const username = params.username as string;
   const [portfolio, setPortfolio] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+
+  console.log('🔍 PortfolioPage.tsx: Username from params:', username);
 
   useEffect(() => {
     function handleClick(e) {
@@ -107,6 +111,8 @@ export default function PortfolioPage() {
     async function fetchPortfolio() {
       if (!username) return;
 
+      console.log('🔍 PortfolioPage.tsx: Fetching portfolio for username:', username);
+
       try {
         const response = getPortfolioByUserName(username);
         if (!response) {
@@ -114,10 +120,45 @@ export default function PortfolioPage() {
         }
 
         const data = await response;
+        console.log('✅ PortfolioPage.tsx: Portfolio data received:', !!data);
+        console.log('📄 PortfolioPage.tsx: Has pagesData:', !!data?.pagesData);
+        
+        if (data?.pagesData) {
+          try {
+            const pagesData = JSON.parse(data.pagesData);
+            console.log('🔍 PortfolioPage.tsx: Parsed pages data:', pagesData);
+            
+            // Handle different data formats
+            let pages = [];
+            if (Array.isArray(pagesData)) {
+              pages = pagesData;
+            } else if (pagesData.pages && Array.isArray(pagesData.pages)) {
+              pages = pagesData.pages;
+            } else if (typeof pagesData === 'object') {
+              pages = Object.values(pagesData);
+            }
+            
+            console.log('=== PORTFOLIOPAGE: AVAILABLE ROUTES ===');
+            console.log(`🏠 Home Page: http://localhost:3000/AIWebsiteBuilders/portfolio/${username}`);
+            
+            pages.forEach((page: any, index) => {
+              if (index === 0) {
+                console.log(`📄 "${page.name}" (Home): http://localhost:3000/AIWebsiteBuilders/portfolio/${username}`);
+              } else {
+                const pageSlug = page.name.toLowerCase().replace(/\s+/g, '-');
+                console.log(`📄 "${page.name}": http://localhost:3000/AIWebsiteBuilders/portfolio/${username}/${pageSlug}`);
+              }
+            });
+            console.log('==========================================');
+          } catch (parseError) {
+            console.error('❌ PortfolioPage.tsx: Error parsing pages data:', parseError);
+          }
+        }
+        
         setPortfolio(data);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching portfolio:", error);
+        console.error("❌ PortfolioPage.tsx: Error fetching portfolio:", error);
         setLoading(false);
       }
     }

@@ -11,7 +11,7 @@ import { Box, Dialog, DialogContent, Fab, Tooltip } from "@mui/material";
 import { createLinkEditor, fixAllLinks, processTemplateLinks } from "./utils/linkUtils";
 import { defineLinkComponent, setupLinkEventHandlers } from "./components/LinkComponent";
 import { createTextEditor, defineTextComponent, setupTextEventHandlers } from "./components/TextComponent";
-import { generateFullHtml } from "./utils/htmlGenerator";
+import { generateFullHtml, generateAllPagesHtml, getProjectData } from "./utils/htmlGenerator";
 import { fixAllLinksBeforeOperation } from "./utils/linkMaintenance";
 import { editorHelpers } from "./utils/editorHelpers";
 import { builderSchema } from "./utils/schemas";
@@ -206,18 +206,23 @@ export default function PortfolioBuilder() {
       // Fix all links before saving using utility function
       fixAllLinksBeforeOperation(editorRef.current);
 
-      const fullHtml = getFullHtml();
-      if (!fullHtml) {
-        console.error("Failed to get HTML content");
+      // Get all pages data from GrapesJS
+      const projectData = getProjectData(editorRef.current);
+      if (!projectData) {
+        console.error("Failed to get project data");
         toast({
           title: "Error",
-          description: "Failed to generate HTML content. Please try again.",
+          description: "Failed to generate project data. Please try again.",
           variant: "destructive",
         });
         return;
       }
 
-      console.log("HTML generated, length:", fullHtml.length);
+      console.log("Project data generated:", {
+        totalPages: projectData.totalPages,
+        currentPageId: projectData.currentPageId,
+        pages: Object.keys(projectData.pages || {})
+      });
 
       console.log("Clearing cache...");
       await dispatch(resetCache());
@@ -235,9 +240,16 @@ export default function PortfolioBuilder() {
 
       console.log("User found:", user.id);
 
+      // Get the first page HTML for backward compatibility (don't use current page)
+      const firstPageHtml = projectData.pages && projectData.pages.length > 0 
+        ? projectData.pages[0].html 
+        : generateFullHtml(editorRef.current);
+      
       const data = {
         userId: user.id,
-        htmlContent: fullHtml,
+        htmlContent: firstPageHtml, // Always use first page for backward compatibility
+        projectData: JSON.stringify(projectData.projectData), // Complete GrapesJS project data
+        pagesData: JSON.stringify(projectData.pages), // All pages HTML data
         name: isDefaultTemplate(selectedTemplate.id)
           ? draftName
           : selectedTemplate.name || "",
@@ -329,6 +341,24 @@ export default function PortfolioBuilder() {
       if (!portfolioId) {
         console.error("No portfolio ID found");
         throw new Error("Portfolio must be saved before publishing");
+      }
+
+      // Save current multi-page data before publishing
+      console.log("=== SAVING CURRENT PROJECT DATA BEFORE PUBLISH ===");
+      const projectData = getProjectData(editorRef.current);
+      if (projectData && !isDefaultTemplate(selectedTemplate?.id)) {
+        const updateData = {
+          projectData: JSON.stringify(projectData.projectData),
+          pagesData: JSON.stringify(projectData.pages),
+        };
+        
+        try {
+          await dispatch(updateExistingPortfolio({ id: portfolioId, data: updateData }));
+          console.log("Project data saved before publish");
+        } catch (saveError) {
+          console.warn("Failed to save project data before publish:", saveError);
+          // Continue with publish anyway, as the content might already be saved
+        }
       }
 
       const response = await dispatch(publishPortfolio(portfolioId));

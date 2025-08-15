@@ -409,11 +409,10 @@ export const createLinkEditor = (e, el, model, editorRef) => {
  * @param editor - The GrapesJS editor instance
  */
 export const fixAllLinks = (editor) => {
-  console.log('Fixing all links in the document');
   
   // Get all link components
   const links = editor.DomComponents.getWrapper().find('a');
-  console.log(`Found ${links.length} links to process`);
+  // console.log(`Found ${links.length} links to process`);
   
   // Update each link to ensure content and href are properly set
   links.forEach(link => {
@@ -423,7 +422,7 @@ export const fixAllLinks = (editor) => {
       const href = attrs.href || '';
       const content = link.get('content') || link.getEl().textContent || 'Link';
       
-      console.log('Processing link:', { href, content });                
+      // console.log('Processing link:', { href, content });                
       
       // Ensure href is set on both the model and DOM
       link.set('href', href);
@@ -446,12 +445,12 @@ export const fixAllLinks = (editor) => {
       // Also update the textContent directly
       link.getEl().textContent = content;
       
-      console.log('Updated link:', { 
-        href: link.get('href'), 
-        attrHref: link.getAttributes().href,
-        domHref: link.getEl().getAttribute('href'),
-        content 
-      });
+      // console.log('Updated link:', { 
+      //   href: link.get('href'), 
+      //   attrHref: link.getAttributes().href,
+      //   domHref: link.getEl().getAttribute('href'),
+      //   content 
+      // });
     } catch (err) {
       console.error('Error updating link:', err);
     }
@@ -464,21 +463,21 @@ export const fixAllLinks = (editor) => {
  * @param createLinkEditor - The function to create link editors
  */
 export const processTemplateLinks = (editor, createLinkEditor) => {
-  console.log('Processing template links...');
+  // console.log('Processing template links...');
   
   try {
     // Get all links in the template through DOM API
     const canvas = editor.Canvas.getBody();
     const domLinks = canvas.querySelectorAll('a:not([data-file-link])');
-    console.log(`Found ${domLinks.length} links in DOM`);
+    // console.log(`Found ${domLinks.length} links in DOM`);
     
     // Process each DOM link - just attach event handlers directly
     domLinks.forEach((domLink, index) => {
       try {
-        console.log(`Processing DOM Link ${index + 1}:`, {
-          href: domLink.getAttribute('href'),
-          text: domLink.textContent
-        });
+        // console.log(`Processing DOM Link ${index + 1}:`, {
+        //   href: domLink.getAttribute('href'),
+        //   text: domLink.textContent
+        // });
         
         // Try to find the corresponding component
         const wrapper = editor.DomComponents.getWrapper();
@@ -495,15 +494,15 @@ export const processTemplateLinks = (editor, createLinkEditor) => {
         
         // If we found a component, try to set its type to 'link'
         if (linkComp) {
-          console.log(`Found component for DOM link ${index + 1}:`, {
-            type: linkComp.get('type'),
-            href: linkComp.getAttributes().href
-          });
+          // console.log(`Found component for DOM link ${index + 1}:`, {
+          //   type: linkComp.get('type'),
+          //   href: linkComp.getAttributes().href
+          // });
           
           // Only try to change type if not already a link
           if (linkComp.get('type') !== 'link') {
             try {
-              console.log('Converting component to link type');
+              // console.log('Converting component to link type');
               linkComp.set('type', 'link');
             } catch (e) {
               console.log('Could not convert to link type, applying handler directly');
@@ -533,7 +532,7 @@ export const processTemplateLinks = (editor, createLinkEditor) => {
         // Add our new handler
         domLink._dblclickHandler = dblclickHandler;
         domLink.addEventListener('dblclick', dblclickHandler);
-        console.log('Added dblclick handler to link element');
+        // console.log('Added dblclick handler to link element');
       } catch (err) {
         console.error(`Error processing link ${index + 1}:`, err);
       }
@@ -546,8 +545,8 @@ export const processTemplateLinks = (editor, createLinkEditor) => {
       const type = link.get('type');
       linkTypeCounts[type] = (linkTypeCounts[type] || 0) + 1;
     });
-    console.log(`Link processing complete. Found ${allLinks.length} links in component tree`);
-    console.log('Link type counts:', linkTypeCounts);
+    // console.log(`Link processing complete. Found ${allLinks.length} links in component tree`);
+    // console.log('Link type counts:', linkTypeCounts);
     
   } catch (err) {
     console.error('Error in processTemplateLinks:', err);

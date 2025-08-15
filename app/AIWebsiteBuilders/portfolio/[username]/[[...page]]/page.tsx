@@ -7,20 +7,28 @@ import {
   getPortfolioMetadata,
 } from "@/lib/metadata";
 import JsonLd from "@/app/components/JsonLd";
-import PortfolioPage from "@/app/components/portfolio/PortfolioPage";
+import MultiPagePortfolio from "@/app/components/portfolio/MultiPagePortfolio";
 
 import { getPortfolioByUserName } from "@/lib/redux/api/portfolio";
 
 export async function generateMetadata({
   params,
 }: {
-  params: { username: string };
+  params: { username: string; page?: string[] };
 }): Promise<Metadata> {
   try {
     const portfolioData = await getPortfolioByUserName(params.username);
-
+    console.log("uujifheuifeurefrererere")
     if (portfolioData) {
-      return getPortfolioMetadata(portfolioData);
+      const pageSlug = params.page?.[0];
+      const pageTitle = pageSlug 
+        ? `${pageSlug.charAt(0).toUpperCase() + pageSlug.slice(1)} - ${portfolioData.user?.name || params.username}`
+        : portfolioData.user?.name || params.username;
+        
+      return {
+        ...getPortfolioMetadata(portfolioData),
+        title: `${pageTitle} | TradesBuilder`,
+      };
     }
   } catch (error) {
     console.error("Error generating metadata:", error);
@@ -37,8 +45,10 @@ export async function generateMetadata({
 export default async function PortfolioUserPage({
   params,
 }: {
-  params: { username: string };
+  params: { username: string; page?: string[] };
 }) {
+  console.log('🚀 [[...page]]/page.tsx: Component loaded with params:', params);
+  
   let portfolioData = null;
   let structuredData = null;
 
@@ -87,7 +97,10 @@ export default async function PortfolioUserPage({
       {structuredData && structuredData.length > 0 && (
         <JsonLd data={structuredData} />
       )}
-      <PortfolioPage />
+      <MultiPagePortfolio 
+        username={params.username} 
+        requestedPage={params.page?.[0]}
+      />
     </>
   );
 }

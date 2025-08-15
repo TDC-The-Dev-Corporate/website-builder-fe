@@ -92,7 +92,6 @@ export const defineLinkComponent = (editor, createLinkEditor) => {
           }
           
           // Log initialization success
-          console.log('Link component initialized successfully with href:', href);
         } catch (error) {
           console.error('Error initializing link component:', error);
         }
@@ -645,14 +644,11 @@ export const setupLinkEventHandlers = (editor, createLinkEditor) => {
     // Set up a component:add event listener to ensure all links are handled correctly
     editor.on('component:add', (model) => {
       if (model.get('tagName') === 'a' && !model.getAttributes()['data-file-link']) {
-        console.log('New link component added:', {
-          type: model.get('type'),
-          href: model.getAttributes().href
-        });
+       
         
         // Ensure the component is recognized as a link type
         if (model.get('type') !== 'link') {
-          console.log('Converting component to link type');
+         
           model.set('type', 'link');
           // Initialize href property
           const href = model.getAttributes().href || '';

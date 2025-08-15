@@ -29,11 +29,83 @@ export const createTemplatesConfig = (
  */
 export const loadSelectedTemplate = (editor, selectedTemplate, processTemplateLinks, createLinkEditor) => {
   if (selectedTemplate) {
-    editor.DomComponents.clear();
-    editor.CssComposer.clear();
-    editor.setComponents(selectedTemplate.data.pages[0].component);
+    console.log('Loading template:', selectedTemplate);
     
-    // Use the imported processTemplateLinks function instead of defining it inline
+    // Check if this is a saved portfolio with project data
+    if (selectedTemplate.projectData && typeof selectedTemplate.projectData === 'string') {
+      console.log('Loading saved portfolio with project data');
+      
+      try {
+        // Parse the project data
+        const projectData = JSON.parse(selectedTemplate.projectData);
+        console.log('Parsed project data:', projectData);
+        
+        // Load the complete project data into GrapesJS
+        editor.loadProjectData(projectData);
+        
+        console.log('Project data loaded successfully');
+      } catch (error) {
+        console.error('Failed to parse project data:', error);
+        console.log('Falling back to htmlContent');
+        
+        // Fallback to loading from htmlContent
+        if (selectedTemplate.htmlContent) {
+          editor.DomComponents.clear();
+          editor.CssComposer.clear();
+          editor.setComponents(selectedTemplate.htmlContent);
+        }
+      }
+    } 
+    // Check if this is a saved portfolio with pages data but no project data
+    else if (selectedTemplate.pagesData && typeof selectedTemplate.pagesData === 'string') {
+      console.log('Loading saved portfolio with pages data');
+      
+      try {
+        const pagesData = JSON.parse(selectedTemplate.pagesData);
+        console.log('Parsed pages data:', pagesData);
+        
+        // Clear existing content
+        editor.DomComponents.clear();
+        editor.CssComposer.clear();
+        
+        // Get the first page or find a home page
+        const pageIds = Object.keys(pagesData);
+        if (pageIds.length > 0) {
+          const firstPage = pagesData[pageIds[0]];
+          if (firstPage.htmlContent) {
+            editor.setComponents(firstPage.htmlContent);
+          }
+          if (firstPage.cssContent) {
+            editor.setStyle(firstPage.cssContent);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to parse pages data:', error);
+        
+        // Fallback to loading from htmlContent
+        if (selectedTemplate.htmlContent) {
+          editor.DomComponents.clear();
+          editor.CssComposer.clear();
+          editor.setComponents(selectedTemplate.htmlContent);
+        }
+      }
+    }
+    // Check if this is a saved portfolio with only htmlContent
+    else if (selectedTemplate.htmlContent) {
+      console.log('Loading saved portfolio with htmlContent only');
+      editor.DomComponents.clear();
+      editor.CssComposer.clear();
+      editor.setComponents(selectedTemplate.htmlContent);
+    }
+    // This is a new template (carpenter, HVAC, etc.)
+    else if (selectedTemplate.data && selectedTemplate.data.pages) {
+      console.log('Loading template from template library');
+      editor.DomComponents.clear();
+      editor.CssComposer.clear();
+      editor.setComponents(selectedTemplate.data.pages[0].component);
+    }
+    
+    // Process template links for all cases
     const processLinks = () => processTemplateLinks(editor, (e, el, model) => createLinkEditor(e, el, model, editor));
     
     // Process immediately and then again after a delay to catch any late-loading links
