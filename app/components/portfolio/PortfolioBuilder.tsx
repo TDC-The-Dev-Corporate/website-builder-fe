@@ -10,12 +10,12 @@ import { Box, Dialog, DialogContent, Fab, Tooltip } from "@mui/material";
 // Import link utilities and components
 import { createLinkEditor, fixAllLinks, processTemplateLinks } from "./utils/linkUtils";
 import { defineLinkComponent, setupLinkEventHandlers } from "./components/LinkComponent";
+import { createTextEditor, defineTextComponent, setupTextEventHandlers } from "./components/TextComponent";
 import { generateFullHtml } from "./utils/htmlGenerator";
 import { fixAllLinksBeforeOperation } from "./utils/linkMaintenance";
 import { editorHelpers } from "./utils/editorHelpers";
 import { builderSchema } from "./utils/schemas";
 import {
-  // richTextEditorConfig,
   createAssetManagerConfig,
   deviceManagerConfig,
   panelsConfig,
@@ -454,6 +454,26 @@ export default function PortfolioBuilder() {
               onEditor={(editor) => {
                 editorRef.current = editor;
 
+                // CRITICAL: Override RTE for buttons before anything else
+                // Override RTE enable to prevent it on buttons
+                editor.on('rte:enable', (rte, component) => {
+                  const el = component.getEl();
+                  if (el && (el.tagName === 'BUTTON' || el.closest('button'))) {
+                    console.log('🛑 Completely blocking RTE for button element');
+                    rte.disable();
+                    return false;
+                  }
+                });
+
+                // Prevent component selection from enabling RTE on buttons
+                editor.on('component:selected', (component) => {
+                  const el = component.getEl();
+                  if (el && (el.tagName === 'BUTTON' || el.closest('button'))) {
+                    console.log('🛑 Preventing text editing on button selection');
+                    component.set('editable', false);
+                  }
+                });
+
                 // Use imported link utilities and component definition
                 console.log('Registering link component before loading template...');
 
@@ -462,6 +482,12 @@ export default function PortfolioBuilder() {
 
                 // Set up event handlers for link interaction
                 setupLinkEventHandlers(editor, (e, el, model) => createLinkEditor(e, el, model, editorRef));
+
+                // Define our custom text component
+                defineTextComponent(editor, (e, el, model) => createTextEditor(e, el, model, editorRef));
+
+                // Set up event handlers for text interaction
+                setupTextEventHandlers(editor, (e, el, model) => createTextEditor(e, el, model, editorRef));
 
                 // Process all existing links immediately when the editor loads
                 // This ensures all links are properly initialized from the start
@@ -756,37 +782,213 @@ export default function PortfolioBuilder() {
                     }
                     return originalAddType.call(this, type, methods);
                   };                  // Configure component types for text editing
-                  editor.DomComponents.addType("button", {
-                    isComponent: (el) => el.tagName === "BUTTON",
-                    model: {
-                      defaults: {
-                        tagName: "button",
-                        editable: true,
-                        droppable: false,
-                        traits: [
-                          "id",
-                          "title",
-                          { type: "text", name: "text", label: "Button Text" }
-                        ],
-                      },
-                    },
-                  });
 
                   // Link component is now defined in LinkComponent.ts
 
-                  // Configure text elements to be editable
+                  // Configure text elements to use custom text editor (non-editable, double-click to edit)
                   ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'div'].forEach(tagName => {
                     editor.DomComponents.addType(tagName, {
                       isComponent: (el) => el.tagName === tagName.toUpperCase(),
                       model: {
                         defaults: {
                           tagName: tagName,
-                          editable: true,
+                          editable: false, // Disable built-in editing
                           droppable: tagName === 'div',
                           traits: ['id', 'title']
                         }
+                      },
+                      view: {
+                        events: {
+                          'dblclick': 'onDoubleClick',
+                          'click': 'onClick'
+                        } as any,
+                        
+                        onClick(e) {
+                          console.log(`🎯 Single click on ${tagName}:`, this.el);
+                          // Select the component
+                          editor.select(this.model);
+                        },
+                        
+                        onDoubleClick(e) {
+                          console.log(`🎯 Double click on ${tagName}, opening custom text editor:`, this.el);
+                          
+                          // For divs, check if they contain buttons - if so, don't handle the event
+                          if (tagName === 'div') {
+                            const hasButtons = this.el.querySelector('button');
+                            if (hasButtons) {
+                              console.log('🚫 Div contains buttons, skipping text editor');
+                              return; // Let button handlers take precedence
+                            }
+                          }
+                          
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.stopImmediatePropagation();
+                          
+                          // Open our custom text editor
+                          createTextEditor(e, this.el, this.model, editor);
+                        }
                       }
                     });
+                  });
+
+                  // Special configuration for buttons to preserve button type
+                  editor.DomComponents.addType("button", {
+                    isComponent: (el) => el.tagName === "BUTTON",
+                    model: {
+                      defaults: {
+                        tagName: "button",
+                        type: "button", // Ensure it stays as button type
+                        editable: false, // Disable built-in editing
+                        droppable: false,
+                        traits: ['id', 'title', 'type', 'disabled']
+                      },
+                      init() {
+                        // Ensure all child text nodes are non-editable
+                        this.set('editable', false);
+                        
+                        // Recursively disable editing on all child components
+                        const disableChildEditing = (component) => {
+                          component.set('editable', false);
+                          component.components().forEach(disableChildEditing);
+                        };
+                        disableChildEditing(this);
+                        
+                        // When the element is available, set DOM attributes
+                        this.on('change:status', () => {
+                          const el = this.getEl();
+                          if (el) {
+                            el.setAttribute('contenteditable', 'false');
+                            el.style.cursor = 'pointer';
+                            // Disable text selection
+                            el.style.userSelect = 'none';
+                            el.style.webkitUserSelect = 'none';
+                            
+                            // Remove any existing RTE classes
+                            el.classList.remove('gjs-text-editable');
+                          }
+                        });
+                      }
+                    },
+                    view: {
+                      events: {
+                        'dblclick': 'onDoubleClick',
+                        'click': 'onClick',
+                        'dblclick *': 'onDoubleClickChild', // Capture double-clicks on any child element
+                        'click *': 'onClickChild' // Capture clicks on any child element
+                      } as any,
+                      
+                      onClick(e) {
+                        console.log(`🎯 Single click on button:`, this.el);
+                        e.stopPropagation(); // Prevent event from bubbling to parent
+                        editor.select(this.model);
+                      },
+                      
+                      onClickChild(e) {
+                        console.log(`🎯 Single click on button child:`, e.target);
+                        e.stopPropagation();
+                        e.preventDefault();
+                        // Redirect to parent button click
+                        editor.select(this.model);
+                      },
+                      
+                      onDoubleClickChild(e) {
+                        console.log(`🎯 Double click on button child:`, e.target);
+                        e.stopPropagation();
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        
+                        // Redirect to parent button double-click
+                        this.onDoubleClick(e);
+                        return false;
+                      },
+                      
+                      onDoubleClick(e) {
+                        console.log(`🎯 Double click on button, opening custom text editor:`, this.el);
+                        console.log('🔍 Button element details:', {
+                          tagName: this.el.tagName,
+                          id: this.el.id,
+                          className: this.el.className,
+                          textContent: this.el.textContent,
+                          modelType: this.model.get('type'),
+                          modelTagName: this.model.get('tagName')
+                        });
+                        
+                        // Stop all event propagation immediately
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        
+                        // Ensure we prevent any default editing behavior
+                        this.model.set('editable', false);
+                        
+                        // Open our custom text editor with this specific button
+                        createTextEditor(e, this.el, this.model, editor);
+                        
+                        // Return false to completely stop the event
+                        return false;
+                      }
+                    }
+                  });
+
+                  // Additional safety: Prevent any built-in RTE from activating on buttons
+                  editor.on('component:selected', (component) => {
+                    const el = component.getEl();
+                    if (el && (el.tagName === 'BUTTON' || el.closest('button'))) {
+                      // Disable any text editing capabilities
+                      component.set('editable', false);
+                      console.log('🚫 Disabled editing for button component');
+                    }
+                  });
+
+                  // Prevent RTE activation on button elements
+                  editor.on('rte:enable', (rte, component) => {
+                    const el = component.getEl();
+                    if (el && (el.tagName === 'BUTTON' || el.closest('button'))) {
+                      console.log('🚫 Preventing RTE on button element');
+                      rte.disable();
+                      return false;
+                    }
+                  });
+
+                  // More aggressive RTE prevention - intercept before GrapesJS processes
+                  editor.on('component:mount', (component) => {
+                    const el = component.getEl();
+                    if (el && el.tagName === 'BUTTON') {
+                      // Add DOM-level event listeners to prevent RTE
+                      const preventRTE = (e) => {
+                        console.log('🛑 DOM-level prevention of RTE on button');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        
+                        // If it's a double-click, trigger our custom editor
+                        if (e.type === 'dblclick') {
+                          setTimeout(() => {
+                            createTextEditor(e, el, component, editor);
+                          }, 0);
+                        }
+                        return false;
+                      };
+                      
+                      // Add listeners for both the button and any text inside
+                      el.addEventListener('dblclick', preventRTE, true); // Use capture phase
+                      el.addEventListener('click', preventRTE, true);
+                      
+                      // Also add to all text nodes inside
+                      const addListenersToTextNodes = (element: HTMLElement) => {
+                        Array.from(element.childNodes).forEach((childNode: ChildNode) => {
+                          const node = childNode as ChildNode;
+                          if (node.nodeType === Node.TEXT_NODE && node.parentElement) {
+                            node.parentElement.addEventListener('dblclick', preventRTE, true);
+                            node.parentElement.addEventListener('click', preventRTE, true);
+                          } else if (node.nodeType === Node.ELEMENT_NODE) {
+                            addListenersToTextNodes(node as HTMLElement);
+                          }
+                        });
+                      };
+                      addListenersToTextNodes(el);
+                    }
                   });
                 });
 
@@ -820,8 +1022,8 @@ export default function PortfolioBuilder() {
                 ...{
                   licenseKey: licenseKey,
 
-                  // Configure default Rich Text Editor
-                  // richTextEditor: richTextEditorConfig,
+                  // Disable built-in Rich Text Editor - we use custom text editor
+                  richTextEditor: false,
 
                   assets: createAssetManagerConfig(uploadToCloudinary, editorRef) as any,
 
