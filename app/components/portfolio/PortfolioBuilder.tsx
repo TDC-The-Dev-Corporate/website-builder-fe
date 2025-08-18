@@ -73,35 +73,6 @@ import { isDefaultTemplate, uploadToCloudinary } from "@/lib/utils";
 import TutorialOverlay from "../tutorial/TutorialOverlay";
 import { tutorialSteps } from "../tutorial/TutorialSteps";
 
-// const validateYouTubeApiKey = () => {
-//   const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-  
-//   console.log('🎥 YouTube API Key Check:', {
-//     hasApiKey: !!apiKey,
-//     keyPreview: apiKey ? `${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}` : 'Not found',
-//     keyLength: apiKey ? apiKey.length : 0
-//   });
-  
-//   if (!apiKey || apiKey === 'YOUTUBE_API_KEY_PLACEHOLDER') {
-//     console.warn(`
-// 🎥 YouTube Integration Notice:
-// ============================
-// YouTube Asset Provider is configured but no API key found.
-// To enable YouTube video browsing and embedding:
-
-// 1. Get a YouTube Data API v3 key from Google Cloud Console
-// 2. Add NEXT_PUBLIC_YOUTUBE_API_KEY=your_key to .env.local
-// 3. Restart your development server
-
-// Current status: API key ${apiKey ? 'is placeholder' : 'not found'}
-//     `);
-//     return false;
-//   }
-  
-//   console.log('✅ YouTube API key configured successfully');
-//   return true;
-// };
-
 export default function PortfolioBuilder() {
   const [isLoading, setIsLoading] = useState(true);
   const editorRef = useRef(null);
@@ -170,9 +141,6 @@ export default function PortfolioBuilder() {
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
-    
-    // Validate YouTube API key configuration
-    // validateYouTubeApiKey();
     
     return () => clearTimeout(timer);
   }, []);
@@ -570,7 +538,7 @@ export default function PortfolioBuilder() {
                 });
               }}
               options={{
-                licenseKey: licenseKey || 'DEMO_LOCALHOST_KEY', // Use your environment variable first, fallback to demo
+                licenseKey: licenseKey, 
                 theme: 'light',
                 project: {
                   type: 'web',
@@ -597,8 +565,7 @@ export default function PortfolioBuilder() {
                 plugins: [
                   // GrapesJS Studio SDK plugins
                   youtubeAssetProvider.init({
-                    // YouTube Data API v3 key - Get yours at https://console.cloud.google.com/
-                    apiKey: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'YOUTUBE_API_KEY_PLACEHOLDER',
+                    apiKey: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
                     
                     // Search parameters for YouTube videos
                     searchParams: ({ searchValue }) => {
@@ -657,7 +624,57 @@ export default function PortfolioBuilder() {
                     // List pages component options
                   }),
                   tableComponent.init({
-                    // Table component options
+                    // Enhanced table block configuration with editable cells
+                    block: { 
+                      category: 'Basic', 
+                      label: '📊 Table',
+                      media: `<svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                      </svg>`,
+                      content: `
+                        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                          <thead>
+                            <tr style="background-color: #f5f5f5;">
+                              <th style="border: 1px solid #ddd; padding: 12px; text-align: left;" data-gjs-editable='true' data-gjs-type='text'>Header 1</th>
+                              <th style="border: 1px solid #ddd; padding: 12px; text-align: left;" data-gjs-editable='true' data-gjs-type='text'>Header 2</th>
+                              <th style="border: 1px solid #ddd; padding: 12px; text-align: left;" data-gjs-editable='true' data-gjs-type='text'>Header 3</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td style="border: 1px solid #ddd; padding: 12px;" data-gjs-editable='true' data-gjs-type='text'>Data 1</td>
+                              <td style="border: 1px solid #ddd; padding: 12px;" data-gjs-editable='true' data-gjs-type='text'>Data 2</td>
+                              <td style="border: 1px solid #ddd; padding: 12px;" data-gjs-editable='true' data-gjs-type='text'>Data 3</td>
+                            </tr>
+                            <tr>
+                              <td style="border: 1px solid #ddd; padding: 12px;" data-gjs-editable='true' data-gjs-type='text'>Data 4</td>
+                              <td style="border: 1px solid #ddd; padding: 12px;" data-gjs-editable='true' data-gjs-type='text'>Data 5</td>
+                              <td style="border: 1px solid #ddd; padding: 12px;" data-gjs-editable='true' data-gjs-type='text'>Data 6</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      `
+                    },
+                    
+                    // Custom settings layout - opens in a nice dialog
+                    openSettings: ({ editor, layoutProps }) => {
+                      console.log('🔧 Opening table settings in dialog');
+                      editor.runCommand('studio:layoutToggle', {
+                        ...layoutProps,
+                        header: false,
+                        style: { 
+                          marginLeft: -20, 
+                          marginRight: -20,
+                          maxWidth: '500px',
+                          maxHeight: '600px'
+                        },
+                        placer: { 
+                          type: 'dialog', 
+                          title: layoutProps.header?.label || 'Table Settings',
+                          modal: true
+                        },
+                      });
+                    }
                   }),
                   // Your existing custom plugins
                   ...createEditorPlugins(
@@ -682,57 +699,9 @@ export default function PortfolioBuilder() {
                       console.log('📦 Asset Manager:', assetManager);
                       console.log('🎥 Available asset providers:', Object.keys(assetManager.getAll()));
                       
-                      // Add a test video component that users can double-click to access YouTube
-                      setTimeout(() => {
-                        const wrapper = editor.DomComponents.getWrapper();
-                        const testVideo = wrapper.append({
-                          tagName: 'iframe',
-                          type: 'video',
-                          attributes: {
-                            'data-gjs-type': 'video',
-                            'data-gjs-provider': 'yt',
-                            style: 'width: 300px; height: 200px; border: 2px dashed #ccc; display: block; margin: 20px auto;',
-                            src: 'about:blank'
-                          },
-                          content: 'Double-click to browse YouTube videos'
-                        });
-                        
-                        console.log('🎬 Test video component added:', testVideo);
-                        
-                        // Add a test button to manually open YouTube asset manager
-                        const testBtn = wrapper.append({
-                          tagName: 'button',
-                          content: '🎥 Test YouTube Integration',
-                          style: { 
-                            padding: '10px 20px', 
-                            margin: '10px auto', 
-                            display: 'block',
-                            backgroundColor: '#ff0000',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '5px',
-                            cursor: 'pointer'
-                          },
-                          script: function() {
-                            this.addEventListener('click', () => {
-                              console.log('🎥 Testing YouTube integration...');
-                              // Try to open asset manager with YouTube provider
-                              if ((window as any).editor) {
-                                (window as any).editor.AssetManager.open({
-                                  types: ['video'],
-                                  select: (asset) => {
-                                    console.log('Selected asset:', asset);
-                                  }
-                                });
-                              }
-                            });
-                          }
-                        });
-                        
-                        // Store editor reference globally for testing
-                        (window as any).editor = editor;
-                        console.log('🔧 Editor stored globally for testing');
-                      }, 1000);
+                      // Store editor reference globally for testing
+                      (window as any).editor = editor;
+                      console.log('🔧 Editor stored globally for testing');
                       
                       // Show the global styles panel by default
                       editor.runCommand('studio:layoutToggle', {
