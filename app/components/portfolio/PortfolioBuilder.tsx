@@ -7,8 +7,6 @@ import { Wand2, Image as ImageIcon } from "lucide-react";
 
 import { Box, Dialog, DialogContent, Fab, Tooltip } from "@mui/material";
 
-// Import link utilities and components
-// Removed custom editors - using Studio SDK built-in editors now
 import { generateFullHtml, generateAllPagesHtml, getProjectData } from "./utils/htmlGenerator";
 import { editorHelpers } from "./utils/editorHelpers";
 import { builderSchema } from "./utils/schemas";
@@ -74,6 +72,35 @@ import { useToast } from "@/hooks/use-toast";
 import { isDefaultTemplate, uploadToCloudinary } from "@/lib/utils";
 import TutorialOverlay from "../tutorial/TutorialOverlay";
 import { tutorialSteps } from "../tutorial/TutorialSteps";
+
+// const validateYouTubeApiKey = () => {
+//   const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+  
+//   console.log('🎥 YouTube API Key Check:', {
+//     hasApiKey: !!apiKey,
+//     keyPreview: apiKey ? `${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}` : 'Not found',
+//     keyLength: apiKey ? apiKey.length : 0
+//   });
+  
+//   if (!apiKey || apiKey === 'YOUTUBE_API_KEY_PLACEHOLDER') {
+//     console.warn(`
+// 🎥 YouTube Integration Notice:
+// ============================
+// YouTube Asset Provider is configured but no API key found.
+// To enable YouTube video browsing and embedding:
+
+// 1. Get a YouTube Data API v3 key from Google Cloud Console
+// 2. Add NEXT_PUBLIC_YOUTUBE_API_KEY=your_key to .env.local
+// 3. Restart your development server
+
+// Current status: API key ${apiKey ? 'is placeholder' : 'not found'}
+//     `);
+//     return false;
+//   }
+  
+//   console.log('✅ YouTube API key configured successfully');
+//   return true;
+// };
 
 export default function PortfolioBuilder() {
   const [isLoading, setIsLoading] = useState(true);
@@ -143,13 +170,14 @@ export default function PortfolioBuilder() {
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
+    
+    // Validate YouTube API key configuration
+    // validateYouTubeApiKey();
+    
     return () => clearTimeout(timer);
   }, []);
-
-  // Cleanup effect to ensure cache is cleared when component unmounts
   useEffect(() => {
     return () => {
-      // Clear any pending operations or caches when component unmounts
       dispatch(resetCache());
     };
   }, [dispatch]);
@@ -213,7 +241,6 @@ export default function PortfolioBuilder() {
     setIsSaving(true);
 
     try {
-      // Get all pages data from GrapesJS - no need to fix links manually with Studio SDK
       const projectData = getProjectData(editorRef.current);
       if (!projectData) {
         console.error("Failed to get project data");
@@ -246,17 +273,15 @@ export default function PortfolioBuilder() {
       }
 
       console.log("User found:", user.id);
-
-      // Get the first page HTML for backward compatibility (don't use current page)
       const firstPageHtml = projectData.pages && projectData.pages.length > 0 
         ? projectData.pages[0].html 
         : generateFullHtml(editorRef.current);
       
       const data = {
         userId: user.id,
-        htmlContent: firstPageHtml, // Always use first page for backward compatibility
-        projectData: JSON.stringify(projectData.projectData), // Complete GrapesJS project data
-        pagesData: JSON.stringify(projectData.pages), // All pages HTML data
+        htmlContent: firstPageHtml, 
+        projectData: JSON.stringify(projectData.projectData), 
+        pagesData: JSON.stringify(projectData.pages),
         name: isDefaultTemplate(selectedTemplate.id)
           ? draftName
           : selectedTemplate.name || "",
@@ -572,7 +597,28 @@ export default function PortfolioBuilder() {
                 plugins: [
                   // GrapesJS Studio SDK plugins
                   youtubeAssetProvider.init({
-                    // YouTube asset provider options
+                    // YouTube Data API v3 key - Get yours at https://console.cloud.google.com/
+                    apiKey: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'YOUTUBE_API_KEY_PLACEHOLDER',
+                    
+                    // Search parameters for YouTube videos
+                    searchParams: ({ searchValue }) => {
+                      console.log('🔍 YouTube search triggered with:', searchValue);
+                      return {
+                        q: searchValue || 'professional portfolio construction trades',
+                        maxResults: 20,
+                        order: 'relevance',
+                        safeSearch: 'strict',
+                        type: ['video'],
+                        videoEmbeddable: 'true',
+                        videoDuration: 'medium' // 4-20 minutes
+                      };
+                    },
+                    
+                    // Thumbnail quality preference
+                    thumbnailQuality: 'high',
+                    
+                    // Keep the YouTube search button in video component properties
+                    skipVideoComponent: false
                   }),
                   layoutSidebarButtons.init({
                     // Layout sidebar buttons options
@@ -625,14 +671,300 @@ export default function PortfolioBuilder() {
                     tableComponent,
                     iconifyComponent,
                     accordionComponent
-                  ).filter(Boolean)
+                  ).filter(Boolean),
+                  // Add Global Styles panel on editor ready
+                  editor =>
+                    editor.onReady(() => {
+                      console.log('🎯 Editor ready - Setting up Studio SDK features');
+                      
+                      // Check if YouTube provider is available
+                      const assetManager = editor.AssetManager;
+                      console.log('📦 Asset Manager:', assetManager);
+                      console.log('🎥 Available asset providers:', Object.keys(assetManager.getAll()));
+                      
+                      // Add a test video component that users can double-click to access YouTube
+                      setTimeout(() => {
+                        const wrapper = editor.DomComponents.getWrapper();
+                        const testVideo = wrapper.append({
+                          tagName: 'iframe',
+                          type: 'video',
+                          attributes: {
+                            'data-gjs-type': 'video',
+                            'data-gjs-provider': 'yt',
+                            style: 'width: 300px; height: 200px; border: 2px dashed #ccc; display: block; margin: 20px auto;',
+                            src: 'about:blank'
+                          },
+                          content: 'Double-click to browse YouTube videos'
+                        });
+                        
+                        console.log('🎬 Test video component added:', testVideo);
+                        
+                        // Add a test button to manually open YouTube asset manager
+                        const testBtn = wrapper.append({
+                          tagName: 'button',
+                          content: '🎥 Test YouTube Integration',
+                          style: { 
+                            padding: '10px 20px', 
+                            margin: '10px auto', 
+                            display: 'block',
+                            backgroundColor: '#ff0000',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            cursor: 'pointer'
+                          },
+                          script: function() {
+                            this.addEventListener('click', () => {
+                              console.log('🎥 Testing YouTube integration...');
+                              // Try to open asset manager with YouTube provider
+                              if ((window as any).editor) {
+                                (window as any).editor.AssetManager.open({
+                                  types: ['video'],
+                                  select: (asset) => {
+                                    console.log('Selected asset:', asset);
+                                  }
+                                });
+                              }
+                            });
+                          }
+                        });
+                        
+                        // Store editor reference globally for testing
+                        (window as any).editor = editor;
+                        console.log('🔧 Editor stored globally for testing');
+                      }, 1000);
+                      
+                      // Show the global styles panel by default
+                      editor.runCommand('studio:layoutToggle', {
+                        id: 'gs',
+                        layout: 'panelGlobalStyles',
+                        header: { label: 'Global Styles' },
+                        placer: { type: 'absolute', position: 'right' }
+                      });
+                    })
                 ],
-                // Studio SDK might handle these configurations differently
-                // Commenting out for now to avoid compatibility issues
-                // layerManager: layerManagerConfig,
-                // selectorManager: selectorManagerConfig,
-                // deviceManager: deviceManagerConfig,
-                // panels: panelsConfig,
+                // Global Styles configuration
+                globalStyles: {
+                  default: [
+                    // Typography - Headings
+                    {
+                      id: 'h1Color',
+                      property: 'color',
+                      field: 'color',
+                      selector: 'h1',
+                      label: 'H1 Color',
+                      defaultValue: '#1a1a1a',
+                      category: { id: 'typography', label: 'Typography', open: true }
+                    },
+                    {
+                      id: 'h1Size',
+                      property: 'font-size',
+                      field: { type: 'number', min: 1, max: 6, step: 0.1, units: ['rem', 'px'] },
+                      selector: 'h1',
+                      label: 'H1 Size',
+                      defaultValue: '2.5rem',
+                      category: { id: 'typography' }
+                    },
+                    {
+                      id: 'h2Color',
+                      property: 'color',
+                      field: 'color',
+                      selector: 'h2',
+                      label: 'H2 Color',
+                      defaultValue: '#1a1a1a',
+                      category: { id: 'typography' }
+                    },
+                    {
+                      id: 'h2Size',
+                      property: 'font-size',
+                      field: { type: 'number', min: 1, max: 5, step: 0.1, units: ['rem', 'px'] },
+                      selector: 'h2',
+                      label: 'H2 Size',
+                      defaultValue: '2rem',
+                      category: { id: 'typography' }
+                    },
+                    {
+                      id: 'h3Color',
+                      property: 'color',
+                      field: 'color',
+                      selector: 'h3',
+                      label: 'H3 Color',
+                      defaultValue: '#1a1a1a',
+                      category: { id: 'typography' }
+                    },
+                    {
+                      id: 'h3Size',
+                      property: 'font-size',
+                      field: { type: 'number', min: 1, max: 4, step: 0.1, units: ['rem', 'px'] },
+                      selector: 'h3',
+                      label: 'H3 Size',
+                      defaultValue: '1.75rem',
+                      category: { id: 'typography' }
+                    },
+                    
+                    // Typography - Body Text
+                    {
+                      id: 'bodyColor',
+                      property: 'color',
+                      field: 'color',
+                      selector: 'body, p',
+                      label: 'Body Text Color',
+                      defaultValue: '#333333',
+                      category: { id: 'typography' }
+                    },
+                    {
+                      id: 'bodySize',
+                      property: 'font-size',
+                      field: { type: 'number', min: 0.8, max: 2, step: 0.1, units: ['rem', 'px'] },
+                      selector: 'body, p',
+                      label: 'Body Text Size',
+                      defaultValue: '1rem',
+                      category: { id: 'typography' }
+                    },
+                    {
+                      id: 'bodyLineHeight',
+                      property: 'line-height',
+                      field: { type: 'number', min: 1, max: 3, step: 0.1 },
+                      selector: 'body, p',
+                      label: 'Body Line Height',
+                      defaultValue: '1.6',
+                      category: { id: 'typography' }
+                    },
+                    
+                    // Colors - Brand
+                    {
+                      id: 'primaryColor',
+                      property: '--primary-color',
+                      field: 'color',
+                      selector: ':root',
+                      label: 'Primary Brand Color',
+                      defaultValue: '#3b82f6',
+                      category: { id: 'colors', label: 'Brand Colors', open: false }
+                    },
+                    {
+                      id: 'secondaryColor',
+                      property: '--secondary-color',
+                      field: 'color',
+                      selector: ':root',
+                      label: 'Secondary Brand Color',
+                      defaultValue: '#64748b',
+                      category: { id: 'colors' }
+                    },
+                    {
+                      id: 'accentColor',
+                      property: '--accent-color',
+                      field: 'color',
+                      selector: ':root',
+                      label: 'Accent Color',
+                      defaultValue: '#f59e0b',
+                      category: { id: 'colors' }
+                    },
+                    
+                    // Buttons
+                    {
+                      id: 'btnPrimaryBg',
+                      property: 'background-color',
+                      field: 'color',
+                      selector: 'button, .btn, input[type="submit"]',
+                      label: 'Button Background',
+                      defaultValue: '#3b82f6',
+                      category: { id: 'buttons', label: 'Buttons', open: false }
+                    },
+                    {
+                      id: 'btnPrimaryColor',
+                      property: 'color',
+                      field: 'color',
+                      selector: 'button, .btn, input[type="submit"]',
+                      label: 'Button Text Color',
+                      defaultValue: '#ffffff',
+                      category: { id: 'buttons' }
+                    },
+                    {
+                      id: 'btnRadius',
+                      property: 'border-radius',
+                      field: {
+                        type: 'select',
+                        options: [
+                          { id: '0', label: 'None' },
+                          { id: '4px', label: 'Small' },
+                          { id: '8px', label: 'Medium' },
+                          { id: '16px', label: 'Large' },
+                          { id: '50px', label: 'Pill' }
+                        ]
+                      },
+                      selector: 'button, .btn, input[type="submit"]',
+                      label: 'Button Border Radius',
+                      defaultValue: '8px',
+                      category: { id: 'buttons' }
+                    },
+                    {
+                      id: 'btnPadding',
+                      property: 'padding',
+                      field: { type: 'text' },
+                      selector: 'button, .btn, input[type="submit"]',
+                      label: 'Button Padding',
+                      defaultValue: '12px 24px',
+                      category: { id: 'buttons' }
+                    },
+                    
+                    // Links
+                    {
+                      id: 'linkColor',
+                      property: 'color',
+                      field: 'color',
+                      selector: 'a',
+                      label: 'Link Color',
+                      defaultValue: '#3b82f6',
+                      category: { id: 'links', label: 'Links', open: false }
+                    },
+                    {
+                      id: 'linkHoverColor',
+                      property: 'color',
+                      field: 'color',
+                      selector: 'a:hover',
+                      label: 'Link Hover Color',
+                      defaultValue: '#1d4ed8',
+                      category: { id: 'links' }
+                    },
+                    {
+                      id: 'linkDecoration',
+                      property: 'text-decoration',
+                      field: {
+                        type: 'select',
+                        options: [
+                          { id: 'none', label: 'None' },
+                          { id: 'underline', label: 'Underline' },
+                          { id: 'overline', label: 'Overline' },
+                          { id: 'line-through', label: 'Strike Through' }
+                        ]
+                      },
+                      selector: 'a',
+                      label: 'Link Decoration',
+                      defaultValue: 'underline',
+                      category: { id: 'links' }
+                    },
+                    
+                    // Layout
+                    {
+                      id: 'containerMaxWidth',
+                      property: 'max-width',
+                      field: { type: 'number', min: 800, max: 1400, step: 50, units: ['px'] },
+                      selector: '.container, .main-content',
+                      label: 'Container Max Width',
+                      defaultValue: '1200px',
+                      category: { id: 'layout', label: 'Layout', open: false }
+                    },
+                    {
+                      id: 'sectionPadding',
+                      property: 'padding',
+                      field: { type: 'text' },
+                      selector: 'section, .section',
+                      label: 'Section Padding',
+                      defaultValue: '60px 0',
+                      category: { id: 'layout' }
+                    }
+                  ]
+                },
                 templates: createTemplatesConfig(
                   carpenterTemplate,
                   hvacTemplate,
