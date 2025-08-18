@@ -8,11 +8,8 @@ import { Wand2, Image as ImageIcon } from "lucide-react";
 import { Box, Dialog, DialogContent, Fab, Tooltip } from "@mui/material";
 
 // Import link utilities and components
-import { createLinkEditor, fixAllLinks, processTemplateLinks } from "./utils/linkUtils";
-import { defineLinkComponent, setupLinkEventHandlers } from "./components/LinkComponent";
-import { createTextEditor, defineTextComponent, setupTextEventHandlers } from "./components/TextComponent";
+// Removed custom editors - using Studio SDK built-in editors now
 import { generateFullHtml, generateAllPagesHtml, getProjectData } from "./utils/htmlGenerator";
-import { fixAllLinksBeforeOperation } from "./utils/linkMaintenance";
 import { editorHelpers } from "./utils/editorHelpers";
 import { builderSchema } from "./utils/schemas";
 import {
@@ -26,9 +23,22 @@ import { createEditorPlugins } from "./config/editorPlugins";
 import { createTemplatesConfig, loadSelectedTemplate as loadTemplate } from "./config/templateConfig";
 
 import StudioEditor from "@grapesjs/studio-sdk/react";
-import { tableComponent } from "@grapesjs/studio-sdk-plugins";
-import { iconifyComponent } from "@grapesjs/studio-sdk-plugins";
-import { accordionComponent } from "@grapesjs/studio-sdk-plugins";
+import { 
+  youtubeAssetProvider, 
+  layoutSidebarButtons, 
+  canvasGridMode, 
+  canvasFullSize, 
+  canvasEmptyState, 
+  rteProseMirror, 
+  flexComponent, 
+  accordionComponent, 
+  iconifyComponent, 
+  swiperComponent, 
+  lightGalleryComponent, 
+  fsLightboxComponent, 
+  listPagesComponent, 
+  tableComponent 
+} from "@grapesjs/studio-sdk-plugins";
 import "@grapesjs/studio-sdk/style";
 
 import { carpenterTemplate } from "@/lib/templates/carpenter";
@@ -203,10 +213,7 @@ export default function PortfolioBuilder() {
     setIsSaving(true);
 
     try {
-      // Fix all links before saving using utility function
-      fixAllLinksBeforeOperation(editorRef.current);
-
-      // Get all pages data from GrapesJS
+      // Get all pages data from GrapesJS - no need to fix links manually with Studio SDK
       const projectData = getProjectData(editorRef.current);
       if (!projectData) {
         console.error("Failed to get project data");
@@ -331,9 +338,6 @@ export default function PortfolioBuilder() {
     setIsPublishing(true);
 
     try {
-      // Fix all links before publishing using utility function
-      fixAllLinksBeforeOperation(editorRef.current);
-
       console.log("=== PUBLISH STARTED ===");
       console.log("Portfolio ID:", portfolioId);
       console.log("Selected Template:", selectedTemplate);
@@ -484,189 +488,13 @@ export default function PortfolioBuilder() {
               onEditor={(editor) => {
                 editorRef.current = editor;
 
-                // CRITICAL: Override RTE for buttons before anything else
-                // Override RTE enable to prevent it on buttons
-                editor.on('rte:enable', (rte, component) => {
-                  const el = component.getEl();
-                  if (el && (el.tagName === 'BUTTON' || el.closest('button'))) {
-                    console.log('🛑 Completely blocking RTE for button element');
-                    rte.disable();
-                    return false;
-                  }
-                });
+                console.log('Editor initialized with Studio SDK');
 
-                // Prevent component selection from enabling RTE on buttons
-                editor.on('component:selected', (component) => {
-                  const el = component.getEl();
-                  if (el && (el.tagName === 'BUTTON' || el.closest('button'))) {
-                    console.log('🛑 Preventing text editing on button selection');
-                    component.set('editable', false);
-                  }
-                });
+                // Load the selected template
+                loadTemplate(editor, selectedTemplate);
 
-                // Use imported link utilities and component definition
-                console.log('Registering link component before loading template...');
-
-                // Define our custom link component
-                defineLinkComponent(editor, (e, el, model) => createLinkEditor(e, el, model, editorRef));
-
-                // Set up event handlers for link interaction
-                setupLinkEventHandlers(editor, (e, el, model) => createLinkEditor(e, el, model, editorRef));
-
-                // Define our custom text component
-                defineTextComponent(editor, (e, el, model) => createTextEditor(e, el, model, editorRef));
-
-                // Set up event handlers for text interaction
-                setupTextEventHandlers(editor, (e, el, model) => createTextEditor(e, el, model, editorRef));
-
-                // Process all existing links immediately when the editor loads
-                // This ensures all links are properly initialized from the start
-                setTimeout(() => {
-                  fixAllLinks(editor);
-                  editor.store(); // Store the changes
-                }, 500);
-
-                // Add event listener for storage to ensure links are properly saved
-                editor.on('storage:start', () => fixAllLinks(editor));
-
-                // Also process links before publishing
-                editor.on('component:selected', (component) => {
-                  if (component && component.get('type') === 'link') {
-                    console.log('Link selected, ensuring href is set:', component.get('href'));
-                    const href = component.get('href') || component.getAttributes().href || '';
-                    component.set('href', href);
-                    component.setAttributes({ href });
-                    component.getEl().setAttribute('href', href);
-                  }
-                }); loadTemplate(editor, selectedTemplate, processTemplateLinks, createLinkEditor);
-
-                editor.DomComponents.addType("modal", {
-                  isComponent: (el) => el.classList?.contains("modal"),
-                  model: {
-                    defaults: {
-                      name: "Modal",
-                      traits: [
-                        "id",
-                        {
-                          type: "checkbox",
-                          label: "Visible in editor",
-                          name: "visibleInEditor",
-                          changeProp: true,
-                        },
-                      ],
-                      visibleInEditor: false,
-                      script: function () {
-                        const modal = this;
-                        const closeBtns = modal.querySelectorAll(
-                          '[data-bs-dismiss="modal"], .btn-close'
-                        );
-
-                        closeBtns.forEach((btn) => {
-                          btn.addEventListener("click", () => {
-                            modal.classList.remove("show");
-                            modal.style.display = "none";
-                          });
-                        });
-
-                        document
-                          .querySelectorAll('[data-bs-toggle="modal"]')
-                          .forEach((trigger) => {
-                            const target =
-                              trigger.getAttribute("data-bs-target");
-                            if (target === `#${modal.id}`) {
-                              trigger.addEventListener("click", () => {
-                                modal.classList.add("show");
-                                modal.style.display = "block";
-                              });
-                            }
-                          });
-                      },
-                    },
-
-                    init() {
-                      this.on("change:visibleInEditor", () => {
-                        const el = this.view?.el;
-                        if (el) {
-                          const val = this.get("visibleInEditor");
-                          el.classList.toggle("show", val);
-
-                          if (val) {
-                            // Make modal visible and properly positioned for editing
-                            el.style.display = "block";
-                            el.style.opacity = "1";
-                            el.style.visibility = "visible";
-                            el.style.position = "fixed";
-                            el.style.top = "50%";
-                            el.style.left = "50%";
-                            el.style.transform = "translate(-50%, -50%)";
-                            el.style.zIndex = "1050";
-                            el.style.minHeight = "300px";
-                            el.style.minWidth = "400px";
-                            el.style.maxWidth = "90%";
-                            el.style.maxHeight = "90%";
-                            el.style.border = "2px dashed #3b82f6";
-                            el.style.borderRadius = "8px";
-                            el.style.backgroundColor = "white";
-                            el.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
-                            el.style.overflow = "auto";
-
-                            // Add a backdrop
-                            const backdrop = document.createElement("div");
-                            backdrop.className = "gjs-modal-backdrop";
-                            backdrop.style.cssText = `
-                              position: fixed;
-                              top: 0;
-                              left: 0;
-                              width: 100%;
-                              height: 100%;
-                              background: rgba(0,0,0,0.5);
-                              z-index: 1040;
-                              pointer-events: none;
-                            `;
-
-                            // Remove existing backdrop if any
-                            const existingBackdrop = document.querySelector(
-                              ".gjs-modal-backdrop"
-                            );
-                            if (existingBackdrop) {
-                              existingBackdrop.remove();
-                            }
-
-                            // Add backdrop to canvas
-                            const canvas = editor.Canvas.getBody();
-                            canvas.appendChild(backdrop);
-                          } else {
-                            // Reset to normal state
-                            el.style.display = "none";
-                            el.style.position = "";
-                            el.style.top = "";
-                            el.style.left = "";
-                            el.style.transform = "";
-                            el.style.zIndex = "";
-                            el.style.minHeight = "";
-                            el.style.minWidth = "";
-                            el.style.maxWidth = "";
-                            el.style.maxHeight = "";
-                            el.style.border = "";
-                            el.style.borderRadius = "";
-                            el.style.backgroundColor = "";
-                            el.style.boxShadow = "";
-                            el.style.overflow = "";
-
-                            // Remove backdrop
-                            const backdrop = document.querySelector(
-                              ".gjs-modal-backdrop"
-                            );
-                            if (backdrop) {
-                              backdrop.remove();
-                            }
-                          }
-                        }
-                      });
-                    },
-                  },
-                });
-
+                // Studio SDK handles most component definitions automatically
+                // Only keep minimal editor setup
                 editor.on("load", () => {
                   const panelManager = editor.Panels;
 
@@ -687,339 +515,7 @@ export default function PortfolioBuilder() {
                     event.preventDefault();
                   });
 
-                  // Add a direct dblclick handler on the canvas to ensure all links are editable
-                  canvasBody.addEventListener("dblclick", (event) => {
-                    const el = event.target as HTMLElement;
-                    const linkEl = el.tagName === 'A' ? el : el.closest('a');
-
-                    if (linkEl && !linkEl.getAttribute('data-file-link')) {
-                      console.log('Direct canvas dblclick on link element');
-                      event.preventDefault();
-                      event.stopPropagation();
-
-                      // Find the component for this element if it exists
-                      // But don't rely on it - we'll use direct DOM approach
-                      const wrapper = editor.DomComponents.getWrapper();
-                      const allLinks = wrapper.find('a');
-                      const matchingComponents = allLinks.filter(comp => comp.view && comp.view.el === linkEl);
-
-                      const linkComp = matchingComponents.length > 0 ? matchingComponents[0] : null;
-
-                      // Always use the direct link editor with the DOM element
-                      // This ensures it works regardless of component state
-                      console.log('Using direct link editor for consistent behavior');
-                      createLinkEditor(event, linkEl, linkComp, editor);
-                    }
-                  });
-
-                  // Add a global click listener for links with direct double-click handling
-                  canvasBody.addEventListener("click", (event) => {
-                    const el = event.target as HTMLElement;
-                    const linkEl = el.tagName === 'A' ? el : el.closest('a');
-
-                    if (linkEl && !linkEl.getAttribute('data-file-link')) {
-                      console.log('Link clicked:', {
-                        element: linkEl,
-                        href: linkEl.getAttribute('href'),
-                        hasFileLink: linkEl.getAttribute('data-file-link'),
-                      });
-
-                      // Try to find the component model for this element
-                      const wrapper = editor.DomComponents.getWrapper();
-                      const allLinks = wrapper.find('a');
-                      const matchingComponents = allLinks.filter(comp => comp.view && comp.view.el === linkEl);
-
-                      console.log('Component found:', {
-                        found: matchingComponents.length > 0,
-                        type: matchingComponents.length > 0 ? matchingComponents[0].get('type') : 'none',
-                        components: matchingComponents
-                      });
-
-                      // Always ensure the element has a dblclick handler
-                      // This is the most reliable approach
-                      if (!(linkEl as any).__hasFixedDblClick) {
-                        (linkEl as any).__hasFixedDblClick = true;
-                        linkEl.addEventListener('dblclick', (e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          console.log('Direct dblclick event on link');
-
-                          // Find the component but don't rely on it
-                          const currentLinks = wrapper.find('a');
-                          const currentMatch = currentLinks.find(comp => comp.view && comp.view.el === linkEl);
-
-                          // Always use direct DOM approach
-                          createLinkEditor(e, linkEl, currentMatch || null, editor);
-                        });
-                      }
-                    }
-                  });
-
-                  // Set up a component:add event listener to ensure all links are handled correctly
-                  editor.on('component:add', (model) => {
-                    if (model.get('tagName') === 'a' && !model.getAttributes()['data-file-link']) {
-                      console.log('New link component added:', {
-                        type: model.get('type'),
-                        href: model.getAttributes().href
-                      });
-
-                      // Ensure the component is recognized as a link type
-                      if (model.get('type') !== 'link') {
-                        console.log('Converting component to link type');
-                        model.set('type', 'link');
-                        // Initialize href property
-                        const href = model.getAttributes().href || '';
-                        model.set('href', href);
-
-                        // Force a view update
-                        setTimeout(() => {
-                          const view = model.getView();
-                          if (view) {
-                            console.log('Re-rendering view for new link');
-                            view.render();
-                          }
-                        }, 10000);
-                      }
-                    }
-                  });
-
-                  // Also watch for component:update to catch any links that might change
-                  editor.on('component:update', (model) => {
-                    if (model.get('tagName') === 'a' && !model.getAttributes()['data-file-link'] && model.get('type') !== 'link') {
-                      console.log('Link component updated but not of type link:', {
-                        type: model.get('type'),
-                        href: model.getAttributes().href
-                      });
-                      model.set('type', 'link');
-                    }
-                  });
-
-                  // Override the default handling of links to ensure our custom component is used
-                  const originalAddType = editor.DomComponents.addType;
-                  editor.DomComponents.addType = function (type, methods) {
-                    // When we detect the 'default' type being added, make sure links are handled by our custom component
-                    if (type === 'default') {
-                      const origIsComponent = methods.isComponent;
-                      if (origIsComponent) {
-                        methods.isComponent = function (el) {
-                          // If it's an anchor tag but not a file link, don't let the default component claim it
-                          if (el.tagName === 'A' && !el.getAttribute('data-file-link')) {
-                            return false;
-                          }
-                          return origIsComponent(el);
-                        };
-                      }
-                    }
-                    return originalAddType.call(this, type, methods);
-                  };                  // Configure component types for text editing
-
-                  // Link component is now defined in LinkComponent.ts
-
-                  // Configure text elements to use custom text editor (non-editable, double-click to edit)
-                  ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'div'].forEach(tagName => {
-                    editor.DomComponents.addType(tagName, {
-                      isComponent: (el) => el.tagName === tagName.toUpperCase(),
-                      model: {
-                        defaults: {
-                          tagName: tagName,
-                          editable: false, // Disable built-in editing
-                          droppable: tagName === 'div',
-                          traits: ['id', 'title']
-                        }
-                      },
-                      view: {
-                        events: {
-                          'dblclick': 'onDoubleClick',
-                          'click': 'onClick'
-                        } as any,
-                        
-                        onClick(e) {
-                          console.log(`🎯 Single click on ${tagName}:`, this.el);
-                          // Select the component
-                          editor.select(this.model);
-                        },
-                        
-                        onDoubleClick(e) {
-                          console.log(`🎯 Double click on ${tagName}, opening custom text editor:`, this.el);
-                          
-                          // For divs, check if they contain buttons - if so, don't handle the event
-                          if (tagName === 'div') {
-                            const hasButtons = this.el.querySelector('button');
-                            if (hasButtons) {
-                              console.log('🚫 Div contains buttons, skipping text editor');
-                              return; // Let button handlers take precedence
-                            }
-                          }
-                          
-                          e.preventDefault();
-                          e.stopPropagation();
-                          e.stopImmediatePropagation();
-                          
-                          // Open our custom text editor
-                          createTextEditor(e, this.el, this.model, editor);
-                        }
-                      }
-                    });
-                  });
-
-                  // Special configuration for buttons to preserve button type
-                  editor.DomComponents.addType("button", {
-                    isComponent: (el) => el.tagName === "BUTTON",
-                    model: {
-                      defaults: {
-                        tagName: "button",
-                        type: "button", // Ensure it stays as button type
-                        editable: false, // Disable built-in editing
-                        droppable: false,
-                        traits: ['id', 'title', 'type', 'disabled']
-                      },
-                      init() {
-                        // Ensure all child text nodes are non-editable
-                        this.set('editable', false);
-                        
-                        // Recursively disable editing on all child components
-                        const disableChildEditing = (component) => {
-                          component.set('editable', false);
-                          component.components().forEach(disableChildEditing);
-                        };
-                        disableChildEditing(this);
-                        
-                        // When the element is available, set DOM attributes
-                        this.on('change:status', () => {
-                          const el = this.getEl();
-                          if (el) {
-                            el.setAttribute('contenteditable', 'false');
-                            el.style.cursor = 'pointer';
-                            // Disable text selection
-                            el.style.userSelect = 'none';
-                            el.style.webkitUserSelect = 'none';
-                            
-                            // Remove any existing RTE classes
-                            el.classList.remove('gjs-text-editable');
-                          }
-                        });
-                      }
-                    },
-                    view: {
-                      events: {
-                        'dblclick': 'onDoubleClick',
-                        'click': 'onClick',
-                        'dblclick *': 'onDoubleClickChild', // Capture double-clicks on any child element
-                        'click *': 'onClickChild' // Capture clicks on any child element
-                      } as any,
-                      
-                      onClick(e) {
-                        console.log(`🎯 Single click on button:`, this.el);
-                        e.stopPropagation(); // Prevent event from bubbling to parent
-                        editor.select(this.model);
-                      },
-                      
-                      onClickChild(e) {
-                        console.log(`🎯 Single click on button child:`, e.target);
-                        e.stopPropagation();
-                        e.preventDefault();
-                        // Redirect to parent button click
-                        editor.select(this.model);
-                      },
-                      
-                      onDoubleClickChild(e) {
-                        console.log(`🎯 Double click on button child:`, e.target);
-                        e.stopPropagation();
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-                        
-                        // Redirect to parent button double-click
-                        this.onDoubleClick(e);
-                        return false;
-                      },
-                      
-                      onDoubleClick(e) {
-                        console.log(`🎯 Double click on button, opening custom text editor:`, this.el);
-                        console.log('🔍 Button element details:', {
-                          tagName: this.el.tagName,
-                          id: this.el.id,
-                          className: this.el.className,
-                          textContent: this.el.textContent,
-                          modelType: this.model.get('type'),
-                          modelTagName: this.model.get('tagName')
-                        });
-                        
-                        // Stop all event propagation immediately
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.stopImmediatePropagation();
-                        
-                        // Ensure we prevent any default editing behavior
-                        this.model.set('editable', false);
-                        
-                        // Open our custom text editor with this specific button
-                        createTextEditor(e, this.el, this.model, editor);
-                        
-                        // Return false to completely stop the event
-                        return false;
-                      }
-                    }
-                  });
-
-                  // Additional safety: Prevent any built-in RTE from activating on buttons
-                  editor.on('component:selected', (component) => {
-                    const el = component.getEl();
-                    if (el && (el.tagName === 'BUTTON' || el.closest('button'))) {
-                      // Disable any text editing capabilities
-                      component.set('editable', false);
-                      console.log('🚫 Disabled editing for button component');
-                    }
-                  });
-
-                  // Prevent RTE activation on button elements
-                  editor.on('rte:enable', (rte, component) => {
-                    const el = component.getEl();
-                    if (el && (el.tagName === 'BUTTON' || el.closest('button'))) {
-                      console.log('🚫 Preventing RTE on button element');
-                      rte.disable();
-                      return false;
-                    }
-                  });
-
-                  // More aggressive RTE prevention - intercept before GrapesJS processes
-                  editor.on('component:mount', (component) => {
-                    const el = component.getEl();
-                    if (el && el.tagName === 'BUTTON') {
-                      // Add DOM-level event listeners to prevent RTE
-                      const preventRTE = (e) => {
-                        console.log('🛑 DOM-level prevention of RTE on button');
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.stopImmediatePropagation();
-                        
-                        // If it's a double-click, trigger our custom editor
-                        if (e.type === 'dblclick') {
-                          setTimeout(() => {
-                            createTextEditor(e, el, component, editor);
-                          }, 0);
-                        }
-                        return false;
-                      };
-                      
-                      // Add listeners for both the button and any text inside
-                      el.addEventListener('dblclick', preventRTE, true); // Use capture phase
-                      el.addEventListener('click', preventRTE, true);
-                      
-                      // Also add to all text nodes inside
-                      const addListenersToTextNodes = (element: HTMLElement) => {
-                        Array.from(element.childNodes).forEach((childNode: ChildNode) => {
-                          const node = childNode as ChildNode;
-                          if (node.nodeType === Node.TEXT_NODE && node.parentElement) {
-                            node.parentElement.addEventListener('dblclick', preventRTE, true);
-                            node.parentElement.addEventListener('click', preventRTE, true);
-                          } else if (node.nodeType === Node.ELEMENT_NODE) {
-                            addListenersToTextNodes(node as HTMLElement);
-                          }
-                        });
-                      };
-                      addListenersToTextNodes(el);
-                    }
-                  });
+                  console.log("Editor loaded successfully");
                 });
 
                 editor.on("canvas:dragdata", async (dataTransfer, result) => {
@@ -1049,17 +545,78 @@ export default function PortfolioBuilder() {
                 });
               }}
               options={{
-                ...{
-                  licenseKey: licenseKey,
-
-                  // Disable built-in Rich Text Editor - we use custom text editor
-                  richTextEditor: false,
-
-                  assets: createAssetManagerConfig(uploadToCloudinary, editorRef) as any,
-
-                  plugins: createEditorPlugins(
+                licenseKey: licenseKey || 'DEMO_LOCALHOST_KEY', // Use your environment variable first, fallback to demo
+                theme: 'light',
+                project: {
+                  type: 'web',
+                  // Generate unique project ID based on selected template or current time
+                  id: selectedTemplate?.id || `project_${Date.now()}`
+                },
+                identity: {
+                  // Generate unique user ID from logged-in user or fallback to timestamp
+                  id: (() => {
+                    try {
+                      const user = JSON.parse(localStorage.getItem("user") || '{}');
+                      return user.id ? `user_${user.id}` : `user_${Date.now()}`;
+                    } catch {
+                      return `user_${Date.now()}`;
+                    }
+                  })()
+                },
+                assets: createAssetManagerConfig(uploadToCloudinary, editorRef) as any,
+                storage: {
+                  type: 'cloud',
+                  autosaveChanges: 100,
+                  autosaveIntervalMs: 10000
+                },
+                plugins: [
+                  // GrapesJS Studio SDK plugins
+                  youtubeAssetProvider.init({
+                    // YouTube asset provider options
+                  }),
+                  layoutSidebarButtons.init({
+                    // Layout sidebar buttons options
+                  }),
+                  canvasGridMode.init({
+                    // Canvas grid mode options
+                  }),
+                  canvasFullSize.init({
+                    // Canvas full size options
+                  }),
+                  canvasEmptyState.init({
+                    // Canvas empty state options
+                  }),
+                  rteProseMirror.init({
+                    // TinyMCE rich text editor options
+                  }),
+                  flexComponent.init({
+                    // Flex component options
+                  }),
+                  accordionComponent.init({
+                    // Accordion component options
+                  }),
+                  iconifyComponent.init({
+                    // Iconify component options
+                  }),
+                  swiperComponent.init({
+                    // Swiper component options
+                  }),
+                  lightGalleryComponent.init({
+                    // Light gallery component options
+                  }),
+                  fsLightboxComponent.init({
+                    // FS Lightbox component options
+                  }),
+                  listPagesComponent.init({
+                    // List pages component options
+                  }),
+                  tableComponent.init({
+                    // Table component options
+                  }),
+                  // Your existing custom plugins
+                  ...createEditorPlugins(
                     selectedTemplate,
-                    (editor) => loadTemplate(editor, selectedTemplate, processTemplateLinks, createLinkEditor),
+                    (editor) => loadTemplate(editor, selectedTemplate),
                     setShowContentGenerator,
                     tutorialActive,
                     tutorialSteps,
@@ -1068,20 +625,22 @@ export default function PortfolioBuilder() {
                     tableComponent,
                     iconifyComponent,
                     accordionComponent
-                  ).filter(Boolean),
-                  layerManager: layerManagerConfig,
-                  selectorManager: selectorManagerConfig,
-                  deviceManager: deviceManagerConfig,
-                  panels: panelsConfig,
-                  templates: createTemplatesConfig(
-                    carpenterTemplate,
-                    hvacTemplate,
-                    plumberTemplate,
-                    electricianTemplate,
-                    landscaperTemplate,
-                    painterTemplate
-                  ),
-                },
+                  ).filter(Boolean)
+                ],
+                // Studio SDK might handle these configurations differently
+                // Commenting out for now to avoid compatibility issues
+                // layerManager: layerManagerConfig,
+                // selectorManager: selectorManagerConfig,
+                // deviceManager: deviceManagerConfig,
+                // panels: panelsConfig,
+                templates: createTemplatesConfig(
+                  carpenterTemplate,
+                  hvacTemplate,
+                  plumberTemplate,
+                  electricianTemplate,
+                  landscaperTemplate,
+                  painterTemplate
+                ),
               }}
             />
             <FileUploadManager editor={editorRef.current} />

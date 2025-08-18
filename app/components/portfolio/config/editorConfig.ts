@@ -66,7 +66,7 @@ export const richTextEditorConfig = {
  * Asset Manager configuration
  */
 export const createAssetManagerConfig = (uploadToCloudinary, editorRef) => ({
-  storageType: "self",
+  storageType: "self" as const,
   upload: true,
   dropzone: false,
   openAssetsOnDrop: false,

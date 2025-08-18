@@ -27,7 +27,7 @@ export const createTemplatesConfig = (
 /**
  * Load selected template into the editor
  */
-export const loadSelectedTemplate = (editor, selectedTemplate, processTemplateLinks, createLinkEditor) => {
+export const loadSelectedTemplate = (editor, selectedTemplate) => {
   if (selectedTemplate) {
     console.log('Loading template:', selectedTemplate);
     
@@ -105,11 +105,7 @@ export const loadSelectedTemplate = (editor, selectedTemplate, processTemplateLi
       editor.setComponents(selectedTemplate.data.pages[0].component);
     }
     
-    // Process template links for all cases
-    const processLinks = () => processTemplateLinks(editor, (e, el, model) => createLinkEditor(e, el, model, editor));
-    
-    // Process immediately and then again after a delay to catch any late-loading links
-    setTimeout(processLinks, 500);
-    setTimeout(processLinks, 2000); // Try again later in case some components load late
+    // Studio SDK handles link editing automatically with built-in capabilities
+    console.log('Template loaded - Studio SDK will handle all editing features');
   }
 };
