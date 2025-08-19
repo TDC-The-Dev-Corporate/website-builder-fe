@@ -273,15 +273,16 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
                   >
                     {isLoggedIn ? "Dashboard" : "Sign In"}
                   </Typography>
-                  <img
-                    style={{
-                      width: "8.87px",
-                      height: "9.83px",
-                      marginLeft: "7px",
-                    }}
-                    alt="Vector"
-                    src="/vector.svg"
-                  />
+                  <NorthEastIcon
+                className="rotate-icon"
+                sx={{
+                  width: "15px",
+                  height: "15px",
+                  marginLeft: "7px",
+                  transform: "rotate(0deg)",
+                  transition: "transform 0.3s ease-in-out",
+                }}
+              />
                 </Button>
               </MenuItem>
             </Menu>
