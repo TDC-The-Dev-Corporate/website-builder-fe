@@ -18,9 +18,22 @@ import {
   useMediaQuery,
   Divider,
   Avatar,
+  Button,
+  Grid,
+  Paper,
+  Stack,
 } from "@mui/material";
 
-import { Menu, User, Layout, LogOut, DraftingCompass } from "lucide-react";
+import {
+  Menu,
+  User,
+  Layout,
+  LogOut,
+  DraftingCompass,
+  BarChart2,
+  Layers,
+  Users,
+} from "lucide-react";
 
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
 import TemplateViewer from "@/app/components/TemplatesViewer/templateViewer";
@@ -39,7 +52,7 @@ interface Portfolio {
   [key: string]: any;
 }
 
-const DRAWER_WIDTH = 280;
+const DRAWER_WIDTH = 260;
 
 export default function Dashboard() {
   const [username, setUsername] = useState<any>(null);
@@ -170,7 +183,7 @@ export default function Dashboard() {
         sx={{
           display: "flex",
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          background: "linear-gradient(180deg, #071428 0%, #0b1b2b 100%)",
           width: "100%",
         }}
       >
@@ -199,14 +212,37 @@ export default function Dashboard() {
             >
               <Menu />
             </IconButton>
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{ flexGrow: 1, color: "white" }}
-            >
-              {selectedSection.charAt(0).toUpperCase() +
-                selectedSection.slice(1)}
-            </Typography>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography
+                variant="h6"
+                component="div"
+                sx={{ color: "white", fontWeight: 700 }}
+              >
+                {selectedSection.charAt(0).toUpperCase() +
+                  selectedSection.slice(1)}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: "rgba(255,255,255,0.7)", mt: 0.5 }}
+              >
+                Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
+              </Typography>
+            </Box>
+
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => router.push("/AIWebsiteBuilders/template-selector")}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: 2,
+                  height: 36,
+                }}
+              >
+                Start from scratch
+              </Button>
+            </Stack>
           </Toolbar>
         </AppBar>
 

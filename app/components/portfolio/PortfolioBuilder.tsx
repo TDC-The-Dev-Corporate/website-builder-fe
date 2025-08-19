@@ -11,11 +11,7 @@ import { generateFullHtml, generateAllPagesHtml, getProjectData } from "./utils/
 import { editorHelpers } from "./utils/editorHelpers";
 import { builderSchema } from "./utils/schemas";
 import {
-  createAssetManagerConfig,
-  deviceManagerConfig,
-  panelsConfig,
-  layerManagerConfig,
-  selectorManagerConfig
+  createAssetManagerConfig
 } from "./config/editorConfig";
 import { createEditorPlugins } from "./config/editorPlugins";
 import { createTemplatesConfig, loadSelectedTemplate as loadTemplate } from "./config/templateConfig";
@@ -245,29 +241,29 @@ export default function PortfolioBuilder() {
         ? projectData.pages[0].html 
         : generateFullHtml(editorRef.current);
       
+      // Safe guard for null selectedTemplate (blank canvas)
+      const selectedId = selectedTemplate?.id;
+      const isDefault = !selectedTemplate || isDefaultTemplate(selectedId);
+
       const data = {
         userId: user.id,
-        htmlContent: firstPageHtml, 
-        projectData: JSON.stringify(projectData.projectData), 
+        htmlContent: firstPageHtml,
+        projectData: JSON.stringify(projectData.projectData),
         pagesData: JSON.stringify(projectData.pages),
-        name: isDefaultTemplate(selectedTemplate.id)
-          ? draftName
-          : selectedTemplate.name || "",
+        name: isDefault ? draftName : selectedTemplate?.name || "",
       };
 
       console.log("Save data prepared:", data);
 
       let response;
 
-      if (isDefaultTemplate(selectedTemplate.id)) {
+      if (isDefault) {
         console.log("=== CREATING NEW PORTFOLIO ===");
         response = await dispatch(generatePortfolio(data));
       } else {
         console.log("=== UPDATING EXISTING PORTFOLIO ===");
-        console.log("Portfolio ID:", selectedTemplate.id);
-        response = await dispatch(
-          updateExistingPortfolio({ id: selectedTemplate.id, data })
-        );
+        console.log("Portfolio ID:", selectedId);
+        response = await dispatch(updateExistingPortfolio({ id: selectedId, data }));
       }
 
       console.log("Redux response:", response);
@@ -280,14 +276,19 @@ export default function PortfolioBuilder() {
         console.log("Response payload:", response.payload);
 
         setPortfolioId(response.payload.id);
-
-        // Update localStorage with the new portfolio info
+        
         const updatedTemplate = {
-          ...selectedTemplate,
+          ...(selectedTemplate || {}),
           id: response.payload.id,
-          name: data.name
+          name: data.name,
+          // prefer server returned fields, fallback to the current editor snapshot
+          htmlContent: response.payload.htmlContent || firstPageHtml,
+          projectData: response.payload.projectData || data.projectData,
+          pagesData: response.payload.pagesData || data.pagesData,
+          isPublished: response.payload.published || false,
+          deployUrl: response.payload.deployUrl || (selectedTemplate && selectedTemplate.deployUrl) || "",
         };
-        console.log("Updated template:", updatedTemplate);
+        console.log("Updated template for localStorage:", updatedTemplate);
 
         localStorage.setItem("selectedTemplate", JSON.stringify(updatedTemplate));
         setSelectedTemplate(updatedTemplate);
@@ -483,8 +484,20 @@ export default function PortfolioBuilder() {
 
                 console.log('Editor initialized with Studio SDK');
 
-                // Load the selected template
-                loadTemplate(editor, selectedTemplate);
+                // Load the selected template if present; otherwise clear editor to avoid default fallback
+                if (selectedTemplate) {
+                  loadTemplate(editor, selectedTemplate);
+                } else {
+                  try {
+                    // Clear components, styles and assets so the canvas is empty
+                    editor.DomComponents && editor.DomComponents.clear && editor.DomComponents.clear();
+                    editor.CssComposer && editor.CssComposer.clear && editor.CssComposer.clear();
+                    editor.AssetManager && editor.AssetManager.clear && editor.AssetManager.clear();
+                    // No storage clear - avoid calling non-existent API
+                  } catch (e) {
+                    console.warn('Failed to clear editor on empty template', e);
+                  }
+                }
 
                 // Studio SDK handles most component definitions automatically
                 // Only keep minimal editor setup
@@ -934,14 +947,16 @@ export default function PortfolioBuilder() {
                     }
                   ]
                 },
-                templates: createTemplatesConfig(
-                  carpenterTemplate,
-                  hvacTemplate,
-                  plumberTemplate,
-                  electricianTemplate,
-                  landscaperTemplate,
-                  painterTemplate
-                ),
+                templates: selectedTemplate
+                  ? createTemplatesConfig(
+                      carpenterTemplate,
+                      hvacTemplate,
+                      plumberTemplate,
+                      electricianTemplate,
+                      landscaperTemplate,
+                      painterTemplate
+                    )
+                  : undefined,
               }}
             />
             <FileUploadManager editor={editorRef.current} />
@@ -1027,6 +1042,9 @@ export default function PortfolioBuilder() {
           localStorage.getItem("selectedTemplate")
             ? JSON.parse(localStorage.getItem("selectedTemplate")).id
             : ""
+        }
+        defaultDraftName={
+          selectedTemplate?.name || `Untitled ${businessName || "project"}`
         }
       />
 
