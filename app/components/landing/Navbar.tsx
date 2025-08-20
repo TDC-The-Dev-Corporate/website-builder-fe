@@ -110,7 +110,12 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
                   lg: "30px",
                   xl: "35px",
                 },
+                cursor: "pointer",
+                userSelect: "none",
               }}
+              role="button"
+              tabIndex={0}
+              onClick={() => router.push("/")}
             >
               TRADES BUILDER PRO
             </Typography>

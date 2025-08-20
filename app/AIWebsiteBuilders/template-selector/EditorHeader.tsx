@@ -64,7 +64,12 @@ export const EditorHeader: FC<{
             fontWeight: 800,
             color: "white",
             fontSize: isMobile ? "28px" : "48px",
+            cursor: "pointer",
+            userSelect: "none",
           }}
+          role="button"
+          tabIndex={0}
+          onClick={() => router.push("/")}
         >
           TRADES BUILDER PRO
         </Typography>
