@@ -442,9 +442,6 @@ export default function PortfolioBuilder() {
     editorHelpers.insertContent(editorRef.current, content, type);
   };
 
-  // Editor helpers are now imported from utils/editorHelpers.ts
-
-  // Schema is now imported from utils/schemas.ts
   return (
     <>
       <JsonLd data={builderSchema} />
@@ -484,23 +481,17 @@ export default function PortfolioBuilder() {
 
                 console.log('Editor initialized with Studio SDK');
 
-                // Load the selected template if present; otherwise clear editor to avoid default fallback
                 if (selectedTemplate) {
                   loadTemplate(editor, selectedTemplate);
                 } else {
                   try {
-                    // Clear components, styles and assets so the canvas is empty
                     editor.DomComponents && editor.DomComponents.clear && editor.DomComponents.clear();
                     editor.CssComposer && editor.CssComposer.clear && editor.CssComposer.clear();
                     editor.AssetManager && editor.AssetManager.clear && editor.AssetManager.clear();
-                    // No storage clear - avoid calling non-existent API
                   } catch (e) {
                     console.warn('Failed to clear editor on empty template', e);
                   }
                 }
-
-                // Studio SDK handles most component definitions automatically
-                // Only keep minimal editor setup
                 editor.on("load", () => {
                   const panelManager = editor.Panels;
 

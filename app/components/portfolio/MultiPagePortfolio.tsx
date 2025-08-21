@@ -35,7 +35,6 @@ export default function MultiPagePortfolio({
   const [loading, setLoading] = useState(true);
   const [hasMultiplePages, setHasMultiplePages] = useState(false);
 
-  // Setup interactive handlers
   useEffect(() => {
     function handleClick(e) {
       const btn = e.target.closest("[data-action]");
@@ -107,7 +106,6 @@ export default function MultiPagePortfolio({
       form.addEventListener("submit", handleFormSubmit);
     });
 
-    // Cleanup
     return () => {
       document.removeEventListener("click", handleClick);
       document
@@ -124,7 +122,6 @@ export default function MultiPagePortfolio({
     };
   }, []);
 
-  // Fetch portfolio data
   useEffect(() => {
     async function fetchPortfolio() {
       if (!username) return;
@@ -138,14 +135,12 @@ export default function MultiPagePortfolio({
         const data = await response;
         setPortfolio(data);
 
-        // Parse pages data if available
         if (data.pagesData && typeof data.pagesData === 'string') {
           try {
             const pagesData = JSON.parse(data.pagesData);
             console.log('Parsed pages data:', pagesData);
             console.log('Requested page:', requestedPage);
             
-            // Convert array-based pages data to object for easier access
             const pagesObj = {};
             if (Array.isArray(pagesData)) {
               // New format: array of pages

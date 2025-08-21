@@ -90,7 +90,6 @@ export default function PortfolioPage() {
       form.addEventListener("submit", handleFormSubmit);
     });
 
-    // Cleanup
     return () => {
       document.removeEventListener("click", handleClick);
       document
@@ -128,7 +127,6 @@ export default function PortfolioPage() {
             const pagesData = JSON.parse(data.pagesData);
             console.log('🔍 PortfolioPage.tsx: Parsed pages data:', pagesData);
             
-            // Handle different data formats
             let pages = [];
             if (Array.isArray(pagesData)) {
               pages = pagesData;
