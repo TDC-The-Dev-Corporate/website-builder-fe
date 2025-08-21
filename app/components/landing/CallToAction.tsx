@@ -21,15 +21,16 @@ export const CallToAction = () => {
     <Card
       sx={{
         width: "100%",
-        maxWidth: 1280,
+        maxWidth: { xs: "92%", md: "1280px" },
         height: "513px",
         mx: "auto",
         mb: 4,
         borderRadius: "20px",
         overflow: "hidden",
         position: "relative",
-        backgroundColor: "black",
-        color: "white",
+        backgroundColor: "white",
+        color: "#0f172a",
+        border: "1px solid #e6e7eb",
       }}
       data-aos="zoom-in"
     >
@@ -37,10 +38,11 @@ export const CallToAction = () => {
         sx={{
           position: "absolute",
           inset: 0,
-          backgroundImage: "url(/images/CallToActionFrame.jpg)",
+          backgroundImage:
+            "linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.95) 55%, rgba(255,255,255,0.6) 70%, rgba(255,255,255,0) 100%), url(/images/callToActionFrame.jpg)",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          opacity: 0.4,
+          backgroundRepeat: "no-repeat",
           zIndex: 0,
         }}
       />
@@ -73,6 +75,7 @@ export const CallToAction = () => {
             },
             lineHeight: "100&",
             letterSpacing: "2%",
+            color: "#0f172a",
           }}
           data-aos="fade-up"
           data-aos-delay="100"
@@ -85,7 +88,7 @@ export const CallToAction = () => {
           sx={{
             fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 500,
-            color: "#f0f0f0",
+            color: "#475569",
             fontSize: "20px",
             lineHeight: 1.6,
           }}
@@ -96,7 +99,7 @@ export const CallToAction = () => {
         </Typography>
 
         <Button
-          variant="outlined"
+          variant="contained"
           onClick={() => {
             if (!localStorage.getItem("token"))
               router.push("/AIWebsiteBuilders/auth/login");
@@ -107,18 +110,13 @@ export const CallToAction = () => {
             height: "40px",
             padding: "8px 24px",
             borderRadius: "8px",
-            backgroundColor: "white",
-            color: "black",
-            borderColor: "white",
+            backgroundColor: "#0f172a",
+            color: "white",
+            borderColor: "#0f172a",
             display: "flex",
             alignItems: "center",
-            "&:hover": {
-              backgroundColor: "white",
-              color: "black",
-              borderColor: "white",
-              "& .rotate-icon": {
-                transform: "rotate(45deg)",
-              },
+            '&:hover': {
+              backgroundColor: '#0b1220',
             },
           }}
           data-aos="fade-up"

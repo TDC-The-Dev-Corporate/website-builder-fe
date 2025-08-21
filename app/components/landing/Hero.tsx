@@ -24,6 +24,7 @@ const Hero = () => {
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
         backgroundPosition: "center",
+        paddingBottom: { xs: "0px", md: "50px" },
       }}
     >
       <Box sx={{ position: "relative", zIndex: 1 }}>

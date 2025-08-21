@@ -72,7 +72,7 @@ export const Features = (): JSX.Element => {
       component="section"
       sx={{
         width: "100%",
-        backgroundColor: "black",
+        backgroundColor: "white",
         pb: { xs: "40px", md: "70px" }, // 80px on desktop, 40px on mobile
         pt: { xs: "40px", md: "100px" },
         px: { xs: "1.25rem", md: "5rem" }, // 20px on mobile, 80px on desktop
@@ -90,7 +90,7 @@ export const Features = (): JSX.Element => {
             maxWidth: "923px",
             fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 700,
-            color: "white",
+            color: "#0f172a", // dark
             fontSize: { xs: "2.25rem", md: "3.75rem", lg: "4rem" }, // 36px, 60px, 64px
             letterSpacing: "1.28px",
             mb: "30px",
@@ -105,7 +105,7 @@ export const Features = (): JSX.Element => {
             fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
             fontWeight: 500,
             fontSize: "16px !important",
-            color: "#808080",
+            color: "#475569",
             letterSpacing: "0.32px",
             mb: "50px",
           }}
@@ -129,10 +129,10 @@ export const Features = (): JSX.Element => {
               <Card
                 sx={{
                   maxWidth: "413px",
-                  backgroundColor: "black",
+                  backgroundColor: "white",
                   borderRadius: "20px",
-                  border: "none",
-                  boxShadow: "none",
+                  border: "1px solid #e6e7eb",
+                  boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
@@ -161,7 +161,7 @@ export const Features = (): JSX.Element => {
                     sx={{
                       fontFamily: '"Montserrat", Helvetica, Arial, sans-serif',
                       fontWeight: 500,
-                      color: "white",
+                      color: "#0f172a",
                       fontSize: "20px !important",
                       letterSpacing: "0.4px",
                       mb: "0.75rem",
@@ -173,7 +173,7 @@ export const Features = (): JSX.Element => {
                     sx={{
                       fontFamily: '"Inter", Helvetica, Arial, sans-serif',
                       fontWeight: 400,
-                      color: "#808080",
+                      color: "#6b7280",
                       fontSize: "16px !important",
                       lineHeight: "17.5px",
                     }}

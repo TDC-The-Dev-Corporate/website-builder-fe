@@ -54,6 +54,7 @@ export const Showcase = (): JSX.Element => {
         alignItems: "center",
         backgroundColor: "black",
         color: "white",
+        paddingTop: { xs: "2rem", md: "4rem" },
       }}
     >
       <Typography

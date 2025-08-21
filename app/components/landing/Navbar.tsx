@@ -125,27 +125,50 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
         {!isMobile ? (
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Box sx={{ display: "flex" }}>
-              {sections.map(({ id, label, ref }, index) => (
-                <Button
-                  key={id}
-                  onClick={() => handleNavClick(ref)}
-                  sx={{
-                    fontFamily: '"Inter", Helvetica, Arial, sans-serif',
-                    fontWeight: 400,
-                    color: "#808080",
-                    fontSize: "14px !important",
-                    // letterSpacing: "0.28px",
-                    textTransform: "uppercase",
-                    "&:hover": {
-                      color: "white",
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  {label}
-                </Button>
-              ))}
-            </Box>
+  {sections.map(({ id, label, ref }) => (
+    <Button
+      key={id}
+      onClick={() => handleNavClick(ref)}
+      sx={{
+        fontFamily: '"Inter", Helvetica, Arial, sans-serif',
+        fontWeight: 400,
+        color: "white",
+        fontSize: "14px !important",
+        textTransform: "uppercase",
+        backgroundColor: "transparent",
+        padding: "6px 8px",
+      }}
+    >
+      <Box
+        component="span"
+        sx={{
+          display: "inline-block",
+          position: "relative",
+          color: "inherit",
+          '&::after': {
+            content: '""',
+            position: "absolute",
+            left: "50%",
+            bottom: -6,
+            transform: "translateX(-50%) scaleX(0)",
+            transformOrigin: "center",
+            width: "100%",
+            height: "3px",
+            borderRadius: "2px",
+            background: "white",
+            transition: "transform 0.32s cubic-bezier(.2,.8,.2,1)",
+          },
+          '&:hover::after': {
+            transform: "translateX(-50%) scaleX(1)",
+          },
+        }}
+      >
+        {label}
+      </Box>
+    </Button>
+  ))}
+</Box>
+
 
             {/* Sign In / Dashboard Button */}
             <Button
@@ -234,16 +257,39 @@ export const Navbar = ({ sections }: NavbarProps): JSX.Element => {
                   sx={{
                     fontFamily: '"Inter", Helvetica, Arial, sans-serif',
                     fontWeight: 400,
-                    color: "#808080",
+                    color: "white",
                     fontSize: "14px",
                     letterSpacing: "0.28px",
-                    "&:hover": {
-                      color: "white",
-                      backgroundColor: "transparent",
-                    },
+                    backgroundColor: "transparent",
+                    paddingY: 1,
                   }}
                 >
-                  {label}
+                  <Box
+                    component="span"
+                    sx={{
+                      display: "inline-block",
+                      position: "relative",
+                      color: "inherit",
+                      '&::after': {
+                        content: '""',
+                        position: "absolute",
+                        left: "50%",
+                        bottom: -6,
+                        transform: "translateX(-50%) scaleX(0)",
+                        transformOrigin: "center",
+                        width: "100%",
+                        height: "2px",
+                        borderRadius: "2px",
+                        background: "white",
+                        transition: "transform 0.32s cubic-bezier(.2,.8,.2,1)",
+                      },
+                      '&:hover::after': {
+                        transform: "translateX(-50%) scaleX(1)",
+                      },
+                    }}
+                  >
+                    {label}
+                  </Box>
                 </MenuItem>
               ))}
               <MenuItem onClick={handleMenuClose}>

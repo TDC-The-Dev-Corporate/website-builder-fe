@@ -86,7 +86,7 @@ export const Footer = () => {
                   color: "white",
                 }}
               >
-                TRADES BUILDER
+                TRADES BUILDER PRO
               </Typography>
               <Typography
                 variant="body2"
