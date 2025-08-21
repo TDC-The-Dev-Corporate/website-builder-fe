@@ -70,7 +70,7 @@ export default function ThemeRegistry({
                   backgroundColor: "background.default",
                 }}
               >
-                <LoadingSpinner message="Getting the hammer & nails ready..." />
+                <LoadingSpinner />
               </Box>
             ) : (
               <ProtectRoute>{children}</ProtectRoute>
