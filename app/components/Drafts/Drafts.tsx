@@ -13,6 +13,7 @@ import {
   Tooltip,
   IconButton,
   Chip,
+  useTheme,
 } from "@mui/material";
 import { Eye, Edit2, Trash2, Upload } from "lucide-react";
 
@@ -31,6 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Drafts() {
   const router = useRouter();
+  const theme = useTheme();
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const [templates, setTemplates] = useState([]);
@@ -271,14 +273,14 @@ export default function Drafts() {
       <Box sx={{ mb: 6, textAlign: "center" }}>
         <Typography
           variant="h4"
-          sx={{ color: "white", mb: 2, fontWeight: 700 }}
+          sx={{ color: theme.palette.text.primary, mb: 2, fontWeight: 700 }}
         >
           My Templates & Drafts
         </Typography>
         <Typography
           variant="body1"
           sx={{
-            color: "rgba(255, 255, 255, 0.7)",
+            color: theme.palette.text.secondary,
             maxWidth: 600,
             mx: "auto",
             px: { xs: 2, sm: 0 },
@@ -341,14 +343,11 @@ export default function Drafts() {
                           <IconButton
                             onClick={() => handlePublish(template.id)}
                             sx={{
-                              color: "#10b981",
+                              color: "white",
                               backdropFilter: "blur(6px)",
-                              backgroundColor: "rgba(255, 255, 255, 0.3)",
+                              backgroundColor: "#10b981",
                               borderRadius: "50%",
                               padding: "6px",
-                              "&:hover": {
-                                backgroundColor: "rgba(255, 255, 255, 0.5)",
-                              },
                             }}
                           >
                             <Upload size={18} />
@@ -358,14 +357,11 @@ export default function Drafts() {
                           <IconButton
                             onClick={() => handleDelete(template.id)}
                             sx={{
-                              color: "#ef4444",
+                              color: "white",
                               backdropFilter: "blur(6px)",
-                              backgroundColor: "rgba(255, 255, 255, 0.3)",
+                              backgroundColor: "#d32f2f",
                               borderRadius: "50%",
                               padding: "6px",
-                              "&:hover": {
-                                backgroundColor: "rgba(255, 255, 255, 0.5)",
-                              },
                             }}
                           >
                             <Trash2 size={18} />
@@ -382,6 +378,7 @@ export default function Drafts() {
                         transform: "scale(0.5)",
                         transformOrigin: "top left",
                         pointerEvents: "none",
+                        color: theme.palette.text.primary,
                       }}
                       title={template.name}
                     />
@@ -406,7 +403,7 @@ export default function Drafts() {
                     >
                       <Typography
                         variant="h6"
-                        sx={{ color: "white", mb: 1, fontWeight: 600 }}
+                        sx={{ color: theme.palette.text.primary, mb: 1, fontWeight: 600 }}
                       >
                         {template.name}
                       </Typography>
@@ -415,21 +412,21 @@ export default function Drafts() {
 
                   <CardActions sx={{ px: 0, pt: 2, gap: 1 }}>
                     <Button
-                      variant="outlined"
-                      onClick={() => handleView(template)}
-                      startIcon={<Eye size={18} />}
-                      sx={{
-                        flex: 1,
-                        color: "white",
-                        borderColor: "rgba(255, 255, 255, 0.2)",
-                        "&:hover": {
-                          borderColor: "white",
-                          backgroundColor: "rgba(255, 255, 255, 0.1)",
-                        },
-                      }}
-                    >
-                      Preview
-                    </Button>
+                    variant="outlined"
+                    onClick={() => handleView(template)}
+                    startIcon={<Eye size={18} />}
+                    sx={{
+                      flex: 1,
+                      color: "#374151",            // Gray-700
+                      borderColor: "#d1d5db",      // Gray-300
+                      "&:hover": {
+                        borderColor: "#9ca3af",    // Gray-400
+                        backgroundColor: "#f3f4f6", // Gray-100
+                      },
+                    }}
+                  >
+                    Preview
+                  </Button>
                     <Button
                       variant="contained"
                       onClick={() => handleEdit(template)}

@@ -22,6 +22,7 @@ import {
   IconButton,
   Tooltip,
   Divider,
+  Link,
 } from "@mui/material";
 
 import { GlassMorphism } from "@/app/components/animations/GlassMorphism";
@@ -67,7 +68,7 @@ export default function ViewProfile() {
 
   if (!user) {
     return (
-      <Box sx={{ p: 4, textAlign: "center", color: "white" }}>
+      <Box sx={{ p: 4, textAlign: "center", color: "#0f172a" }}>
         <Typography>Please log in to view your profile.</Typography>
       </Box>
     );
@@ -76,7 +77,7 @@ export default function ViewProfile() {
   return (
     <Box sx={{ p: 3, width: "100%", position: "relative" }}>
       {user && <JsonLd data={generateOrganizationSchema(user)} />}
-      <GlassMorphism blur={10} opacity={0.1}>
+      <GlassMorphism blur={10} opacity={0.06}>
         <Tooltip title="Edit Profile" arrow>
           <IconButton
             onClick={() => router.push("/AIWebsiteBuilders/profile/edit")}
@@ -114,12 +115,11 @@ export default function ViewProfile() {
                   borderRadius: "50%",
                   overflow: "hidden",
                   mb: 3,
-                  background:
-                    "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
+                  background: "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "4px solid rgba(255, 255, 255, 0.1)",
+                  border: "4px solid rgba(2,6,23,0.06)",
                 }}
               >
                 {user.profileImage ? (
@@ -141,19 +141,19 @@ export default function ViewProfile() {
             <Box sx={{ p: 4 }}>
               <Typography
                 variant="h4"
-                sx={{ color: "white", mb: 1, fontWeight: 700 }}
+                sx={{ color: "#0f172a", mb: 1, fontWeight: 700 }}
               >
                 {user.name}
               </Typography>
               <Typography
                 variant="h6"
-                sx={{ color: "#3b82f6", mb: 3, fontWeight: 600 }}
+                sx={{ color: "#0b61d6", mb: 3, fontWeight: 600 }}
               >
                 {user.companyName}
               </Typography>
 
               <Divider
-                sx={{ borderColor: "rgba(255, 255, 255, 0.1)", my: 3 }}
+                sx={{ borderColor: "rgba(15,23,42,0.06)", my: 3 }}
               />
 
               <Grid container spacing={3}>
@@ -170,11 +170,11 @@ export default function ViewProfile() {
                     <Box>
                       <Typography
                         variant="body2"
-                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                        sx={{ color: "rgba(15,23,42,0.6)" }}
                       >
                         Email
                       </Typography>
-                      <Typography variant="body1" sx={{ color: "white" }}>
+                      <Typography variant="body1" sx={{ color: "#0f172a" }}>
                         {user.email}
                       </Typography>
                     </Box>
@@ -192,11 +192,11 @@ export default function ViewProfile() {
                     <Box>
                       <Typography
                         variant="body2"
-                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                        sx={{ color: "rgba(15,23,42,0.6)" }}
                       >
                         Phone
                       </Typography>
-                      <Typography variant="body1" sx={{ color: "white" }}>
+                      <Typography variant="body1" sx={{ color: "#0f172a" }}>
                         {user.phoneNumber}
                       </Typography>
                     </Box>
@@ -216,11 +216,11 @@ export default function ViewProfile() {
                     <Box>
                       <Typography
                         variant="body2"
-                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                        sx={{ color: "rgba(15,23,42,0.6)" }}
                       >
                         License Number
                       </Typography>
-                      <Typography variant="body1" sx={{ color: "white" }}>
+                      <Typography variant="body1" sx={{ color: "#0f172a" }}>
                         {user.licenseNumber}
                       </Typography>
                     </Box>
@@ -238,11 +238,11 @@ export default function ViewProfile() {
                     <Box>
                       <Typography
                         variant="body2"
-                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                        sx={{ color: "rgba(15,23,42,0.6)" }}
                       >
                         Trade Specialization
                       </Typography>
-                      <Typography variant="body1" sx={{ color: "white" }}>
+                      <Typography variant="body1" sx={{ color: "#0f172a" }}>
                         {user.tradeSpecialization}
                       </Typography>
                     </Box>
@@ -255,11 +255,11 @@ export default function ViewProfile() {
                     <Box>
                       <Typography
                         variant="body2"
-                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                        sx={{ color: "rgba(15,23,42,0.6)" }}
                       >
                         Business Address
                       </Typography>
-                      <Typography variant="body1" sx={{ color: "white" }}>
+                      <Typography variant="body1" sx={{ color: "#0f172a" }}>
                         {user.address}
                       </Typography>
                     </Box>
@@ -273,15 +273,24 @@ export default function ViewProfile() {
                       <Box>
                         <Typography
                           variant="body2"
-                          sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                          sx={{ color: "rgba(15,23,42,0.6)" }}
                         >
                           Website URL
                         </Typography>
-                        <Typography variant="body1" sx={{ color: "white" }}>
-                          {`${
-                            process.env.NEXT_PUBLIC_APP_URL ||
-                            "https://tradesbuilderpro.com"
-                          }/AIWebsiteBuilders/portfolio/${user.username}`}
+                        <Typography variant="body1" sx={{ color: "#0f172a" }}>
+                          <Link
+                            href={`${process.env.NEXT_PUBLIC_APP_URL ||
+                              "https://tradesbuilderpro.com"
+                              }/AIWebsiteBuilders/portfolio/${user.username}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            underline="hover"
+                            sx={{ color: "#0f172a", fontWeight: 500 }}
+                          >
+                            {`${process.env.NEXT_PUBLIC_APP_URL ||
+                              "https://tradesbuilderpro.com"
+                              }/AIWebsiteBuilders/portfolio/${user.username}`}
+                          </Link>
                         </Typography>
                       </Box>
                     </Box>

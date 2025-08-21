@@ -183,7 +183,7 @@ export default function Dashboard() {
         sx={{
           display: "flex",
           minHeight: "100vh",
-          background: "linear-gradient(180deg, #071428 0%, #0b1b2b 100%)",
+          background: "#f8fafc",
           width: "100%",
         }}
       >
@@ -198,9 +198,9 @@ export default function Dashboard() {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.leavingScreen,
             }),
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
-            backdropFilter: "blur(10px)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+            backgroundColor: "rgba(255,255,255,0.9)",
+            backdropFilter: "none",
+            borderBottom: "1px solid rgba(15,23,42,0.06)",
           }}
         >
           <Toolbar>
@@ -208,7 +208,7 @@ export default function Dashboard() {
               color="inherit"
               edge="start"
               onClick={() => setDrawerOpen(!drawerOpen)}
-              sx={{ mr: 2, color: "white" }}
+              sx={{ mr: 2, color: "#0f172a" }}
             >
               <Menu />
             </IconButton>
@@ -216,14 +216,14 @@ export default function Dashboard() {
               <Typography
                 variant="h6"
                 component="div"
-                sx={{ color: "white", fontWeight: 700 }}
+                sx={{ color: "#0f172a", fontWeight: 700 }}
               >
                 {selectedSection.charAt(0).toUpperCase() +
                   selectedSection.slice(1)}
               </Typography>
               <Typography
                 variant="body2"
-                sx={{ color: "rgba(255,255,255,0.7)", mt: 0.5 }}
+                sx={{ color: "rgba(15,23,42,0.6)", mt: 0.5 }}
               >
                 Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
               </Typography>
@@ -257,10 +257,11 @@ export default function Dashboard() {
             "& .MuiDrawer-paper": {
               width: DRAWER_WIDTH,
               boxSizing: "border-box",
-              backgroundColor: "rgba(15, 23, 42, 0.8)",
-              backdropFilter: "blur(10px)",
+              backgroundColor: "#ffffff",
+              color: "#0f172a",
               border: "none",
-              borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRight: "1px solid rgba(15,23,42,0.06)",
+              boxShadow: "0 4px 12px rgba(2,6,23,0.06)",
             },
           }}
         >
@@ -273,20 +274,20 @@ export default function Dashboard() {
             <Box>
               <Typography
                 variant="subtitle1"
-                sx={{ color: "white", fontWeight: 600 }}
+                sx={{ color: "#0f172a", fontWeight: 600 }}
               >
                 {user?.name}
               </Typography>
               <Typography
                 variant="body2"
-                sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                sx={{ color: "rgba(15,23,42,0.6)" }}
               >
                 {user?.tradeSpecialization}
               </Typography>
             </Box>
           </Box>
 
-          <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.1)" }} />
+          <Divider sx={{ borderColor: "rgba(15,23,42,0.06)" }} />
 
           <List sx={{ flex: 1, pt: 2 }}>
             {menuItems.map((item) => (
@@ -299,14 +300,14 @@ export default function Dashboard() {
                   borderRadius: 2,
                   backgroundColor:
                     selectedSection === item.id
-                      ? "rgba(59, 130, 246, 0.2)"
+                      ? "rgba(59, 130, 246, 0.12)"
                       : "transparent",
                   color:
                     selectedSection === item.id
-                      ? "#3b82f6"
-                      : "rgba(255, 255, 255, 0.7)",
+                      ? "#0b61d6"
+                      : "rgba(15,23,42,0.85)",
                   "&:hover": {
-                    backgroundColor: "rgba(59, 130, 246, 0.1)",
+                    backgroundColor: "rgba(59, 130, 246, 0.06)",
                   },
                   cursor: "pointer",
                 }}
@@ -315,8 +316,8 @@ export default function Dashboard() {
                   sx={{
                     color:
                       selectedSection === item.id
-                        ? "#3b82f6"
-                        : "rgba(255, 255, 255, 0.7)",
+                        ? "#0b61d6"
+                        : "rgba(15,23,42,0.7)",
                     minWidth: 40,
                   }}
                 >
@@ -327,7 +328,7 @@ export default function Dashboard() {
             ))}
           </List>
 
-          <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.1)" }} />
+          <Divider sx={{ borderColor: "rgba(15,23,42,0.06)" }} />
 
           <List>
             <ListItem
@@ -338,7 +339,7 @@ export default function Dashboard() {
                 borderRadius: 2,
                 color: "#ef4444",
                 "&:hover": {
-                  backgroundColor: "rgba(239, 68, 68, 0.1)",
+                  backgroundColor: "rgba(239, 68, 68, 0.06)",
                 },
                 cursor: "pointer",
               }}
@@ -363,6 +364,8 @@ export default function Dashboard() {
               duration: theme.transitions.duration.enteringScreen,
             }),
             marginLeft: { sm: 0 },
+            color: "rgba(15,23,42,0.95)",
+            backgroundColor: "transparent",
           }}
         >
           {renderContent()}

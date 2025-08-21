@@ -74,7 +74,7 @@ export const Features = (): JSX.Element => {
         width: "100%",
         backgroundColor: "white",
         pb: { xs: "40px", md: "70px" }, // 80px on desktop, 40px on mobile
-        pt: { xs: "40px", md: "100px" },
+        pt: { xs: "40px", md: "50px" },
         px: { xs: "1.25rem", md: "5rem" }, // 20px on mobile, 80px on desktop
       }}
     >
